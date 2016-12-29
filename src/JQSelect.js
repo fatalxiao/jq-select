@@ -30,7 +30,9 @@
 				<input type="checkbox" class="jq-select-select-all-checkbox"/>\
 				<span class="jq-select-select-all-name"></span>\
 			</label>\
-			<div class="jq-select-list"></div>\
+			<div class="jq-select-list">\
+				<div class="jq-select-list-scroller"></div>\
+			</div>\
 			<div class="jq-select-buttons">\
 				<button type="button" class="jq-select-buttons-ok"></button>\
 				<button type="button" class="jq-select-buttons-close"></button>\
@@ -199,162 +201,214 @@
 
 		}
 
-		function renderPopupList(data) {
+		function renderPopupList(op) {
 
-			data = data || options.data;
-
-			var list = dropdown.find('.jq-select-list').html('');
+			var data = op && op.data || options.data,
+				scrollTop = op && op.scrollTop || 0,
+				list = dropdown.find('.jq-select-list-scroller').html(''),
+				heightCount = 0;
 
 			if (options.group) { // group
 
 				if (!$.isEmptyObject(data)) {
+
 					for (var groupName in data) {
 
-						var group = $(groupTemplate).attr('data-name', groupName);
-
-						if (options.multi) {
-							_self._value[groupName] && data[groupName]
-							&& _self._value[groupName].length == data[groupName].length
-							&& group.find('.jq-select-group-checkbox').prop('checked', true);
-						} else {
-							group.find('.jq-select-group-checkbox').remove();
+						if (heightCount > scrollTop + options.listHeight) {
+							break;
 						}
 
-						group.find('.jq-select-group-title-name').html(groupName);
+						if (heightCount <= scrollTop + options.listHeight
+							&& heightCount + options.groupTitleHeight + options.itemHeight * data[groupName].length >= scrollTop) {
 
-						var children = group.find('.jq-select-group-children');
-						data[groupName].forEach(function (item) {
+							var group = $(groupTemplate).attr('data-name', groupName).css({
+								top: heightCount
+							});
+							heightCount += options.groupTitleHeight;
 
-							if (isPlainArrayData(data[groupName])) {
-
-								var itemEl = $(itemTemplate);
-
-								if (options.multi) {
-
-									if (
-										_self._value[groupName]
-										&&
-										_self._value[groupName].filter(function (_valueItem) {
-											return _valueItem && item && _valueItem.toString() === item.toString();
-										}).length == 1
-									) {
-										itemEl.find('.jq-select-item-checkbox').prop('checked', true);
-									}
-
-								} else {
-
-									itemEl.find('.jq-select-item-checkbox').remove();
-
-									if (
-										_self._value[groupName] && _self._value[groupName] && item
-										&&
-										_self._value[groupName].toString() === item.toString()
-									) {
-										itemEl.addClass('activated');
-									}
-
-								}
-
-								itemEl.find('.jq-select-item-name').html(item);
-
+							if (options.multi) {
+								_self._value[groupName] && data[groupName]
+								&& _self._value[groupName].length == data[groupName].length
+								&& group.find('.jq-select-group-checkbox').prop('checked', true);
 							} else {
-
-								var itemEl = $(itemTemplate);
-
-								if (options.multi) {
-
-									if (
-										_self._value[groupName]
-										&&
-										_self._value[groupName].filter(function (_valueItem) {
-											return _valueItem[options.valueField] && item[options.valueField]
-												&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
-										}).length == 1
-									) {
-										itemEl.find('.jq-select-item-checkbox').prop('checked', true);
-									}
-
-								} else {
-
-									itemEl.find('.jq-select-item-checkbox').remove();
-
-									if (
-										_self._value[groupName]
-										&&
-										_self._value[groupName][options.valueField] && item[options.valueField]
-										&&
-										_self._value[groupName][options.valueField].toString() === item[options.valueField].toString()
-									) {
-										itemEl.addClass('activated');
-									}
-
-								}
-
-								if (item[options.iconClsField]) {
-									itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
-								} else {
-									itemEl.find('.jq-select-item-icon').remove();
-								}
-
-								itemEl.find('.jq-select-item-name').html(item[options.displayField]);
-
+								group.find('.jq-select-group-checkbox').remove();
 							}
 
-							children.append(itemEl);
+							group.find('.jq-select-group-title-name').html(groupName);
 
-						});
+							var children = group.find('.jq-select-group-children');
+							var itemHeightCount = 0;
 
-						list.append(group);
+							for (var i = 0, len = data[groupName].length; i < len; i++) {
+								if (data[groupName][i] !== undefined) {
+
+									var item = data[groupName][i];
+
+									if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
+
+										var itemEl = $(itemTemplate);
+
+										if (isPlainArrayData(data[groupName])) {
+
+											if (options.multi) {
+
+												if (
+													_self._value[groupName]
+													&&
+													_self._value[groupName].filter(function (_valueItem) {
+														return _valueItem && item && _valueItem.toString() === item.toString();
+													}).length == 1
+												) {
+													itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+												}
+
+											} else {
+
+												itemEl.find('.jq-select-item-checkbox').remove();
+
+												if (
+													_self._value[groupName] && _self._value[groupName] && item
+													&&
+													_self._value[groupName].toString() === item.toString()
+												) {
+													itemEl.addClass('activated');
+												}
+
+											}
+
+											itemEl.find('.jq-select-item-name').html(item);
+
+										} else {
+
+											if (options.multi) {
+
+												if (
+													_self._value[groupName]
+													&&
+													_self._value[groupName].filter(function (_valueItem) {
+														return _valueItem[options.valueField] && item[options.valueField]
+															&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
+													}).length == 1
+												) {
+													itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+												}
+
+											} else {
+
+												itemEl.find('.jq-select-item-checkbox').remove();
+
+												if (
+													_self._value[groupName]
+													&&
+													_self._value[groupName][options.valueField] && item[options.valueField]
+													&&
+													_self._value[groupName][options.valueField].toString() === item[options.valueField].toString()
+												) {
+													itemEl.addClass('activated');
+												}
+
+											}
+
+											if (item[options.iconClsField]) {
+												itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
+											} else {
+												itemEl.find('.jq-select-item-icon').remove();
+											}
+
+											itemEl.find('.jq-select-item-name').html(item[options.displayField]);
+
+										}
+
+										children.append(itemEl.css({
+											top: itemHeightCount
+										}));
+
+									}
+
+									itemHeightCount += options.itemHeight;
+									heightCount += options.itemHeight;
+
+								}
+							}
+
+							list.append(group);
+
+						} else {
+							heightCount += options.groupTitleHeight + options.itemHeight * data[groupName].length;
+						}
 
 					}
+
+					var listHeight = 0;
+					for (var groupName in data) {
+						listHeight += options.groupTitleHeight + options.itemHeight * data[groupName].length;
+					}
+					list.height(listHeight);
+
 				}
 
 			} else { // not group
 
 				if ($.isArray(data)) {
-					data.forEach(function (item) {
 
-						var itemEl
+					for (var i = 0, len = data.length; i < len; i++) {
+						if (data[i] !== undefined) {
 
-						if (isPlainArrayData(data)) {
+							var item = data[i];
 
-							itemEl = $(itemTemplate);
+							if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
 
-							if (options.multi) {
-								_self._value.filter(function (_valueItem) {
-									return _valueItem && item && _valueItem.toString() === item.toString();
-								}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
-							} else {
-								itemEl.find('.jq-select-item-checkbox').remove();
-								_self._value && item && _self._value.toString() === item.toString()
-								&& itemEl.addClass('activated');
+								var itemEl = $(itemTemplate);
+
+								if (isPlainArrayData(data)) {
+
+									if (options.multi) {
+										_self._value.filter(function (_valueItem) {
+											return _valueItem && item && _valueItem.toString() === item.toString();
+										}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+									} else {
+										itemEl.find('.jq-select-item-checkbox').remove();
+										_self._value && item && _self._value.toString() === item.toString()
+										&& itemEl.addClass('activated');
+									}
+
+									itemEl.find('.jq-select-item-name').html(item);
+
+								} else {
+
+									if (options.multi) {
+										_self._value.filter(function (_valueItem) {
+											return _valueItem[options.valueField] && item[options.valueField]
+												&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
+										}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+									} else {
+										itemEl.find('.jq-select-item-checkbox').remove();
+										_self._value[options.valueField] && item[options.valueField]
+										&& _self._value[options.valueField].toString() === item[options.valueField].toString()
+										&& itemEl.addClass('activated');
+									}
+
+									itemEl.find('.jq-select-item-name').html(item[options.displayField]);
+
+								}
+
+								list.append(itemEl.css({
+									top: heightCount
+								}));
+
 							}
 
-							itemEl.find('.jq-select-item-name').html(item);
-
-						} else {
-
-							itemEl = $(itemTemplate);
-
-							if (options.multi) {
-								_self._value.filter(function (_valueItem) {
-									return _valueItem[options.valueField] && item[options.valueField]
-										&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
-								}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
-							} else {
-								itemEl.find('.jq-select-item-checkbox').remove();
-								_self._value[options.valueField] && item[options.valueField]
-								&& _self._value[options.valueField].toString() === item[options.valueField].toString()
-								&& itemEl.addClass('activated');
+							if (heightCount > scrollTop + options.listHeight) {
+								break;
 							}
 
-							itemEl.find('.jq-select-item-name').html(item[options.displayField]);
+							heightCount += options.itemHeight;
 
 						}
+					}
 
-						list.append(itemEl);
+					list.height(data.length * options.itemHeight);
 
-					});
 				}
 
 			}
@@ -388,7 +442,9 @@
 
 			if (_self.filterText) {
 				_self.filterData = getFilteredData();
-				renderPopupList(_self.filterData);
+				renderPopupList({
+					data: _self.filterData
+				});
 			} else {
 				renderPopupList();
 			}
@@ -443,7 +499,9 @@
 				}
 
 				_self.filterData = getFilteredData()
-				renderPopupList(_self.filterData);
+				renderPopupList({
+					data: _self.filterData
+				});
 				resetPopupPosition();
 
 			});
@@ -540,7 +598,7 @@
 						selectedItem = options.data[groupName][group.find('.jq-select-item').index($(this))];
 
 					} else {
-						var list = $(this).parents('.jq-select-list');
+						var list = $(this).parents('.jq-select-list-scroller');
 						selectedItem = options.data[list.find('.jq-select-item').index($(this))];
 					}
 
@@ -578,7 +636,7 @@
 						selectedItem = options.data[groupName][group.find('.jq-select-item').index($(this))];
 
 					} else {
-						var list = $(this).parents('.jq-select-list');
+						var list = $(this).parents('.jq-select-list-scroller');
 						selectedItem = options.data[list.find('.jq-select-item').index($(this))];
 					}
 
@@ -609,6 +667,17 @@
 			});
 
 		};
+
+		function bindScrollEvents() {
+
+			wrapper.find('.jq-select-list').scroll(function (e) {
+				e.stopPropagation();
+				renderPopupList({
+					scrollTop: e.target.scrollTop
+				});
+			});
+
+		}
 
 		function onSelect(items) {
 
@@ -876,7 +945,7 @@
 					count = checkedCheckboxes.length;
 
 				checkedCheckboxes.each(function () {
-					var list = $(this).parents('.jq-select-list');
+					var list = $(this).parents('.jq-select-list-scroller');
 					result.push(options.data[list.find('.jq-select-item-checkbox').index($(this))]);
 				});
 
@@ -921,7 +990,7 @@
 
 				var selected = wrapper.find('.jq-select-item.activated');
 
-				var list = selected.parents('.jq-select-list');
+				var list = selected.parents('.jq-select-list-scroller');
 				var result = options.data[list.find('.jq-select-item').index(selected)];
 
 				if ($.isPlainObject(result)) {
@@ -984,6 +1053,8 @@
 					bindSelectEvents();
 
 					bindButtonsEvents();
+
+					bindScrollEvents();
 
 				}
 
@@ -1083,6 +1154,9 @@
 
 		triggerWidth: 200,
 		popupWidth: 200,
+		listHeight: 300,
+		groupTitleHeight: 30,
+		itemHeight: 30,
 
 		hideFilter: false,
 

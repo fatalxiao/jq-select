@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+
+		<meta charset="UTF-8">
+		<title>jq-select demo</title>
+
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+		<link rel="stylesheet" href="../dist/JQSelect.min.css"/>
+
+		<style>
+			body {
+				margin: 0;
+				font-family: Arial, sans-serif;
+			}
+
+			.form-group {
+				margin: 50px;
+				line-height: 40px;
+			}
+
+			.form-group:first-child {
+				margin-top: 25px;
+			}
+
+			.form-group:last-child {
+				margin-bottom: 25px;
+			}
+
+			.form-group > label {
+				display: block;
+				text-align: left;
+				color: #4C637B;
+				user-select: none;
+			}
+		</style>
+
+	</head>
+	<body>
+
+		<form>
+
+			<div class="form-group">
+				<label>single / simple array data</label>
+				<button id="single-simple-array" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>single / object array data</label>
+				<button id="single-object-array" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>single / group / simple array data</label>
+				<button id="single-group-simple-array" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>single / group / object array data</label>
+				<button id="single-group-object-array" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>multi / simple array data</label>
+				<button id="multi-simple-array" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>multi / object array data</label>
+				<button id="multi-object-array" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>multi / group / simple array data</label>
+				<button id="multi-group-simple-array" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>multi / group / object array data</label>
+				<button id="multi-group-object-array" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>single / loading / buttons</label>
+				<button id="single-loading-buttons" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>multi / group / buttons / loading</label>
+				<button id="multi-group-buttons-loading" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>multi / group / filter / select all</label>
+				<button id="multi-group-filter-selectall" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>icon</label>
+				<button id="icon" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>updateOptions</label>
+				<button id="updateoptions" type="button" class="jq-select"></button>
+			</div>
+
+			<div class="form-group">
+				<label>large size</label>
+				<button id="largetsize" type="button" class="jq-select"></button>
+			</div>
+
+		</form>
+
+		<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+		<script src="../dist/JQSelect.min.js"></script>
+
+		<script src="index.js"></script>
+
+	</body>
+</html>

@@ -203,6 +203,8 @@
 
 		function renderPopupList(op) {
 
+			console.log(_self._value);
+
 			var data = op && op.data || options.data,
 				scrollTop = op && op.scrollTop || 0,
 				list = dropdown.find('.jq-select-list-scroller').html(''),
@@ -246,7 +248,9 @@
 
 									if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
 
-										var itemEl = $(itemTemplate);
+										var itemEl = $(itemTemplate).css({
+											top: itemHeightCount
+										}).attr('data-index', i);
 
 										if (isPlainArrayData(data[groupName])) {
 
@@ -319,9 +323,7 @@
 
 										}
 
-										children.append(itemEl.css({
-											top: itemHeightCount
-										}));
+										children.append(itemEl);
 
 									}
 
@@ -358,7 +360,9 @@
 
 							if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
 
-								var itemEl = $(itemTemplate);
+								var itemEl = $(itemTemplate).css({
+									top: heightCount
+								}).attr('data-index', i);
 
 								if (isPlainArrayData(data)) {
 
@@ -392,9 +396,7 @@
 
 								}
 
-								list.append(itemEl.css({
-									top: heightCount
-								}));
+								list.append(itemEl);
 
 							}
 
@@ -595,11 +597,13 @@
 							return;
 						}
 
-						selectedItem = options.data[groupName][group.find('.jq-select-item').index($(this))];
+						// selectedItem = options.data[groupName][group.find('.jq-select-item').index($(this))];
+						selectedItem = options.data[groupName][$(this).attr('data-index')];
 
 					} else {
-						var list = $(this).parents('.jq-select-list-scroller');
-						selectedItem = options.data[list.find('.jq-select-item').index($(this))];
+						// var list = $(this).parents('.jq-select-list-scroller');
+						// selectedItem = options.data[list.find('.jq-select-item').index($(this))];
+						selectedItem = options.data[$(this).attr('data-index')];
 					}
 
 					var checked = $(this).children('input[type="checkbox"]').prop('checked');
@@ -633,11 +637,13 @@
 							return;
 						}
 
-						selectedItem = options.data[groupName][group.find('.jq-select-item').index($(this))];
+						// selectedItem = options.data[groupName][group.find('.jq-select-item').index($(this))];
+						selectedItem = options.data[groupName][$(this).attr('data-index')];
 
 					} else {
-						var list = $(this).parents('.jq-select-list-scroller');
-						selectedItem = options.data[list.find('.jq-select-item').index($(this))];
+						// var list = $(this).parents('.jq-select-list-scroller');
+						// selectedItem = options.data[list.find('.jq-select-item').index($(this))];
+						selectedItem = options.data[$(this).attr('data-index')];
 					}
 
 					wrapper.find('.jq-select-item').removeClass('activated');

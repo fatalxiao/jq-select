@@ -11,8 +11,3 @@ node_modules
 
 # windows thumbnail cache
 Thumbs.db
-
-# Dev
-src/index.html
-src/index.js
-src/vendor/

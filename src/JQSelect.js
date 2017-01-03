@@ -554,14 +554,12 @@
 				if (checked) {
 
 					var items = $.extend(true, [], options.data[groupName]);
-					// _self._selectedValue = $.extend(true, {}, _self._value);
 					_self._selectedValue[groupName] = items;
 
 					onSelect(selectedItems);
 
 				} else {
 
-					// _self._selectedValue = $.extend(true, {}, _self._value);
 					_self._selectedValue[groupName] && delete _self._selectedValue[groupName];
 
 					onDeselect(selectedItems);
@@ -601,15 +599,19 @@
 						selectedItem = options.data[groupName][index];
 
 						if (checked) {
-							// _self._selectedValue = $.extend(true, {}, _self._value);
 							if (!_self._selectedValue[groupName]) {
 								_self._selectedValue[groupName] = [];
 							}
 							_self._selectedValue[groupName].push(selectedItem);
 						} else {
-							// _self._selectedValue = $.extend(true, {}, _self._value);
 							if (_self._selectedValue[groupName]) {
-								_self._selectedValue[groupName].splice(_self._selectedValue[groupName].indexOf(selectedItem), 1);
+								_self._selectedValue[groupName] = _self._selectedValue[groupName].filter(function (item) {
+									if (isPlainArrayData(_self._selectedValue[groupName])) {
+										return item !== selectedItem;
+									} else {
+										return item[options.valueField] !== selectedItem[options.valueField];
+									}
+								});
 							}
 						}
 
@@ -619,7 +621,6 @@
 						selectedItem = options.data[index];
 
 						if (checked) {
-							// _self._selectedValue = $.extend(true, [], _self._value);
 							_self._selectedValue.push(selectedItem);
 						} else {
 							_self._selectedValue.splice(_self._selectedValue.indexOf(selectedItem), 1);

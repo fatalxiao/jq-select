@@ -59,9 +59,11 @@
 			wrapper, dropdown;
 
 		this._value = !options.group && options.multi ? [] : {};
-		this.isLoading = false;
-		this.filterText = '';
-		this.filterData = null;
+		this._selectedValue = !options.group && options.multi ? [] : {};
+		this._isLoading = false;
+		this._filterText = '';
+		this._filterData = null;
+		this._listScrollTop = 0;
 
 		function isPlainArrayData(data) {
 
@@ -82,49 +84,8 @@
 		}
 
 		function setLoading(bool) {
-			_self.isLoading = bool;
+			_self._isLoading = bool;
 			bool ? wrapper.addClass('loading') : wrapper.removeClass('loading');
-		}
-
-		function formatCheckbox() {
-
-			if (!options.multi) {
-				return;
-			}
-
-			var flag = true;
-
-			if (options.group) {
-
-				wrapper.find('.jq-select-group').each(function () {
-
-					var groupFlag = true;
-
-					$(this).find('.jq-select-item-checkbox').each(function () {
-						if (!$(this).prop('checked')) {
-							groupFlag = false;
-							return false;
-						}
-					});
-
-					$(this).find('.jq-select-group-checkbox').prop('checked', groupFlag);
-
-					flag = flag && groupFlag;
-
-				});
-
-			} else {
-				wrapper.find('.jq-select-item-checkbox').each(function () {
-					if (!$(this).prop('checked')) {
-						flag = false;
-						return false;
-					}
-				});
-			}
-
-			wrapper.find('.jq-select-select-all-name').html(flag ? options.deselectAllText : options.selectAllText);
-			wrapper.find('.jq-select-select-all-checkbox').prop('checked', flag);
-
 		}
 
 		function resetPopupPosition(dropdown) {
@@ -135,7 +96,7 @@
 			var triggerHeight = trigger.height();
 
 			var dropdownHeight = 0;
-			var data = _self.filterData || options.data;
+			var data = _self._filterData || options.data;
 			if (options.group) {
 				for (var groupName in data) {
 					if (data[groupName].length > 0) {
@@ -177,9 +138,9 @@
 					var data = options.data[groupName].filter(function (item) {
 						if ($.isPlainObject(item)) {
 							return item && item[options.displayField]
-								&& item[options.displayField].toUpperCase().indexOf(_self.filterText.toUpperCase()) > -1;
+								&& item[options.displayField].toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 						} else {
-							return item && item.toUpperCase().indexOf(_self.filterText.toUpperCase()) > -1;
+							return item && item.toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 						}
 					});
 					if (data.length > 0) {
@@ -190,9 +151,9 @@
 				result = options.data.filter(function (item) {
 					if ($.isPlainObject(item)) {
 						return item && item[options.displayField]
-							&& item[options.displayField].toUpperCase().indexOf(_self.filterText.toUpperCase()) > -1;
+							&& item[options.displayField].toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 					} else {
-						return item && item.toUpperCase().indexOf(_self.filterText.toUpperCase()) > -1;
+						return item && item.toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 					}
 				});
 			}
@@ -203,177 +164,85 @@
 
 		function renderPopupList(op) {
 
-			console.log(_self._value);
-
 			var data = op && op.data || options.data,
 				scrollTop = op && op.scrollTop || 0,
-				list = dropdown.find('.jq-select-list-scroller').html(''),
+				list = wrapper.find('.jq-select-list-scroller').html(''),
 				heightCount = 0;
 
 			if (options.group) { // group
 
-				if (!$.isEmptyObject(data)) {
-
-					for (var groupName in data) {
-
-						if (heightCount > scrollTop + options.listHeight) {
-							break;
-						}
-
-						if (heightCount <= scrollTop + options.listHeight
-							&& heightCount + options.groupTitleHeight + options.itemHeight * data[groupName].length >= scrollTop) {
-
-							var group = $(groupTemplate).attr('data-name', groupName).css({
-								top: heightCount
-							});
-							heightCount += options.groupTitleHeight;
-
-							if (options.multi) {
-								_self._value[groupName] && data[groupName]
-								&& _self._value[groupName].length == data[groupName].length
-								&& group.find('.jq-select-group-checkbox').prop('checked', true);
-							} else {
-								group.find('.jq-select-group-checkbox').remove();
-							}
-
-							group.find('.jq-select-group-title-name').html(groupName);
-
-							var children = group.find('.jq-select-group-children');
-							var itemHeightCount = 0;
-
-							for (var i = 0, len = data[groupName].length; i < len; i++) {
-								if (data[groupName][i] !== undefined) {
-
-									var item = data[groupName][i];
-
-									if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
-
-										var itemEl = $(itemTemplate).css({
-											top: itemHeightCount
-										}).attr('data-index', i);
-
-										if (isPlainArrayData(data[groupName])) {
-
-											if (options.multi) {
-
-												if (
-													_self._value[groupName]
-													&&
-													_self._value[groupName].filter(function (_valueItem) {
-														return _valueItem && item && _valueItem.toString() === item.toString();
-													}).length == 1
-												) {
-													itemEl.find('.jq-select-item-checkbox').prop('checked', true);
-												}
-
-											} else {
-
-												itemEl.find('.jq-select-item-checkbox').remove();
-
-												if (
-													_self._value[groupName] && _self._value[groupName] && item
-													&&
-													_self._value[groupName].toString() === item.toString()
-												) {
-													itemEl.addClass('activated');
-												}
-
-											}
-
-											itemEl.find('.jq-select-item-name').html(item);
-
-										} else {
-
-											if (options.multi) {
-
-												if (
-													_self._value[groupName]
-													&&
-													_self._value[groupName].filter(function (_valueItem) {
-														return _valueItem[options.valueField] && item[options.valueField]
-															&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
-													}).length == 1
-												) {
-													itemEl.find('.jq-select-item-checkbox').prop('checked', true);
-												}
-
-											} else {
-
-												itemEl.find('.jq-select-item-checkbox').remove();
-
-												if (
-													_self._value[groupName]
-													&&
-													_self._value[groupName][options.valueField] && item[options.valueField]
-													&&
-													_self._value[groupName][options.valueField].toString() === item[options.valueField].toString()
-												) {
-													itemEl.addClass('activated');
-												}
-
-											}
-
-											if (item[options.iconClsField]) {
-												itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
-											} else {
-												itemEl.find('.jq-select-item-icon').remove();
-											}
-
-											itemEl.find('.jq-select-item-name').html(item[options.displayField]);
-
-										}
-
-										children.append(itemEl);
-
-									}
-
-									itemHeightCount += options.itemHeight;
-									heightCount += options.itemHeight;
-
-								}
-							}
-
-							list.append(group);
-
-						} else {
-							heightCount += options.groupTitleHeight + options.itemHeight * data[groupName].length;
-						}
-
-					}
-
-					var listHeight = 0;
-					for (var groupName in data) {
-						listHeight += options.groupTitleHeight + options.itemHeight * data[groupName].length;
-					}
-					list.height(listHeight);
-
+				if ($.isEmptyObject(data)) {
+					return;
 				}
 
-			} else { // not group
+				for (var groupName in data) {
 
-				if ($.isArray(data)) {
+					// not render if the group el below the display area
+					if (heightCount > scrollTop + options.listHeight) {
+						break;
+					}
 
-					for (var i = 0, len = data.length; i < len; i++) {
-						if (data[i] !== undefined) {
+					if (heightCount <= scrollTop + options.listHeight
+						&& heightCount + options.groupTitleHeight + options.itemHeight * data[groupName].length >= scrollTop) {
 
-							var item = data[i];
+						var group = $(groupTemplate).attr('data-name', groupName).css({
+							top: heightCount
+						});
+						heightCount += options.groupTitleHeight;
+
+						if (options.multi) {
+							_self._selectedValue[groupName] && data[groupName]
+							&& _self._selectedValue[groupName].length == data[groupName].length
+							&& group.find('.jq-select-group-checkbox').prop('checked', true);
+						} else {
+							group.find('.jq-select-group-checkbox').remove();
+						}
+
+						group.find('.jq-select-group-title-name').html(groupName);
+
+						var children = group.find('.jq-select-group-children');
+						var itemHeightCount = 0;
+
+						for (var i = 0, len = data[groupName].length; i < len; i++) {
+
+							if (data[groupName][i] === undefined) {
+								continue;
+							}
+
+							var item = data[groupName][i];
 
 							if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
 
 								var itemEl = $(itemTemplate).css({
-									top: heightCount
+									top: itemHeightCount
 								}).attr('data-index', i);
 
-								if (isPlainArrayData(data)) {
+								if (isPlainArrayData(data[groupName])) {
 
 									if (options.multi) {
-										_self._value.filter(function (_valueItem) {
-											return _valueItem && item && _valueItem.toString() === item.toString();
-										}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+
+										if (
+											_self._selectedValue[groupName]
+											&&
+											_self._selectedValue[groupName].filter(function (_valueItem) {
+												return _valueItem && item && _valueItem.toString() === item.toString();
+											}).length == 1
+										) {
+											itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+										}
+
 									} else {
+
 										itemEl.find('.jq-select-item-checkbox').remove();
-										_self._value && item && _self._value.toString() === item.toString()
-										&& itemEl.addClass('activated');
+
+										if (
+											_self._selectedValue[groupName] && _self._selectedValue[groupName] && item
+											&&
+											_self._selectedValue[groupName].toString() === item.toString()
+										) {
+											itemEl.addClass('activated');
+										}
+
 									}
 
 									itemEl.find('.jq-select-item-name').html(item);
@@ -381,43 +250,142 @@
 								} else {
 
 									if (options.multi) {
-										_self._value.filter(function (_valueItem) {
-											return _valueItem[options.valueField] && item[options.valueField]
-												&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
-										}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+
+										if (
+											_self._selectedValue[groupName]
+											&&
+											_self._selectedValue[groupName].filter(function (_valueItem) {
+												return _valueItem[options.valueField] && item[options.valueField]
+													&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
+											}).length == 1
+										) {
+											itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+										}
+
 									} else {
+
 										itemEl.find('.jq-select-item-checkbox').remove();
-										_self._value[options.valueField] && item[options.valueField]
-										&& _self._value[options.valueField].toString() === item[options.valueField].toString()
-										&& itemEl.addClass('activated');
+
+										if (
+											_self._selectedValue[groupName]
+											&&
+											_self._selectedValue[groupName][options.valueField] && item[options.valueField]
+											&&
+											_self._selectedValue[groupName][options.valueField].toString() === item[options.valueField].toString()
+										) {
+											itemEl.addClass('activated');
+										}
+
+									}
+
+									if (item[options.iconClsField]) {
+										itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
+									} else {
+										itemEl.find('.jq-select-item-icon').remove();
 									}
 
 									itemEl.find('.jq-select-item-name').html(item[options.displayField]);
 
 								}
 
-								list.append(itemEl);
+								children.append(itemEl);
 
 							}
 
-							if (heightCount > scrollTop + options.listHeight) {
-								break;
-							}
-
+							itemHeightCount += options.itemHeight;
 							heightCount += options.itemHeight;
 
 						}
-					}
 
-					list.height(data.length * options.itemHeight);
+						list.append(group);
+
+					} else {
+						heightCount += options.groupTitleHeight + options.itemHeight * data[groupName].length;
+					}
 
 				}
 
+				var listHeight = 0;
+				for (var groupName in data) {
+					listHeight += options.groupTitleHeight + options.itemHeight * data[groupName].length;
+				}
+				list.height(listHeight);
+
+			} else { // not group
+
+				if (!$.isArray(data)) {
+					return;
+				}
+
+				for (var i = 0, len = data.length; i < len; i++) {
+
+					if (data[i] === undefined) {
+						continue;
+					}
+
+					var item = data[i];
+
+					if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
+
+						var itemEl = $(itemTemplate).css({
+							top: heightCount
+						}).attr('data-index', i);
+
+						if (isPlainArrayData(data)) {
+
+							if (options.multi) {
+								_self._selectedValue.filter(function (_valueItem) {
+									return _valueItem && item && _valueItem.toString() === item.toString();
+								}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+							} else {
+								itemEl.find('.jq-select-item-checkbox').remove();
+								_self._selectedValue && item && _self._selectedValue.toString() === item.toString()
+								&& itemEl.addClass('activated');
+							}
+
+							itemEl.find('.jq-select-item-name').html(item);
+
+						} else {
+
+							if (options.multi) {
+								_self._selectedValue.filter(function (_valueItem) {
+									return _valueItem[options.valueField] && item[options.valueField]
+										&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
+								}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+							} else {
+								itemEl.find('.jq-select-item-checkbox').remove();
+								_self._selectedValue[options.valueField] && item[options.valueField]
+								&& _self._selectedValue[options.valueField].toString() === item[options.valueField].toString()
+								&& itemEl.addClass('activated');
+							}
+
+							itemEl.find('.jq-select-item-name').html(item[options.displayField]);
+
+						}
+
+						list.append(itemEl);
+
+					}
+
+					if (heightCount > scrollTop + options.listHeight) {
+						break;
+					}
+
+					heightCount += options.itemHeight;
+
+				}
+
+				list.height(data.length * options.itemHeight);
+
 			}
+
+			bindSelectEvents();
 
 		}
 
 		function showPopup() {
+
+			_self._listScrollTop = 0;
 
 			// dropdown
 			dropdown = $(dropdownTemplate).css('min-width', options.triggerWidth);
@@ -432,7 +400,7 @@
 			if (options.hideFilter) {
 				dropdown.find('.jq-select-filter').remove();
 			} else {
-				dropdown.find('.jq-select-filter').val(_self.filterText);
+				dropdown.find('.jq-select-filter').val(_self._filterText);
 			}
 
 			// Select All
@@ -440,15 +408,6 @@
 				dropdown.find('.jq-select-select-all').remove();
 			} else {
 				dropdown.find('.jq-select-select-all-name').html(options.selectAllText);
-			}
-
-			if (_self.filterText) {
-				_self.filterData = getFilteredData();
-				renderPopupList({
-					data: _self.filterData
-				});
-			} else {
-				renderPopupList();
 			}
 
 			// buttons
@@ -482,6 +441,15 @@
 			// append to body
 			wrapper.append(dropdown);
 
+			if (_self._filterText) {
+				_self._filterData = getFilteredData();
+				renderPopupList({
+					data: _self._filterData
+				});
+			} else {
+				renderPopupList();
+			}
+
 		};
 
 		function removePopup() {
@@ -492,17 +460,17 @@
 
 			wrapper.find('.jq-select-filter').bind('input', function (e) {
 
-				_self.filterText = e.target.value;
+				_self._filterText = e.target.value;
 
-				if (!_self.filterText) {
+				if (!_self._filterText) {
 					renderPopupList();
 					resetPopupPosition();
 					return;
 				}
 
-				_self.filterData = getFilteredData()
+				_self._filterData = getFilteredData()
 				renderPopupList({
-					data: _self.filterData
+					data: _self._filterData
 				});
 				resetPopupPosition();
 
@@ -517,7 +485,7 @@
 
 				e.stopPropagation();
 
-				if (!options.data) {
+				if (!options.data || !options.multi) {
 					return;
 				}
 
@@ -526,8 +494,6 @@
 				var checked = checkbox.prop('checked');
 
 				wrapper.find('.jq-select-select-all-name').html(checked ? options.deselectAllText : options.selectAllText);
-				wrapper.find('.jq-select-group-checkbox').prop('checked', checked);
-				wrapper.find('.jq-select-item-checkbox').prop('checked', checked);
 
 				if (options.group) {
 					var data = $.extend(true, {}, options.data);
@@ -539,10 +505,30 @@
 				}
 
 				if (checked) {
+
+					if (options.group) {
+						_self._selectedValue = $.extend(true, {}, options.data);
+					} else {
+						_self._selectedValue = $.extend(true, [], options.data);
+					}
+
 					onSelect(selectedItems);
+
 				} else {
+
+					if (options.group) {
+						_self._selectedValue = {};
+					} else {
+						_self._selectedValue = [];
+					}
+
 					onDeselect(selectedItems);
+
 				}
+
+				renderPopupList({
+					scrollTop: _self._listScrollTop
+				});
 
 			});
 
@@ -563,16 +549,28 @@
 					return;
 				}
 
-				group.find('.jq-select-item-checkbox').prop('checked', checked);
 				var selectedItems = $.extend(true, [], options.data[groupName]);
 
-				formatCheckbox();
-
 				if (checked) {
+
+					var items = $.extend(true, [], options.data[groupName]);
+					// _self._selectedValue = $.extend(true, {}, _self._value);
+					_self._selectedValue[groupName] = items;
+
 					onSelect(selectedItems);
+
 				} else {
+
+					// _self._selectedValue = $.extend(true, {}, _self._value);
+					_self._selectedValue[groupName] && delete _self._selectedValue[groupName];
+
 					onDeselect(selectedItems);
+
 				}
+
+				renderPopupList({
+					scrollTop: _self._listScrollTop
+				});
 
 			});
 
@@ -586,6 +584,8 @@
 						return;
 					}
 
+					var checked = $(this).children('input[type="checkbox"]').prop('checked');
+
 					var selectedItem;
 
 					if (options.group) {
@@ -597,24 +597,45 @@
 							return;
 						}
 
-						// selectedItem = options.data[groupName][group.find('.jq-select-item').index($(this))];
-						selectedItem = options.data[groupName][$(this).attr('data-index')];
+						var index = $(this).attr('data-index');
+						selectedItem = options.data[groupName][index];
+
+						if (checked) {
+							// _self._selectedValue = $.extend(true, {}, _self._value);
+							if (!_self._selectedValue[groupName]) {
+								_self._selectedValue[groupName] = [];
+							}
+							_self._selectedValue[groupName].push(selectedItem);
+						} else {
+							// _self._selectedValue = $.extend(true, {}, _self._value);
+							if (_self._selectedValue[groupName]) {
+								_self._selectedValue[groupName].splice(_self._selectedValue[groupName].indexOf(selectedItem), 1);
+							}
+						}
 
 					} else {
-						// var list = $(this).parents('.jq-select-list-scroller');
-						// selectedItem = options.data[list.find('.jq-select-item').index($(this))];
-						selectedItem = options.data[$(this).attr('data-index')];
+
+						var index = $(this).attr('data-index');
+						selectedItem = options.data[index];
+
+						if (checked) {
+							// _self._selectedValue = $.extend(true, [], _self._value);
+							_self._selectedValue.push(selectedItem);
+						} else {
+							_self._selectedValue.splice(_self._selectedValue.indexOf(selectedItem), 1);
+						}
+
 					}
-
-					var checked = $(this).children('input[type="checkbox"]').prop('checked');
-
-					formatCheckbox();
 
 					if (checked) {
 						onSelect([selectedItem]);
 					} else {
 						onDeselect([selectedItem]);
 					}
+
+					renderPopupList({
+						scrollTop: _self._listScrollTop
+					});
 
 				});
 			} else {
@@ -637,18 +658,21 @@
 							return;
 						}
 
-						// selectedItem = options.data[groupName][group.find('.jq-select-item').index($(this))];
 						selectedItem = options.data[groupName][$(this).attr('data-index')];
+						_self._selectedValue = {groupName: selectedItem};
 
 					} else {
-						// var list = $(this).parents('.jq-select-list-scroller');
-						// selectedItem = options.data[list.find('.jq-select-item').index($(this))];
 						selectedItem = options.data[$(this).attr('data-index')];
+						_self._selectedValue = selectedItem;
 					}
 
 					wrapper.find('.jq-select-item').removeClass('activated');
 					$(this).addClass('activated');
 					onSelect(selectedItem);
+
+					renderPopupList({
+						scrollTop: _self._listScrollTop
+					});
 
 				});
 			}
@@ -669,40 +693,33 @@
 				e.stopPropagation();
 				removePopup();
 				wrapper.removeClass('activated');
-				options.onClose && options.onClose();
+				closehandle();
 			});
 
 		};
 
 		function bindScrollEvents() {
-
 			wrapper.find('.jq-select-list').scroll(function (e) {
 				e.stopPropagation();
+				_self._listScrollTop = e.target.scrollTop;
 				renderPopupList({
 					scrollTop: e.target.scrollTop
 				});
 			});
-
 		}
 
 		function onSelect(items) {
-
 			options.onSelect && options.onSelect(items);
-
 			if (options.hideOKButton) { // trigger onChange callback if ok button is hidden
 				triggerChange();
 			}
-
 		};
 
 		function onDeselect(items) {
-
 			options.onDeselect && options.onDeselect(items);
-
 			if (options.hideOKButton) { // trigger onChange callback if ok button is hidden
 				triggerChange();
 			}
-
 		};
 
 		function initValue() {
@@ -759,6 +776,7 @@
 				} else {
 					trigger.children('.jq-select-text').html(options.noSelectText);
 				}
+				_self._selectedValue = $.extend(true, {}, result);
 				_self._value = $.extend(true, {}, result);
 
 			} else if (options.multi && !options.group) { // multi & not group
@@ -795,6 +813,7 @@
 				} else {
 					trigger.children('.jq-select-text').html(options.noSelectText);
 				}
+				_self._selectedValue = $.extend(true, [], result);
 				_self._value = $.extend(true, [], result);
 
 			} else if (!options.multi && options.group) { // single & group
@@ -850,6 +869,7 @@
 				} else {
 					trigger.children('.jq-select-text').html(options.noSelectText);
 				}
+				_self._selectedValue = $.extend(true, {}, result);
 				_self._value = $.extend(true, {}, result);
 
 			} else { // single & not group
@@ -895,8 +915,10 @@
 				}
 
 				if ($.isPlainObject(result)) {
+					_self._selectedValue = $.extend(true, {}, result);
 					_self._value = $.extend(true, {}, result);
 				} else {
+					_self._selectedValue = result;
 					_self._value = result;
 				}
 
@@ -912,114 +934,75 @@
 
 			if (options.multi && options.group) { // multi & group
 
-				var checkedCheckboxes = wrapper.find('.jq-select-item-checkbox:checked'),
-					result = {},
-					count = checkedCheckboxes.length
-
-				checkedCheckboxes.each(function () {
-
-					var group = $(this).parents('.jq-select-group');
-					var groupName = group.attr('data-name');
-
-					if (!options.data[groupName]) {
-						return;
-					}
-
-					if (!result[groupName]) {
-						result[groupName] = [];
-					}
-
-					result[groupName].push(options.data[groupName][group.find('.jq-select-item-checkbox').index($(this))]);
-
-				});
-
+				var count = 0;
+				for (var groupName in _self._selectedValue) {
+					count += _self._selectedValue[groupName].length;
+				}
 				if (count > 0) {
 					trigger.children('.jq-select-text').html(count + ' selected');
 				} else {
 					trigger.children('.jq-select-text').html(options.noSelectText);
 				}
 
-				if (JSON.stringify(_self._value) != JSON.stringify(result)) {
-					options.onChange && options.onChange(result);
-					_self._value = $.extend(true, {}, result);
+				if (JSON.stringify(_self._value) != JSON.stringify(_self._selectedValue)) {
+					options.onChange && options.onChange(_self._selectedValue);
+					_self._value = $.extend(true, {}, _self._selectedValue);
 				}
 
 			} else if (options.multi && !options.group) { // multi & not group
 
-				var checkedCheckboxes = wrapper.find('.jq-select-item-checkbox:checked'),
-					result = [],
-					count = checkedCheckboxes.length;
-
-				checkedCheckboxes.each(function () {
-					var list = $(this).parents('.jq-select-list-scroller');
-					result.push(options.data[list.find('.jq-select-item-checkbox').index($(this))]);
-				});
-
+				var count = _self._selectedValue.length;
 				if (count > 0) {
 					trigger.children('.jq-select-text').html(count + ' selected');
 				} else {
 					trigger.children('.jq-select-text').html(options.noSelectText);
 				}
 
-				if (JSON.stringify(_self._value) != JSON.stringify(result)) {
-					options.onChange && options.onChange(result);
-					_self._value = $.extend(true, [], result);
+				if (JSON.stringify(_self._value) != JSON.stringify(_self._selectedValue)) {
+					options.onChange && options.onChange(_self._selectedValue);
+					_self._value = $.extend(true, [], _self._selectedValue);
 				}
 
 			} else if (!options.multi && options.group) { // single & group
 
-				var selected = wrapper.find('.jq-select-item.activated'),
-					result = {};
-
-				var group = selected.parents('.jq-select-group');
-				var groupName = group.attr('data-name');
-
-				if (!options.data[groupName]) {
-					return;
+				var item;
+				for (var groupName in _self._selectedValue) {
+					item = _self._selectedValue[groupName];
 				}
-
-				if (!result[groupName]) {
-					result[groupName] = [];
-				}
-
-				var item = options.data[groupName][group.find('.jq-select-item').index(selected)];
-				result[groupName] = item;
-
 				trigger.children('.jq-select-text').html($.isPlainObject(item) ? item[options.displayField] : item);
 
-				if (JSON.stringify(_self._value) != JSON.stringify(result)) {
-					options.onChange && options.onChange(result);
-					_self._value = $.extend(true, {}, result);
+				if (JSON.stringify(_self._value) != JSON.stringify(_self._selectedValue)) {
+					options.onChange && options.onChange(_self._selectedValue);
+					_self._value = $.extend(true, {}, _self._selectedValue);
 				}
 
 			} else { // single & not group
 
-				var selected = wrapper.find('.jq-select-item.activated');
+				if ($.isPlainObject(_self._selectedValue)) {
 
-				var list = selected.parents('.jq-select-list-scroller');
-				var result = options.data[list.find('.jq-select-item').index(selected)];
+					trigger.children('.jq-select-text').html(_self._selectedValue[options.displayField]);
 
-				if ($.isPlainObject(result)) {
-
-					trigger.children('.jq-select-text').html(result[options.displayField]);
-
-					if (JSON.stringify(_self._value) !== JSON.stringify(result)) {
-						options.onChange && options.onChange(result);
-						_self._value = $.extend(true, {}, result);
+					if (JSON.stringify(_self._value) !== JSON.stringify(_self._selectedValue)) {
+						options.onChange && options.onChange(_self._selectedValue);
+						_self._value = $.extend(true, {}, _self._selectedValue);
 					}
 
 				} else {
 
-					trigger.children('.jq-select-text').html(result);
+					trigger.children('.jq-select-text').html(_self._selectedValue);
 
-					if (_self._value !== result) {
-						options.onChange && options.onChange(result);
-						_self._value = result;
+					if (_self._value !== _self._selectedValue) {
+						options.onChange && options.onChange(_self._selectedValue);
+						_self._value = _self._selectedValue;
 					}
 
 				}
 
 			}
+
+			renderPopupList({
+				scrollTop: _self._listScrollTop
+			});
 
 			if (options.autoClose) {
 
@@ -1027,7 +1010,7 @@
 
 				if (wrapper.hasClass('activated')) {
 					wrapper.removeClass('activated');
-					options.onClose && options.onClose();
+					closehandle();
 				}
 
 			}
@@ -1044,19 +1027,17 @@
 
 				if (wrapper.hasClass('activated')) {
 					wrapper.removeClass('activated');
-					options.onClose && options.onClose();
+					closehandle();
 					return;
 				}
 
-				if (!_self.isLoading) {
+				if (!_self._isLoading) {
 
 					wrapper.addClass('activated');
 
 					showPopup();
 
 					bindFilterEvents();
-
-					bindSelectEvents();
 
 					bindButtonsEvents();
 
@@ -1073,7 +1054,7 @@
 
 				if (wrapper.hasClass('activated')) {
 					wrapper.removeClass('activated');
-					options.onClose && options.onClose();
+					closehandle();
 				}
 
 			}
@@ -1084,12 +1065,19 @@
 			resetPopupPosition();
 		}
 
+		function closehandle() {
+			if (!options.hideOKButton) {
+				_self._selectedValue = $.extend(true, !options.group && options.multi ? [] : {}, _self._value);
+			}
+			options.onClose && options.onClose();
+		}
+
 		this.init = function () {
 
 			if (!trigger.hasClass('jq-select-formated')) {
 				trigger.addClass('jq-select-formated')
-					.html('<span class="jq-select-text">' + options.noSelectText + '</span>')
-					.wrap(wrapTemplate);
+				.html('<span class="jq-select-text">' + options.noSelectText + '</span>')
+				.wrap(wrapTemplate);
 			}
 			trigger.css('width', options.triggerWidth);
 			trigger.find('.jq-select-icon').remove();
@@ -1099,8 +1087,8 @@
 			initValue();
 
 			wrapper = trigger.parent()
-				.toggleClass('jq-select-option-multi', options.multi)
-				.toggleClass('jq-select-option-group', options.group);
+			.toggleClass('jq-select-option-multi', options.multi)
+			.toggleClass('jq-select-option-group', options.group);
 
 			$(document).on('mousedown', mousedownHandle);
 			$(window).on('resize', resizeHandle);

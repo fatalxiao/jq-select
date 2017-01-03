@@ -4,9 +4,10 @@ function generateRandomArray() {
 	return data;
 }
 
-function generateSimpleArrayData() {
+function generateSimpleArrayData(size) {
+	size = size || 10;
 	var data = [];
-	for (var i = 0; i < 10; i++) data.push(i);
+	for (var i = 0; i < size; i++) data.push(i);
 	return data;
 }
 
@@ -33,11 +34,13 @@ function generateGroupSimpleArrayData() {
 	return data;
 }
 
-function generateGroupObjectArrayData() {
+function generateGroupObjectArrayData(listSize, groupSize) {
+	listSize = listSize || 10;
+	groupSize = groupSize || 10;
 	var data = {};
-	for (var i = 0; i < 10; i++) {
+	for (var i = 0; i < listSize; i++) {
 		var group = [];
-		for (var j = 0; j < 10; j++) {
+		for (var j = 0; j < groupSize; j++) {
 			group.push({
 				value: 'value' + i + j,
 				label: 'label' + i + j
@@ -402,7 +405,7 @@ $(function () {
 
 	// updateOptions
 	function updateSelect(data) {
-		$('#updateoptions').JQSelect({
+		$('#update-options').JQSelect({
 			data: data,
 			iconCls: 'fa fa-circle-thin',
 			hideFilter: true,
@@ -429,17 +432,63 @@ $(function () {
 	updateSelect(generateRandomArray());
 	setTimeout(function () {
 		updateSelect(generateRandomArray());
-		console.log('select "updateoptions" updated');
+		console.log('select "update-options" updated');
 	}, 2000);
 
 	// large size
-	$('#largetsize').JQSelect({
+	$('#large-size').JQSelect({
 		group: true,
 		data: generateGroupObjectArrayDataLargeSize(),
 		triggerWidth: 300,
 		popupWidth: 'auto',
 		hideOKButton: true,
 		hideCloseButton: true,
+		onSelect: function (selectItems) {
+			console.log('onSelect: ', selectItems);
+		},
+		onDeselect: function (selectItems) {
+			console.log('onDeselect: ', selectItems);
+		},
+		onChange: function (value) {
+			console.log('onChange: ', value);
+		},
+		onOK: function () {
+			console.log('onOK');
+		},
+		onClose: function () {
+			console.log('onClose');
+		}
+	});
+
+	$('#big-data').JQSelect({
+		multi: false,
+		group: false,
+		hideFilter: true,
+		hideOKButton: true,
+		hideCloseButton: true,
+		autoClose: true,
+		data: generateSimpleArrayData(10000),
+		onSelect: function (selectItems) {
+			console.log('onSelect: ', selectItems);
+		},
+		onDeselect: function (selectItems) {
+			console.log('onDeselect: ', selectItems);
+		},
+		onChange: function (value) {
+			console.log('onChange: ', value);
+		},
+		onOK: function () {
+			console.log('onOK');
+		},
+		onClose: function () {
+			console.log('onClose');
+		}
+	});
+
+	$('#big-data-group-multi').JQSelect({
+		multi: true,
+		group: true,
+		data: generateGroupObjectArrayData(100, 100),
 		onSelect: function (selectItems) {
 			console.log('onSelect: ', selectItems);
 		},

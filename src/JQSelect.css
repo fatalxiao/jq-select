@@ -148,8 +148,8 @@
 }
 
 .jq-select-wrapper .jq-select-popup .jq-select-group {
-	position: absolute;
-	width: 100%;
+	position: relative;
+	/*width: 100%;*/
 	left: 0;
 }
 
@@ -191,8 +191,8 @@
 	color: #4C637B;
 	box-sizing: border-box;
 	padding: 0 12px;
-	position: absolute;
-	width: 100%;
+	position: relative;
+	/*width: 100%;*/
 	left: 0;
 }
 

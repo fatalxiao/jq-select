@@ -175,6 +175,8 @@
 					return;
 				}
 
+				var isFirstGroup = true;
+
 				for (var groupName in data) {
 
 					// not render if the group el below the display area
@@ -185,9 +187,13 @@
 					if (heightCount <= scrollTop + options.listHeight
 						&& heightCount + options.groupTitleHeight + options.itemHeight * data[groupName].length >= scrollTop) {
 
-						var group = $(groupTemplate).attr('data-name', groupName).css({
-							top: heightCount
-						});
+						var group = $(groupTemplate).attr('data-name', groupName);
+
+						if (isFirstGroup) {
+							list.append('<div style="height:' + heightCount + 'px"></div>');
+							isFirstGroup = false;
+						}
+
 						heightCount += options.groupTitleHeight;
 
 						if (options.multi) {
@@ -201,7 +207,7 @@
 						group.find('.jq-select-group-title-name').html(groupName);
 
 						var children = group.find('.jq-select-group-children');
-						var itemHeightCount = 0;
+						var isFirstItem = true;
 
 						for (var i = 0, len = data[groupName].length; i < len; i++) {
 
@@ -213,9 +219,12 @@
 
 							if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
 
-								var itemEl = $(itemTemplate).css({
-									top: itemHeightCount
-								}).attr('data-index', i);
+								var itemEl = $(itemTemplate).attr('data-index', i);
+
+								if (isFirstItem) {
+									children.append('<div style="height:' + options.itemHeight * i + 'px"></div>');
+									isFirstItem = false;
+								}
 
 								if (isPlainArrayData(data[groupName])) {
 
@@ -292,7 +301,6 @@
 
 							}
 
-							itemHeightCount += options.itemHeight;
 							heightCount += options.itemHeight;
 
 						}
@@ -317,19 +325,28 @@
 					return;
 				}
 
+				var isFirstItem = true;
+
 				for (var i = 0, len = data.length; i < len; i++) {
 
 					if (data[i] === undefined) {
 						continue;
 					}
 
-					var item = data[i];
+					if (heightCount > scrollTop + options.listHeight) {
+						break;
+					}
 
 					if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
 
-						var itemEl = $(itemTemplate).css({
-							top: heightCount
-						}).attr('data-index', i);
+						var item = data[i];
+
+						var itemEl = $(itemTemplate).attr('data-index', i);
+
+						if (isFirstItem) {
+							list.append('<div style="height:' + heightCount + 'px"></div>');
+							isFirstItem = false;
+						}
 
 						if (isPlainArrayData(data)) {
 
@@ -365,10 +382,6 @@
 
 						list.append(itemEl);
 
-					}
-
-					if (heightCount > scrollTop + options.listHeight) {
-						break;
 					}
 
 					heightCount += options.itemHeight;

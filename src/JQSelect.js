@@ -718,18 +718,54 @@
 		function bindButtonsEvents() {
 
 			wrapper.find('.jq-select-buttons-ok').mousedown(function (e) {
+
 				e.stopPropagation();
+
 				triggerChange();
+
 				removePopup();
 				wrapper.removeClass('activated');
+
 				options.onOK && options.onOK();
+
+			});
+
+			wrapper.find('.jq-select-buttons-clear').mousedown(function (e) {
+
+				e.stopPropagation();
+
+				if (options.multi) {
+
+					var selectedItems = [];
+
+					if (options.group) {
+						for (var groupName in _self._selectedValue) {
+							selectedItems = selectedItems.concat(_self._selectedValue[groupName]);
+						}
+					} else {
+						selectedItems = _self._selectedValue;
+					}
+
+					onDeselect(selectedItems);
+
+				}
+
+				_self._selectedValue = !options.group && options.multi ? [] : {};
+				renderPopupList({
+					scrollTop: _self._listScrollTop
+				});
+
 			});
 
 			wrapper.find('.jq-select-buttons-close').mousedown(function (e) {
+
 				e.stopPropagation();
+
 				removePopup();
 				wrapper.removeClass('activated');
+
 				closehandle();
+
 			});
 
 		};

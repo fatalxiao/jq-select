@@ -28,6 +28,8 @@ $('#select').JQSelect(options);
 |deselectAllText|String|"Deselect All"||
 |hideOKButton|Boolean|false||
 |okButtonText|String|"OK"||
+|hideClearButton|Boolean|false||
+|clearButtonText|String|"Clear"||
 |hideCloseButton|Boolean|false||
 |closeButtonText|String|"Close"||
 |autoClose|Boolean|false|Close the popup when select item if true.|

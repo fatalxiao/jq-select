@@ -96,6 +96,7 @@ function generateGroupObjectArrayDataLargeSize() {
 
 $(function () {
 
+	// single / simple array data
 	$('#single-simple-array').JQSelect({
 		multi: false,
 		group: false,
@@ -121,6 +122,7 @@ $(function () {
 		}
 	});
 
+	// single / object array data
 	$('#single-object-array').JQSelect({
 		multi: false,
 		group: false,
@@ -147,6 +149,7 @@ $(function () {
 		}
 	});
 
+	// single / group / simple array data
 	$('#single-group-simple-array').JQSelect({
 		multi: false,
 		group: true,
@@ -171,6 +174,7 @@ $(function () {
 		}
 	});
 
+	// single / group / object array data
 	$('#single-group-object-array').JQSelect({
 		multi: false,
 		group: true,
@@ -201,6 +205,7 @@ $(function () {
 		}
 	});
 
+	// multi / simple array data
 	$('#multi-simple-array').JQSelect({
 		multi: true,
 		group: false,
@@ -225,12 +230,10 @@ $(function () {
 		}
 	});
 
-	$('#multi-object-array').JQSelect({
+	// multi / object array data / buttons
+	$('#multi-object-array-buttons').JQSelect({
 		multi: true,
 		group: false,
-		hideFilter: true,
-		hideOKButton: true,
-		hideCloseButton: true,
 		data: generateObjectArrayData(),
 		value: ['value0', 'value3'],
 		onSelect: function (selectItems) {
@@ -250,6 +253,7 @@ $(function () {
 		}
 	});
 
+	// multi / group / simple array data
 	$('#multi-group-simple-array').JQSelect({
 		multi: true,
 		group: true,
@@ -274,6 +278,7 @@ $(function () {
 		}
 	});
 
+	// multi / group / object array data
 	$('#multi-group-object-array').JQSelect({
 		multi: true,
 		group: true,

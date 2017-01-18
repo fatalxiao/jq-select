@@ -246,25 +246,32 @@
 
 .jq-select-wrapper .jq-select-popup .jq-select-buttons > button {
 	float: left;
-	width: 50%;
 	height: 40px;
 	color: #4C637B;
 	background: #F2F6FA;
-	border: none;
 	padding: 0;
 	box-sizing: border-box;
 	cursor: pointer;
 	user-select: none;
+	border: none;
+	border-left: 1px solid #E8EDF4;
 	transition: all 100ms ease-in-out;
 }
 
-.jq-select-wrapper .jq-select-popup .jq-select-buttons.hide-ok-button .jq-select-buttons-close,
-.jq-select-wrapper .jq-select-popup .jq-select-buttons.hide-cancel-button .jq-select-buttons-ok {
+.jq-select-wrapper .jq-select-popup .jq-select-buttons.buttons-3 > button {
+	width: 33.333333%;
+}
+
+.jq-select-wrapper .jq-select-popup .jq-select-buttons.buttons-2 > button {
+	width: 50%;
+}
+
+.jq-select-wrapper .jq-select-popup .jq-select-buttons.buttons-1 > button {
 	width: 100%;
 }
 
-.jq-select-wrapper .jq-select-popup .jq-select-buttons > button:last-child {
-	border-left: 1px solid #E8EDF4;
+.jq-select-wrapper .jq-select-popup .jq-select-buttons > button:first-child {
+	border-left: none;
 }
 
 .jq-select-wrapper .jq-select-popup .jq-select-buttons > button:hover {

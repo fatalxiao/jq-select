@@ -35,6 +35,7 @@
 			</div>\
 			<div class="jq-select-buttons">\
 				<button type="button" class="jq-select-buttons-ok"></button>\
+				<button type="button" class="jq-select-buttons-clear"></button>\
 				<button type="button" class="jq-select-buttons-close"></button>\
 			</div>\
 		 </div>';
@@ -400,7 +401,7 @@
 
 			_self._listScrollTop = 0;
 
-			// dropdown
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- dropdown -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 			dropdown = $(dropdownTemplate).css('min-width', options.triggerWidth);
 
 			if (options.popupWidth === 'auto') {
@@ -408,46 +409,61 @@
 			} else if (!isNaN(options.popupWidth)) {
 				dropdown.width(options.popupWidth);
 			}
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- dropdown -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-			// filter
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- filter -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 			if (options.hideFilter) {
 				dropdown.find('.jq-select-filter').remove();
 			} else {
 				dropdown.find('.jq-select-filter').val(_self._filterText);
 			}
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- filter -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-			// Select All
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Select All -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 			if (!options.multi || options.hideSelectAll) {
 				dropdown.find('.jq-select-select-all').remove();
 			} else {
 				dropdown.find('.jq-select-select-all-name').html(options.selectAllText);
 			}
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Select All -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-			// buttons
-			var buttons = dropdown.find('.jq-select-buttons');
-			var okButton = dropdown.find('.jq-select-buttons-ok');
-			var cancelButton = dropdown.find('.jq-select-buttons-close');
-			if (options.hideOKButton && options.hideCloseButton) {
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+			var buttons = dropdown.find('.jq-select-buttons'),
+				okButton = dropdown.find('.jq-select-buttons-ok'),
+				clearButton = dropdown.find('.jq-select-buttons-clear'),
+				closeButton = dropdown.find('.jq-select-buttons-close'),
+				buttonsCount = 0;
+
+			// ok button
+			if (options.hideOKButton) {
+				okButton.remove();
+			} else {
+				okButton.html(options.okButtonText);
+				buttonsCount++;
+			}
+
+			// clear button
+			if (options.hideClearButton) {
+				clearButton.remove();
+			} else {
+				clearButton.html(options.clearButtonText);
+				buttonsCount++;
+			}
+
+			// cancel button
+			if (options.hideCloseButton) {
+				closeButton.remove();
+			} else {
+				closeButton.html(options.closeButtonText);
+				buttonsCount++;
+			}
+
+			if (buttonsCount === 0) {
 				buttons.remove();
 			} else {
-
-				// ok button
-				if (options.hideOKButton) {
-					okButton.remove();
-					buttons.addClass('hide-ok-button');
-				} else {
-					okButton.html(options.okButtonText);
-				}
-
-				// cancel button
-				if (options.hideCloseButton) {
-					cancelButton.remove();
-					buttons.addClass('hide-cancel-button');
-				} else {
-					cancelButton.html(options.closeButtonText);
-				}
-
+				buttons.addClass('buttons-' + buttonsCount);
 			}
+			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 			resetPopupPosition(dropdown);
 
@@ -636,7 +652,13 @@
 						if (checked) {
 							_self._selectedValue.push(selectedItem);
 						} else {
-							_self._selectedValue.splice(_self._selectedValue.indexOf(selectedItem), 1);
+							_self._selectedValue = _self._selectedValue.filter(function (item) {
+								if (isPlainArrayData(_self._selectedValue)) {
+									return item !== selectedItem;
+								} else {
+									return item[options.valueField] !== selectedItem[options.valueField];
+								}
+							});
 						}
 
 					}
@@ -1174,6 +1196,8 @@
 
 		hideOKButton: false,
 		okButtonText: 'OK',
+		hideClearButton: false,
+		clearButtonText: 'Clear',
 		hideCloseButton: false,
 		closeButtonText: 'Close',
 		autoClose: false,

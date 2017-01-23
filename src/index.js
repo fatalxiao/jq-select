@@ -130,7 +130,6 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
-		hideClearButton: true,
 		autoClose: true,
 		data: generateObjectArrayData(),
 		value: 'value0',

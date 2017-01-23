@@ -753,11 +753,14 @@
 						selectedItems = _self._selectedValue;
 					}
 
+					_self._selectedValue = !options.group && options.multi ? [] : {};
 					onDeselect(selectedItems);
 
+				} else {
+					_self._selectedValue = !options.group && options.multi ? [] : {};
+					triggerChange();
 				}
 
-				_self._selectedValue = !options.group && options.multi ? [] : {};
 				renderPopupList({
 					scrollTop: _self._listScrollTop
 				});
@@ -1044,7 +1047,12 @@
 				for (var groupName in _self._selectedValue) {
 					item = _self._selectedValue[groupName];
 				}
-				trigger.children('.jq-select-text').html($.isPlainObject(item) ? item[options.displayField] : item);
+				trigger.children('.jq-select-text').html(
+					$.isPlainObject(item) ?
+						(item[options.displayField] ? item[options.displayField] : options.noSelectText)
+						:
+						item
+				);
 
 				if (JSON.stringify(_self._value) != JSON.stringify(_self._selectedValue)) {
 					options.onChange && options.onChange(_self._selectedValue);
@@ -1055,7 +1063,10 @@
 
 				if ($.isPlainObject(_self._selectedValue)) {
 
-					trigger.children('.jq-select-text').html(_self._selectedValue[options.displayField]);
+					trigger.children('.jq-select-text').html(
+						_self._selectedValue[options.displayField] ?
+							_self._selectedValue[options.displayField] : options.noSelectText
+					);
 
 					if (JSON.stringify(_self._value) !== JSON.stringify(_self._selectedValue)) {
 						options.onChange && options.onChange(_self._selectedValue);

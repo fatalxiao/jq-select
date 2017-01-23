@@ -66,6 +66,10 @@
 		this._filterData = null;
 		this._listScrollTop = 0;
 
+		function isValue(value) {
+			return value !== null && value !== undefined;
+		}
+
 		function isPlainArrayData(data) {
 
 			data = data || options.data;
@@ -138,10 +142,10 @@
 				for (var groupName in options.data) {
 					var data = options.data[groupName].filter(function (item) {
 						if ($.isPlainObject(item)) {
-							return item && item[options.displayField]
+							return isValue(item) && isValue(item[options.displayField])
 								&& item[options.displayField].toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 						} else {
-							return item && item.toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
+							return isValue(item) && item.toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 						}
 					});
 					if (data.length > 0) {
@@ -151,10 +155,10 @@
 			} else {
 				result = options.data.filter(function (item) {
 					if ($.isPlainObject(item)) {
-						return item && item[options.displayField]
+						return isValue(item) && isValue(item[options.displayField])
 							&& item[options.displayField].toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 					} else {
-						return item && item.toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
+						return isValue(item) && item.toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 					}
 				});
 			}
@@ -235,7 +239,7 @@
 											_self._selectedValue[groupName]
 											&&
 											_self._selectedValue[groupName].filter(function (_valueItem) {
-												return _valueItem && item && _valueItem.toString() === item.toString();
+												return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
 											}).length == 1
 										) {
 											itemEl.find('.jq-select-item-checkbox').prop('checked', true);
@@ -246,7 +250,7 @@
 										itemEl.find('.jq-select-item-checkbox').remove();
 
 										if (
-											_self._selectedValue[groupName] && item
+											isValue(_self._selectedValue[groupName]) && isValue(item)
 											&& _self._selectedValue[groupName].toString() === item.toString()
 										) {
 											itemEl.addClass('activated');
@@ -264,7 +268,8 @@
 											_self._selectedValue[groupName]
 											&&
 											_self._selectedValue[groupName].filter(function (_valueItem) {
-												return _valueItem[options.valueField] && item[options.valueField]
+												return isValue(_valueItem[options.valueField])
+													&& isValue(item[options.valueField])
 													&& _valueItem[options.valueField].toString()
 													=== item[options.valueField].toString();
 											}).length == 1
@@ -277,11 +282,10 @@
 										itemEl.find('.jq-select-item-checkbox').remove();
 
 										if (
-											_self._selectedValue[groupName]
-											&& _self._selectedValue[groupName][options.valueField]
-											&& item && item[options.valueField]
-											&&
-											_self._selectedValue[groupName][options.valueField].toString()
+											isValue(_self._selectedValue[groupName])
+											&& isValue(_self._selectedValue[groupName][options.valueField])
+											&& isValue(item) && item[options.valueField]
+											&& _self._selectedValue[groupName][options.valueField].toString()
 											=== item[options.valueField].toString()
 										) {
 											itemEl.addClass('activated');
@@ -354,11 +358,11 @@
 
 							if (options.multi) {
 								_self._selectedValue.filter(function (_valueItem) {
-									return _valueItem && item && _valueItem.toString() === item.toString();
+									return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
 								}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
 							} else {
 								itemEl.find('.jq-select-item-checkbox').remove();
-								_self._selectedValue && item && _self._selectedValue.toString() === item.toString()
+								isValue(_self._selectedValue) && isValue(item) && _self._selectedValue.toString() === item.toString()
 								&& itemEl.addClass('activated');
 							}
 
@@ -368,12 +372,13 @@
 
 							if (options.multi) {
 								_self._selectedValue.filter(function (_valueItem) {
-									return _valueItem[options.valueField] && item[options.valueField]
+									return isValue(_valueItem[options.valueField]) && isValue(item[options.valueField])
 										&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
 								}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
 							} else {
 								itemEl.find('.jq-select-item-checkbox').remove();
-								_self._selectedValue[options.valueField] && item[options.valueField]
+								isValue(_self._selectedValue[options.valueField])
+								&& isValue(item[options.valueField])
 								&& _self._selectedValue[options.valueField].toString() === item[options.valueField].toString()
 								&& itemEl.addClass('activated');
 							}

@@ -246,9 +246,8 @@
 										itemEl.find('.jq-select-item-checkbox').remove();
 
 										if (
-											_self._selectedValue[groupName] && _self._selectedValue[groupName] && item
-											&&
-											_self._selectedValue[groupName].toString() === item.toString()
+											_self._selectedValue[groupName] && item
+											&& _self._selectedValue[groupName].toString() === item.toString()
 										) {
 											itemEl.addClass('activated');
 										}
@@ -266,7 +265,8 @@
 											&&
 											_self._selectedValue[groupName].filter(function (_valueItem) {
 												return _valueItem[options.valueField] && item[options.valueField]
-													&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
+													&& _valueItem[options.valueField].toString()
+													=== item[options.valueField].toString();
 											}).length == 1
 										) {
 											itemEl.find('.jq-select-item-checkbox').prop('checked', true);
@@ -278,10 +278,11 @@
 
 										if (
 											_self._selectedValue[groupName]
+											&& _self._selectedValue[groupName][options.valueField]
+											&& item && item[options.valueField]
 											&&
-											_self._selectedValue[groupName][options.valueField] && item[options.valueField]
-											&&
-											_self._selectedValue[groupName][options.valueField].toString() === item[options.valueField].toString()
+											_self._selectedValue[groupName][options.valueField].toString()
+											=== item[options.valueField].toString()
 										) {
 											itemEl.addClass('activated');
 										}
@@ -450,7 +451,7 @@
 				buttonsCount++;
 			}
 
-			// cancel button
+			// close button
 			if (options.hideCloseButton) {
 				closeButton.remove();
 			} else {
@@ -695,7 +696,8 @@
 						}
 
 						selectedItem = options.data[groupName][$(this).attr('data-index')];
-						_self._selectedValue = {groupName: selectedItem};
+						_self._selectedValue = {};
+						_self._selectedValue[groupName] = selectedItem;
 
 					} else {
 						selectedItem = options.data[$(this).attr('data-index')];
@@ -782,16 +784,12 @@
 
 		function onSelect(items) {
 			options.onSelect && options.onSelect(items);
-			if (options.hideOKButton) { // trigger onChange callback if ok button is hidden
-				triggerChange();
-			}
+			triggerChange();
 		};
 
 		function onDeselect(items) {
 			options.onDeselect && options.onDeselect(items);
-			if (options.hideOKButton) { // trigger onChange callback if ok button is hidden
-				triggerChange();
-			}
+			triggerChange();
 		};
 
 		function initValue() {
@@ -1138,9 +1136,7 @@
 		}
 
 		function closehandle() {
-			if (!options.hideOKButton) {
-				_self._selectedValue = $.extend(true, !options.group && options.multi ? [] : {}, _self._value);
-			}
+			_self._selectedValue = $.extend(true, !options.group && options.multi ? [] : {}, _self._value);
 			options.onClose && options.onClose();
 		}
 

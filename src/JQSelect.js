@@ -117,7 +117,7 @@
 			if (options.hideFilter === false) {
 				dropdownHeight += 30;
 			}
-			if (options.hideOKButton === false || options.hideCloseButton === false) {
+			if (options.hideOKButton === false || options.hideCloseButton === false || options.hideClearButton === false) {
 				dropdownHeight += 40;
 			}
 

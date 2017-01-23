@@ -103,6 +103,7 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		autoClose: true,
 		data: generateSimpleArrayData(),
 		onSelect: function (selectItems) {
@@ -129,6 +130,7 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		autoClose: true,
 		data: generateObjectArrayData(),
 		value: 'value0',
@@ -156,6 +158,7 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		data: generateGroupSimpleArrayData(),
 		onSelect: function (selectItems) {
 			console.log('onSelect: ', selectItems);
@@ -181,6 +184,7 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		data: generateGroupObjectArrayData(),
 		value: {
 			group0: {
@@ -212,6 +216,7 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		data: generateSimpleArrayData(),
 		onSelect: function (selectItems) {
 			console.log('onSelect: ', selectItems);
@@ -260,6 +265,7 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		data: generateGroupSimpleArrayData(),
 		onSelect: function (selectItems) {
 			console.log('onSelect: ', selectItems);
@@ -285,6 +291,7 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		data: generateGroupObjectArrayData(),
 		value: {
 			group0: ['value01']
@@ -365,6 +372,7 @@ $(function () {
 		data: generateGroupObjectArrayData(),
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		onSelect: function (selectItems) {
 			console.log('onSelect: ', selectItems);
 		},
@@ -391,6 +399,7 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		onSelect: function (selectItems) {
 			console.log('onSelect: ', selectItems);
 		},
@@ -416,6 +425,7 @@ $(function () {
 			hideFilter: true,
 			hideOKButton: true,
 			hideCloseButton: true,
+			hideClearButton: true,
 			onSelect: function (selectItems) {
 				console.log('onSelect: ', selectItems);
 			},
@@ -448,6 +458,7 @@ $(function () {
 		popupWidth: 'auto',
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		onSelect: function (selectItems) {
 			console.log('onSelect: ', selectItems);
 		},
@@ -471,6 +482,7 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
+		hideClearButton: true,
 		autoClose: true,
 		data: generateSimpleArrayData(10000),
 		onSelect: function (selectItems) {

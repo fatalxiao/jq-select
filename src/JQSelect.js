@@ -733,7 +733,7 @@
 				removePopup();
 				wrapper.removeClass('activated');
 
-				options.onOK && options.onOK();
+				options.onOK && options.onOK(_self._value);
 
 			});
 
@@ -1153,7 +1153,7 @@
 
 		function closehandle() {
 			_self._selectedValue = $.extend(true, !options.group && options.multi ? [] : {}, _self._value);
-			options.onClose && options.onClose();
+			options.onClose && options.onClose(_self._value);
 		}
 
 		this.init = function () {

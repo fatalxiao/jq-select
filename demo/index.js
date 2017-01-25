@@ -115,11 +115,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -130,7 +130,6 @@ $(function () {
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
-		hideClearButton: true,
 		autoClose: true,
 		data: generateObjectArrayData(),
 		value: 'value0',
@@ -143,11 +142,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -169,11 +168,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -201,11 +200,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -227,11 +226,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -250,11 +249,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -276,11 +275,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -305,11 +304,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -329,11 +328,11 @@ $(function () {
 			onChange: function (value) {
 				console.log('onChange: ', value);
 			},
-			onOK: function () {
-				console.log('onOK');
+			onOK: function (value) {
+				console.log('onOK', value);
 			},
-			onClose: function () {
-				console.log('onClose');
+			onClose: function (value) {
+				console.log('onClose', value);
 			}
 		}).trigger('updateOptions').trigger('loadingEnd');
 	}, 2000);
@@ -356,11 +355,11 @@ $(function () {
 			onChange: function (value) {
 				console.log('onChange: ', value);
 			},
-			onOK: function () {
-				console.log('onOK');
+			onOK: function (value) {
+				console.log('onOK', value);
 			},
-			onClose: function () {
-				console.log('onClose');
+			onClose: function (value) {
+				console.log('onClose', value);
 			}
 		}).trigger('updateOptions').trigger('loadingEnd');
 	}, 2000);
@@ -382,11 +381,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -409,11 +408,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -435,11 +434,11 @@ $(function () {
 			onChange: function (value) {
 				console.log('onChange: ', value);
 			},
-			onOK: function () {
-				console.log('onOK');
+			onOK: function (value) {
+				console.log('onOK', value);
 			},
-			onClose: function () {
-				console.log('onClose');
+			onClose: function (value) {
+				console.log('onClose', value);
 			}
 		}).trigger('updateOptions');
 	}
@@ -468,11 +467,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -494,11 +493,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 
@@ -515,11 +514,11 @@ $(function () {
 		onChange: function (value) {
 			console.log('onChange: ', value);
 		},
-		onOK: function () {
-			console.log('onOK');
+		onOK: function (value) {
+			console.log('onOK', value);
 		},
-		onClose: function () {
-			console.log('onClose');
+		onClose: function (value) {
+			console.log('onClose', value);
 		}
 	});
 

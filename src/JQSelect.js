@@ -63,7 +63,7 @@
 		this._selectedValue = !options.group && options.multi ? [] : {};
 		this._isLoading = false;
 		this._filterText = '';
-		// this._filterData = null;
+		this._filterData = null;
 		this._listScrollTop = 0;
 		this._rendering = false;
 
@@ -213,11 +213,23 @@
 								&& _self._selectedValue[groupName] && filteredData[groupName]) {
 
 								var count = 0;
-								filteredData[groupName].forEach(function (item) {
-									if (_self._selectedValue[groupName].indexOf(item) > -1) {
-										count++;
-									}
-								});
+								if (isPlainArrayData(filteredData[groupName])) {
+									filteredData[groupName].forEach(function (item) {
+										if (_self._selectedValue[groupName].indexOf(item) > -1) {
+											count++;
+										}
+									});
+								} else {
+									filteredData[groupName].forEach(function (item) {
+										for (var i = 0, len = _self._selectedValue[groupName].length; i < len; i++) {
+											if (
+												_self._selectedValue[groupName][i][options.valueField].toString() === item[options.valueField].toString()) {
+												count++;
+												break;
+											}
+										}
+									});
+								}
 
 								if (count === filteredData[groupName].length) {
 									group.find('.jq-select-group-checkbox').prop('checked', true);
@@ -392,7 +404,11 @@
 
 				}
 
-				list.height(heightCount);
+				var listHeight = 0;
+				for (var groupName in filteredData) {
+					listHeight += options.groupTitleHeight + options.itemHeight * filteredData[groupName].length;
+				}
+				list.height(listHeight);
 
 			} else { // not group
 
@@ -474,7 +490,7 @@
 
 				}
 
-				list.height(heightCount);
+				list.height(filteredData.length * options.itemHeight);
 
 			}
 
@@ -557,14 +573,7 @@
 			// append to body
 			wrapper.append(dropdown);
 
-			// if (_self._filterText) {
-			// 	_self._filterData = getFilteredData();
-			// 	renderPopupList({
-			// 		data: _self._filterData
-			// 	});
-			// } else {
 			renderPopupList();
-			// }
 
 			bindSelectAllEvents();
 
@@ -581,17 +590,8 @@
 				_self._filterText = e.target.value;
 				_self._filterData = getFilteredData() || options.data;
 
-				// if (!_self._filterText) {
 				renderPopupList();
 				resetPopupPosition();
-				// 	return;
-				// }
-				//
-				// _self._filterData = getFilteredData()
-				// renderPopupList({
-				// 	data: _self._filterData
-				// });
-				// resetPopupPosition();
 
 			});
 
@@ -631,7 +631,35 @@
 				if (checked) {
 
 					if (options.group) {
-						_self._selectedValue = $.extend(true, _self._selectedValue, data);
+
+						for (var groupName in data) {
+
+							if (!_self._selectedValue[groupName]) {
+								_self._selectedValue[groupName] = [];
+							}
+
+							if (isPlainArrayData(data[groupName])) {
+								data[groupName].forEach(function (item) {
+									if (_self._selectedValue[groupName].filter(function (selectedItem) {
+											return isValue(item) && isValue(selectedItem) && item.toString() === selectedItem.toString();
+										}).length == 0) {
+										_self._selectedValue[groupName].push(item);
+									}
+								});
+							} else {
+								data[groupName].forEach(function (item) {
+									if (_self._selectedValue[groupName].filter(function (selectedItem) {
+											return isValue(item[options.valueField])
+												&& isValue(selectedItem[options.valueField])
+												&& item[options.valueField].toString() === selectedItem[options.valueField].toString();
+										}).length == 0) {
+										_self._selectedValue[groupName].push(item);
+									}
+								});
+							}
+
+						}
+
 					} else {
 
 						_self._selectedValue = $.extend(true, [], _self._selectedValue);
@@ -684,6 +712,9 @@
 											&& item[options.valueField].toString() !== selectedItem[options.valueField].toString();
 									}
 								});
+								if (_self._selectedValue[groupName].length < 1) {
+									delete _self._selectedValue[groupName];
+								}
 							});
 
 						}
@@ -747,13 +778,12 @@
 
 					_self._selectedValue = $.extend(true, [], _self._selectedValue);
 
-					if (!_self._selectedValue[groupName]) {
-						_self._selectedValue[groupName] = [];
-					}
-
 					if (isPlainArrayData(data[groupName])) {
 						data[groupName].forEach(function (item) {
-							if (_self._selectedValue[groupName].filter(function (selectedItem) {
+							if (!_self._selectedValue[groupName] || _self._selectedValue[groupName].length <= 0) {
+								_self._selectedValue[groupName] = [];
+								_self._selectedValue[groupName].push(item);
+							} else if (_self._selectedValue[groupName].filter(function (selectedItem) {
 									return isValue(item) && isValue(selectedItem) && item.toString() === selectedItem.toString();
 								}).length == 0) {
 								_self._selectedValue[groupName].push(item);
@@ -761,7 +791,10 @@
 						});
 					} else {
 						data[groupName].forEach(function (item) {
-							if (_self._selectedValue[groupName].filter(function (selectedItem) {
+							if (!_self._selectedValue[groupName] || _self._selectedValue[groupName].length <= 0) {
+								_self._selectedValue[groupName] = [];
+								_self._selectedValue[groupName].push(item);
+							} else if (_self._selectedValue[groupName].filter(function (selectedItem) {
 									return isValue(item[options.valueField])
 										&& isValue(selectedItem[options.valueField])
 										&& item[options.valueField].toString() === selectedItem[options.valueField].toString();
@@ -1274,10 +1307,6 @@
 				}
 
 			}
-
-			// renderPopupList({
-			// 	scrollTop: _self._listScrollTop
-			// });
 
 			if (options.autoClose) {
 

@@ -148,9 +148,9 @@
 					var data = options.data[groupName].filter(function (item) {
 						if ($.isPlainObject(item)) {
 							return isValue(item) && isValue(item[options.displayField])
-								&& item[options.displayField].toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
+								&& item[options.displayField].toString().toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 						} else {
-							return isValue(item) && item.toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
+							return isValue(item) && item.toString().toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 						}
 					});
 					if (data.length > 0) {
@@ -161,9 +161,9 @@
 				result = options.data.filter(function (item) {
 					if ($.isPlainObject(item)) {
 						return isValue(item) && isValue(item[options.displayField])
-							&& item[options.displayField].toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
+							&& item[options.displayField].toString().toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 					} else {
-						return isValue(item) && item.toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
+						return isValue(item) && item.toString().toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
 					}
 				});
 			}
@@ -180,7 +180,9 @@
 				filteredData = _self._filterData || options.data,
 				scrollTop = op && op.scrollTop || 0,
 				list = wrapper.find('.jq-select-list-scroller').html(''),
-				heightCount = 0;
+				listHtml = $('<div></div>'),
+				listHeight = 0;
+			heightCount = 0;
 
 			if (options.group) { // group
 
@@ -203,7 +205,7 @@
 						var group = $(groupTemplate).attr('data-name', groupName);
 
 						if (isFirstGroup) {
-							list.append('<div style="height:' + heightCount + 'px"></div>');
+							listHtml.append('<div style="height:' + heightCount + 'px"></div>');
 							isFirstGroup = false;
 						}
 						heightCount += options.groupTitleHeight;
@@ -356,7 +358,7 @@
 						}
 
 						if (count > 0) {
-							list.append(group);
+							listHtml.append(group);
 						} else {
 							heightCount -= options.groupTitleHeight;
 						}
@@ -404,11 +406,9 @@
 
 				}
 
-				var listHeight = 0;
 				for (var groupName in filteredData) {
 					listHeight += options.groupTitleHeight + options.itemHeight * filteredData[groupName].length;
 				}
-				list.height(listHeight);
 
 			} else { // not group
 
@@ -416,7 +416,8 @@
 					return;
 				}
 
-				var isFirstItem = true;
+				var ipa = isPlainArrayData(data),
+					isFirstItem = true;
 
 				for (var i = 0, len = data.length; i < len; i++) {
 
@@ -435,14 +436,14 @@
 						var itemEl = $(itemTemplate).attr('data-index', i);
 
 						if (isFirstItem) {
-							list.append('<div style="height:' + heightCount + 'px"></div>');
+							heightCount > 0 && listHtml.append('<div style="height:' + heightCount + 'px"></div>');
 							isFirstItem = false;
 						}
 
-						if (isPlainArrayData(data)) {
+						if (ipa) {
 
 							if (_self._filterText
-								&& item.toUpperCase().indexOf(_self._filterText.toUpperCase()) == -1) {
+								&& item.toString().toUpperCase().indexOf(_self._filterText.toUpperCase()) == -1) {
 								continue;
 							}
 
@@ -482,7 +483,7 @@
 
 						}
 
-						list.append(itemEl);
+						listHtml.append(itemEl);
 
 					}
 
@@ -490,9 +491,11 @@
 
 				}
 
-				list.height(filteredData.length * options.itemHeight);
+				listHeight = filteredData.length * options.itemHeight;
 
 			}
+
+			list.append(listHtml.html()).height(listHeight);
 
 			bindSelectEvents();
 

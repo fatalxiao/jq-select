@@ -476,7 +476,6 @@ $(function () {
 	$('#big-data').JQSelect({
 		multi: false,
 		group: false,
-		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
 		hideClearButton: true,

@@ -63,8 +63,9 @@
 		this._selectedValue = !options.group && options.multi ? [] : {};
 		this._isLoading = false;
 		this._filterText = '';
-		this._filterData = null;
+		// this._filterData = null;
 		this._listScrollTop = 0;
+		this._rendering = false;
 
 		function isValue(value) {
 			return value !== null && value !== undefined;
@@ -101,7 +102,11 @@
 			var triggerHeight = trigger.height();
 
 			var dropdownHeight = 0;
-			var data = _self._filterData || options.data;
+			var data = options.data;
+			if (!options.hideFilter && _self._filterText) {
+				data = getFilteredData();
+			}
+
 			if (options.group) {
 				for (var groupName in data) {
 					if (data[groupName].length > 0) {
@@ -169,7 +174,9 @@
 
 		function renderPopupList(op) {
 
-			var data = op && op.data || options.data,
+			_self._rendering = true;
+
+			var data = options.data,
 				scrollTop = op && op.scrollTop || 0,
 				list = wrapper.find('.jq-select-list-scroller').html(''),
 				heightCount = 0;
@@ -198,7 +205,6 @@
 							list.append('<div style="height:' + heightCount + 'px"></div>');
 							isFirstGroup = false;
 						}
-
 						heightCount += options.groupTitleHeight;
 
 						if (options.multi) {
@@ -211,8 +217,9 @@
 
 						group.find('.jq-select-group-title-name').html(groupName);
 
-						var children = group.find('.jq-select-group-children');
-						var isFirstItem = true;
+						var children = group.find('.jq-select-group-children'),
+							isFirstItem = true,
+							count = 0;
 
 						for (var i = 0, len = data[groupName].length; i < len; i++) {
 
@@ -232,6 +239,11 @@
 								}
 
 								if (isPlainArrayData(data[groupName])) {
+
+									if (_self._filterText
+										&& item.toUpperCase().indexOf(_self._filterText.toUpperCase()) == -1) {
+										continue;
+									}
 
 									if (options.multi) {
 
@@ -261,6 +273,12 @@
 									itemEl.find('.jq-select-item-name').html(item);
 
 								} else {
+
+									if (_self._filterText
+										&& item[options.displayField].toUpperCase()
+										.indexOf(_self._filterText.toUpperCase()) == -1) {
+										continue;
+									}
 
 									if (options.multi) {
 
@@ -304,6 +322,7 @@
 								}
 
 								children.append(itemEl);
+								count++;
 
 							}
 
@@ -311,19 +330,56 @@
 
 						}
 
-						list.append(group);
+						if (count > 0) {
+							list.append(group);
+						} else {
+							heightCount -= options.groupTitleHeight;
+						}
 
 					} else {
-						heightCount += options.groupTitleHeight + options.itemHeight * data[groupName].length;
+
+						heightCount += options.groupTitleHeight;
+						var count = 0;
+
+						for (var i = 0, len = data[groupName].length; i < len; i++) {
+
+							if (data[groupName][i] === undefined) {
+								continue;
+							}
+
+							var item = data[groupName][i];
+
+							if (isPlainArrayData(data[groupName])) {
+
+								if (_self._filterText
+									&& item.toUpperCase().indexOf(_self._filterText.toUpperCase()) == -1) {
+									continue;
+								}
+
+							} else {
+
+								if (_self._filterText
+									&& item[options.displayField].toUpperCase()
+									.indexOf(_self._filterText.toUpperCase()) == -1) {
+									continue;
+								}
+
+							}
+
+							count++;
+							heightCount += options.itemHeight;
+
+						}
+
+						if (count == 0) {
+							heightCount -= options.groupTitleHeight;
+						}
+
 					}
 
 				}
 
-				var listHeight = 0;
-				for (var groupName in data) {
-					listHeight += options.groupTitleHeight + options.itemHeight * data[groupName].length;
-				}
-				list.height(listHeight);
+				list.height(heightCount);
 
 			} else { // not group
 
@@ -356,6 +412,11 @@
 
 						if (isPlainArrayData(data)) {
 
+							if (_self._filterText
+								&& item.toUpperCase().indexOf(_self._filterText.toUpperCase()) == -1) {
+								continue;
+							}
+
 							if (options.multi) {
 								_self._selectedValue.filter(function (_valueItem) {
 									return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
@@ -369,6 +430,11 @@
 							itemEl.find('.jq-select-item-name').html(item);
 
 						} else {
+
+							if (_self._filterText
+								&& item[options.displayField].toUpperCase().indexOf(_self._filterText.toUpperCase()) == -1) {
+								continue;
+							}
 
 							if (options.multi) {
 								_self._selectedValue.filter(function (_valueItem) {
@@ -395,11 +461,13 @@
 
 				}
 
-				list.height(data.length * options.itemHeight);
+				list.height(heightCount);
 
 			}
 
 			bindSelectEvents();
+
+			_self._rendering = false;
 
 		}
 
@@ -476,14 +544,16 @@
 			// append to body
 			wrapper.append(dropdown);
 
-			if (_self._filterText) {
-				_self._filterData = getFilteredData();
-				renderPopupList({
-					data: _self._filterData
-				});
-			} else {
-				renderPopupList();
-			}
+			// if (_self._filterText) {
+			// 	_self._filterData = getFilteredData();
+			// 	renderPopupList({
+			// 		data: _self._filterData
+			// 	});
+			// } else {
+			renderPopupList();
+			// }
+
+			bindSelectAllEvents();
 
 		};
 
@@ -496,31 +566,37 @@
 			wrapper.find('.jq-select-filter').bind('input', function (e) {
 
 				_self._filterText = e.target.value;
+				_self._filterData = getFilteredData() || options.data;
 
-				if (!_self._filterText) {
-					renderPopupList();
-					resetPopupPosition();
-					return;
-				}
-
-				_self._filterData = getFilteredData()
-				renderPopupList({
-					data: _self._filterData
-				});
+				// if (!_self._filterText) {
+				renderPopupList();
 				resetPopupPosition();
+				// 	return;
+				// }
+				//
+				// _self._filterData = getFilteredData()
+				// renderPopupList({
+				// 	data: _self._filterData
+				// });
+				// resetPopupPosition();
 
 			});
 
 		};
 
-		function bindSelectEvents() {
+		function bindSelectAllEvents() {
 
-			// select all
 			wrapper.find('.jq-select-select-all').change(function (e) {
 
 				e.stopPropagation();
 
-				if (!options.data || !options.multi) {
+				if (_self._rendering) {
+					return;
+				}
+
+				var data = _self._filterData || options.data;
+
+				if (!data || !options.multi) {
 					return;
 				}
 
@@ -531,30 +607,92 @@
 				wrapper.find('.jq-select-select-all-name').html(checked ? options.deselectAllText : options.selectAllText);
 
 				if (options.group) {
-					var data = $.extend(true, {}, options.data);
+					data = $.extend(true, {}, data);
 					for (var i in data) {
 						selectedItems = selectedItems.concat(data[i]);
 					}
 				} else {
-					selectedItems = $.extend(true, [], options.data);
+					selectedItems = $.extend(true, [], data);
 				}
 
 				if (checked) {
 
 					if (options.group) {
-						_self._selectedValue = $.extend(true, {}, options.data);
+						_self._selectedValue = $.extend(true, _self._selectedValue, data);
 					} else {
-						_self._selectedValue = $.extend(true, [], options.data);
+
+						_self._selectedValue = $.extend(true, [], _self._selectedValue);
+
+						if (isPlainArrayData(data)) {
+							data.forEach(function (item) {
+								if (_self._selectedValue.filter(function (selectedItem) {
+										return isValue(item) && isValue(selectedItem) && item.toString() === selectedItem.toString();
+									}).length == 0) {
+									_self._selectedValue.push(item);
+								}
+							});
+						} else {
+							data.forEach(function (item) {
+								if (_self._selectedValue.filter(function (selectedItem) {
+										return isValue(item[options.valueField])
+											&& isValue(selectedItem[options.valueField])
+											&& item[options.valueField].toString() === selectedItem[options.valueField].toString();
+									}).length == 0) {
+									_self._selectedValue.push(item);
+								}
+							});
+						}
+
 					}
 
 					onSelect(selectedItems);
 
 				} else {
 
+					_self._selectedValue = $.extend(true, [], _self._selectedValue);
+
 					if (options.group) {
-						_self._selectedValue = {};
+
+						for (var groupName in data) {
+
+							if (!_self._selectedValue[groupName] || !data[groupName]) {
+								continue;
+							}
+
+							var ipa = isPlainArrayData(data[groupName]);
+
+							data[groupName].forEach(function (item) {
+								_self._selectedValue[groupName] = _self._selectedValue[groupName].filter(function (selectedItem) {
+									if (ipa) {
+										return isValue(item) && isValue(selectedItem) && item.toString() !== selectedItem.toString();
+									} else {
+										return isValue(item[options.valueField])
+											&& isValue(selectedItem[options.valueField])
+											&& item[options.valueField].toString() !== selectedItem[options.valueField].toString();
+									}
+								});
+							});
+
+						}
+
 					} else {
-						_self._selectedValue = [];
+
+						if (isPlainArrayData(data)) {
+							data.forEach(function (item) {
+								_self._selectedValue = _self._selectedValue.filter(function (selectedItem) {
+									return isValue(item) && isValue(selectedItem) && item.toString() !== selectedItem.toString();
+								});
+							});
+						} else {
+							data.forEach(function (item) {
+								_self._selectedValue = _self._selectedValue.filter(function (selectedItem) {
+									return isValue(item[options.valueField])
+										&& isValue(selectedItem[options.valueField])
+										&& item[options.valueField].toString() !== selectedItem[options.valueField].toString();
+								});
+							});
+						}
+
 					}
 
 					onDeselect(selectedItems);
@@ -567,12 +705,18 @@
 
 			});
 
+		}
+
+		function bindSelectEvents() {
+
 			// select group
 			wrapper.find('.jq-select-group-title').change(function (e) {
 
 				e.stopPropagation();
 
-				if (!options.data) {
+				var data = _self._filterData || options.data;
+
+				if (!data) {
 					return;
 				}
 
@@ -580,21 +724,45 @@
 				var group = $(this).parents('.jq-select-group');
 				var groupName = group.attr('data-name');
 
-				if (!options.data[groupName]) {
+				if (!data[groupName]) {
 					return;
 				}
 
-				var selectedItems = $.extend(true, [], options.data[groupName]);
+				var selectedItems = $.extend(true, [], data[groupName]);
 
 				if (checked) {
 
-					var items = $.extend(true, [], options.data[groupName]);
-					_self._selectedValue[groupName] = items;
+					_self._selectedValue = $.extend(true, [], _self._selectedValue);
+
+					if (!_self._selectedValue[groupName]) {
+						_self._selectedValue[groupName] = [];
+					}
+
+					if (isPlainArrayData(data[groupName])) {
+						data[groupName].forEach(function (item) {
+							if (_self._selectedValue[groupName].filter(function (selectedItem) {
+									return isValue(item) && isValue(selectedItem) && item.toString() === selectedItem.toString();
+								}).length == 0) {
+								_self._selectedValue[groupName].push(item);
+							}
+						});
+					} else {
+						data[groupName].forEach(function (item) {
+							if (_self._selectedValue[groupName].filter(function (selectedItem) {
+									return isValue(item[options.valueField])
+										&& isValue(selectedItem[options.valueField])
+										&& item[options.valueField].toString() === selectedItem[options.valueField].toString();
+								}).length == 0) {
+								_self._selectedValue[groupName].push(item);
+							}
+						});
+					}
 
 					onSelect(selectedItems);
 
 				} else {
 
+					_self._selectedValue = $.extend(true, [], _self._selectedValue);
 					_self._selectedValue[groupName] && delete _self._selectedValue[groupName];
 
 					onDeselect(selectedItems);
@@ -612,6 +780,10 @@
 				wrapper.find('.jq-select-item').change(function (e) {
 
 					e.stopPropagation();
+
+					if (_self._rendering) {
+						return;
+					}
 
 					if (!options.data) {
 						return;
@@ -684,6 +856,10 @@
 				wrapper.find('.jq-select-item').mousedown(function (e) {
 
 					e.stopPropagation();
+
+					if (_self._rendering) {
+						return;
+					}
 
 					if (!options.data) {
 						return;
@@ -1086,9 +1262,9 @@
 
 			}
 
-			renderPopupList({
-				scrollTop: _self._listScrollTop
-			});
+			// renderPopupList({
+			// 	scrollTop: _self._listScrollTop
+			// });
 
 			if (options.autoClose) {
 

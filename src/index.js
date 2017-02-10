@@ -261,7 +261,6 @@ $(function () {
 	$('#multi-group-simple-array').JQSelect({
 		multi: true,
 		group: true,
-		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
 		hideClearButton: true,
@@ -287,7 +286,6 @@ $(function () {
 	$('#multi-group-object-array').JQSelect({
 		multi: true,
 		group: true,
-		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
 		hideClearButton: true,

@@ -179,9 +179,7 @@
 			var data = options.data,
 				filteredData = _self._filterData || options.data,
 				scrollTop = op && op.scrollTop || 0,
-				list = wrapper.find('.jq-select-list-scroller').html(''),
-				listHtml = $('<div></div>'),
-				listHeight = 0;
+				list = wrapper.find('.jq-select-list-scroller').html('');
 			heightCount = 0;
 
 			if (options.group) { // group
@@ -205,7 +203,7 @@
 						var group = $(groupTemplate).attr('data-name', groupName);
 
 						if (isFirstGroup) {
-							listHtml.append('<div style="height:' + heightCount + 'px"></div>');
+							list.append('<div style="height:' + heightCount + 'px"></div>');
 							isFirstGroup = false;
 						}
 						heightCount += options.groupTitleHeight;
@@ -358,7 +356,7 @@
 						}
 
 						if (count > 0) {
-							listHtml.append(group);
+							list.append(group);
 						} else {
 							heightCount -= options.groupTitleHeight;
 						}
@@ -406,9 +404,11 @@
 
 				}
 
+				var listHeight = 0;
 				for (var groupName in filteredData) {
 					listHeight += options.groupTitleHeight + options.itemHeight * filteredData[groupName].length;
 				}
+				list.height(listHeight);
 
 			} else { // not group
 
@@ -436,7 +436,7 @@
 						var itemEl = $(itemTemplate).attr('data-index', i);
 
 						if (isFirstItem) {
-							heightCount > 0 && listHtml.append('<div style="height:' + heightCount + 'px"></div>');
+							heightCount > 0 && list.append('<div style="height:' + heightCount + 'px"></div>');
 							isFirstItem = false;
 						}
 
@@ -467,10 +467,12 @@
 							}
 
 							if (options.multi) {
-								_self._selectedValue.filter(function (_valueItem) {
-									return isValue(_valueItem[options.valueField]) && isValue(item[options.valueField])
-										&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
-								}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+								if (_self._selectedValue.filter(function (_valueItem) {
+										return isValue(_valueItem[options.valueField]) && isValue(item[options.valueField])
+											&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
+									}).length == 1) {
+									itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+								}
 							} else {
 								itemEl.find('.jq-select-item-checkbox').remove();
 								isValue(_self._selectedValue[options.valueField])
@@ -483,7 +485,7 @@
 
 						}
 
-						listHtml.append(itemEl);
+						list.append(itemEl);
 
 					}
 
@@ -491,11 +493,9 @@
 
 				}
 
-				listHeight = filteredData.length * options.itemHeight;
+				list.height(filteredData.length * options.itemHeight);
 
 			}
-
-			list.append(listHtml.html()).height(listHeight);
 
 			bindSelectEvents();
 

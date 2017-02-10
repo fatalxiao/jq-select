@@ -177,6 +177,7 @@
 			_self._rendering = true;
 
 			var data = options.data,
+				filteredData = _self._filterData || options.data,
 				scrollTop = op && op.scrollTop || 0,
 				list = wrapper.find('.jq-select-list-scroller').html(''),
 				heightCount = 0;
@@ -208,9 +209,21 @@
 						heightCount += options.groupTitleHeight;
 
 						if (options.multi) {
-							_self._selectedValue[groupName] && data[groupName]
-							&& _self._selectedValue[groupName].length == data[groupName].length
-							&& group.find('.jq-select-group-checkbox').prop('checked', true);
+							if (_self._selectedValue && filteredData
+								&& _self._selectedValue[groupName] && filteredData[groupName]) {
+
+								var count = 0;
+								filteredData[groupName].forEach(function (item) {
+									if (_self._selectedValue[groupName].indexOf(item) > -1) {
+										count++;
+									}
+								});
+
+								if (count === filteredData[groupName].length) {
+									group.find('.jq-select-group-checkbox').prop('checked', true);
+								}
+
+							}
 						} else {
 							group.find('.jq-select-group-checkbox').remove();
 						}

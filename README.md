@@ -26,6 +26,8 @@ $('#select').JQSelect(options);
 |hideSelectAll|Boolean|false||
 |selectAllText|String|"Select All"||
 |deselectAllText|String|"Deselect All"||
+|checkboxIconCls|String|"jq-select-checkbox"||
+|checkboxActivatedCls|String|"activated"||
 |hideOKButton|Boolean|false||
 |okButtonText|String|"OK"||
 |hideClearButton|Boolean|false||

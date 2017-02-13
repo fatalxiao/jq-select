@@ -22,38 +22,6 @@
 		}
 	};
 
-	var wrapTemplate = '<div class="jq-select-wrapper"/>';
-	var dropdownTemplate =
-		'<div class="jq-select-popup">\
-			<input type="text" class="jq-select-filter" placeholder="filter..."/>\
-			<label type="text" class="jq-select-select-all" placeholder="filter...">\
-				<input type="checkbox" class="jq-select-select-all-checkbox"/>\
-				<span class="jq-select-select-all-name"></span>\
-			</label>\
-			<div class="jq-select-list">\
-				<div class="jq-select-list-scroller"></div>\
-			</div>\
-			<div class="jq-select-buttons">\
-				<button type="button" class="jq-select-buttons-ok"></button>\
-				<button type="button" class="jq-select-buttons-clear"></button>\
-				<button type="button" class="jq-select-buttons-close"></button>\
-			</div>\
-		 </div>';
-	var groupTemplate =
-		'<div class="jq-select-group">\
-			<label class="jq-select-group-title">\
-				<input type="checkbox" class="jq-select-group-checkbox"/>\
-				<span class="jq-select-group-title-name"></span>\
-			</label>\
-			<div class="jq-select-group-children"></div>\
-		 </div>';
-	var itemTemplate =
-		'<label class="jq-select-item">\
-			<input type="checkbox" class="jq-select-item-checkbox"/>\
-			<i class="jq-select-item-icon"></i>\
-			<span class="jq-select-item-name"></span>\
-		 </label>';
-
 	function JQSelect(trigger, options) {
 
 		var _self = this,
@@ -66,6 +34,38 @@
 		this._filterData = null;
 		this._listScrollTop = 0;
 		this._rendering = false;
+
+		var wrapTemplate = '<div class="jq-select-wrapper"/>';
+		var dropdownTemplate =
+			'<div class="jq-select-popup">\
+				<input type="text" class="jq-select-filter" placeholder="filter..."/>\
+				<label type="text" class="jq-select-select-all" placeholder="filter...">\
+					<div class="' + options.checkboxIconCls + ' jq-select-select-all-checkbox"></div>\
+					<span class="jq-select-select-all-name"></span>\
+				</label>\
+				<div class="jq-select-list">\
+					<div class="jq-select-list-scroller"></div>\
+				</div>\
+				<div class="jq-select-buttons">\
+					<button type="button" class="jq-select-buttons-ok"></button>\
+					<button type="button" class="jq-select-buttons-clear"></button>\
+					<button type="button" class="jq-select-buttons-close"></button>\
+				</div>\
+			 </div>';
+		var groupTemplate =
+			'<div class="jq-select-group">\
+				<label class="jq-select-group-title">\
+					<div class="' + options.checkboxIconCls + ' jq-select-group-checkbox"></div>\
+					<span class="jq-select-group-title-name"></span>\
+				</label>\
+				<div class="jq-select-group-children"></div>\
+			 </div>';
+		var itemTemplate =
+			'<label class="jq-select-item">\
+				<div class="' + options.checkboxIconCls + ' jq-select-item-checkbox"></div>\
+				<i class="jq-select-item-icon"></i>\
+				<span class="jq-select-item-name"></span>\
+			 </label>';
 
 		function isValue(value) {
 			return value !== null && value !== undefined;
@@ -232,7 +232,7 @@
 								}
 
 								if (count === filteredData[groupName].length) {
-									group.find('.jq-select-group-checkbox').prop('checked', true);
+									group.find('.jq-select-group-checkbox').addClass(options.checkboxActivatedCls);
 								}
 
 							}
@@ -279,7 +279,7 @@
 												return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
 											}).length == 1
 										) {
-											itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+											itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
 										}
 
 									} else {
@@ -290,9 +290,15 @@
 											isValue(_self._selectedValue[groupName]) && isValue(item)
 											&& _self._selectedValue[groupName].toString() === item.toString()
 										) {
-											itemEl.addClass('activated');
+											itemEl.addClass(options.checkboxActivatedCls);
 										}
 
+									}
+
+									if (item[options.iconClsField]) {
+										itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
+									} else {
+										itemEl.find('.jq-select-item-icon').remove();
 									}
 
 									itemEl.find('.jq-select-item-name').html(item);
@@ -317,7 +323,7 @@
 													=== item[options.valueField].toString();
 											}).length == 1
 										) {
-											itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+											itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
 										}
 
 									} else {
@@ -331,7 +337,7 @@
 											&& _self._selectedValue[groupName][options.valueField].toString()
 											=== item[options.valueField].toString()
 										) {
-											itemEl.addClass('activated');
+											itemEl.addClass(options.checkboxActivatedCls);
 										}
 
 									}
@@ -450,11 +456,17 @@
 							if (options.multi) {
 								_self._selectedValue.filter(function (_valueItem) {
 									return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
-								}).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+								}).length == 1 && itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
 							} else {
 								itemEl.find('.jq-select-item-checkbox').remove();
 								isValue(_self._selectedValue) && isValue(item) && _self._selectedValue.toString() === item.toString()
-								&& itemEl.addClass('activated');
+								&& itemEl.addClass(options.checkboxActivatedCls);
+							}
+
+							if (item[options.iconClsField]) {
+								itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
+							} else {
+								itemEl.find('.jq-select-item-icon').remove();
 							}
 
 							itemEl.find('.jq-select-item-name').html(item);
@@ -471,14 +483,20 @@
 										return isValue(_valueItem[options.valueField]) && isValue(item[options.valueField])
 											&& _valueItem[options.valueField].toString() === item[options.valueField].toString();
 									}).length == 1) {
-									itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+									itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
 								}
 							} else {
 								itemEl.find('.jq-select-item-checkbox').remove();
 								isValue(_self._selectedValue[options.valueField])
 								&& isValue(item[options.valueField])
 								&& _self._selectedValue[options.valueField].toString() === item[options.valueField].toString()
-								&& itemEl.addClass('activated');
+								&& itemEl.addClass(options.checkboxActivatedCls);
+							}
+
+							if (item[options.iconClsField]) {
+								itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
+							} else {
+								itemEl.find('.jq-select-item-icon').remove();
 							}
 
 							itemEl.find('.jq-select-item-name').html(item[options.displayField]);
@@ -602,7 +620,7 @@
 
 		function bindSelectAllEvents() {
 
-			wrapper.find('.jq-select-select-all').change(function (e) {
+			wrapper.find('.jq-select-select-all').click(function (e) {
 
 				e.stopPropagation();
 
@@ -617,8 +635,9 @@
 				}
 
 				var selectedItems = [];
-				var checkbox = $(this).children('input[type="checkbox"]');
-				var checked = checkbox.prop('checked');
+				var checkbox = $(this).children('.jq-select-select-all-checkbox');
+				var checked = !checkbox.hasClass(options.checkboxActivatedCls);
+				checkbox.toggleClass(options.checkboxActivatedCls, checked);
 
 				wrapper.find('.jq-select-select-all-name').html(checked ? options.deselectAllText : options.selectAllText);
 
@@ -706,17 +725,19 @@
 							var ipa = isPlainArrayData(data[groupName]);
 
 							data[groupName].forEach(function (item) {
-								_self._selectedValue[groupName] = _self._selectedValue[groupName].filter(function (selectedItem) {
-									if (ipa) {
-										return isValue(item) && isValue(selectedItem) && item.toString() !== selectedItem.toString();
-									} else {
-										return isValue(item[options.valueField])
-											&& isValue(selectedItem[options.valueField])
-											&& item[options.valueField].toString() !== selectedItem[options.valueField].toString();
+								if (_self._selectedValue[groupName]) {
+									_self._selectedValue[groupName] = _self._selectedValue[groupName].filter(function (selectedItem) {
+										if (ipa) {
+											return isValue(item) && isValue(selectedItem) && item.toString() !== selectedItem.toString();
+										} else {
+											return isValue(item[options.valueField])
+												&& isValue(selectedItem[options.valueField])
+												&& item[options.valueField].toString() !== selectedItem[options.valueField].toString();
+										}
+									});
+									if (_self._selectedValue[groupName].length < 1) {
+										delete _self._selectedValue[groupName];
 									}
-								});
-								if (_self._selectedValue[groupName].length < 1) {
-									delete _self._selectedValue[groupName];
 								}
 							});
 
@@ -757,7 +778,7 @@
 		function bindSelectEvents() {
 
 			// select group
-			wrapper.find('.jq-select-group-title').change(function (e) {
+			wrapper.find('.jq-select-group-title').click(function (e) {
 
 				e.stopPropagation();
 
@@ -767,7 +788,7 @@
 					return;
 				}
 
-				var checked = $(this).children('input[type="checkbox"]').prop('checked');
+				var checked = !$(this).children('.jq-select-group-checkbox').hasClass(options.checkboxActivatedCls);
 				var group = $(this).parents('.jq-select-group');
 				var groupName = group.attr('data-name');
 
@@ -826,7 +847,7 @@
 
 			// select item
 			if (options.multi) {
-				wrapper.find('.jq-select-item').change(function (e) {
+				wrapper.find('.jq-select-item').click(function (e) {
 
 					e.stopPropagation();
 
@@ -838,7 +859,7 @@
 						return;
 					}
 
-					var checked = $(this).children('input[type="checkbox"]').prop('checked');
+					var checked = !$(this).children('.jq-select-item-checkbox').hasClass(options.checkboxActivatedCls);
 
 					var selectedItem;
 
@@ -934,8 +955,8 @@
 						_self._selectedValue = selectedItem;
 					}
 
-					wrapper.find('.jq-select-item').removeClass('activated');
-					$(this).addClass('activated');
+					wrapper.find('.jq-select-item').removeClass(options.checkboxActivatedCls);
+					$(this).addClass(options.checkboxActivatedCls);
 					onSelect(selectedItem);
 
 					renderPopupList({
@@ -1462,6 +1483,9 @@
 		hideSelectAll: false,
 		selectAllText: 'Select All',
 		deselectAllText: 'Deselect All',
+
+		checkboxIconCls: 'jq-select-checkbox',
+		checkboxActivatedCls: 'activated',
 
 		hideOKButton: false,
 		okButtonText: 'OK',

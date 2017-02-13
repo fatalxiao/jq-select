@@ -16,7 +16,8 @@ function generateObjectArrayData() {
 	for (var i = 0; i < 10; i++) {
 		data.push({
 			value: 'value' + i,
-			label: 'label' + i
+			label: 'label' + i,
+			iconCls: 'hello world'
 		});
 	}
 	return data;

@@ -539,7 +539,13 @@
 			if (options.hideFilter) {
 				dropdown.find('.jq-select-filter').remove();
 			} else {
-				dropdown.find('.jq-select-filter').val(_self._filterText);
+
+				if (options.keepFilter) {
+					dropdown.find('.jq-select-filter').val(_self._filterText);
+				} else {
+					_self._filterText = '';
+					_self._filterData = null;
+				}
 			}
 			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- filter -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -1479,6 +1485,7 @@
 		itemHeight: 30,
 
 		hideFilter: false,
+		keepFilter: false,
 
 		hideSelectAll: false,
 		selectAllText: 'Select All',

@@ -23,6 +23,7 @@ $('#select').JQSelect(options);
 |triggerWidth|Number|200||
 |popupWidth|Number / String|200|A number or 'auto'.|
 |hideFilter|Boolean|false||
+|keepFilter|Boolean|false|Whether keep filter text or not when close the popup.|
 |hideSelectAll|Boolean|false||
 |selectAllText|String|"Select All"||
 |deselectAllText|String|"Deselect All"||

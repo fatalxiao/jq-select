@@ -106,12 +106,25 @@
 	background: url("images/checked-icon.png");
 }
 
-.jq-select-wrapper .jq-select-popup .jq-select-filter {
+.jq-select-wrapper .jq-select-popup .jq-select-filter-wrapper {
+	position: relative;
+}
+
+.jq-select-wrapper .jq-select-popup .jq-select-filter-wrapper .jq-select-filter-icon {
+	position: absolute;
+	left: 10px;
+	top: 9px;
+	width: 12px;
+	height: 12px;
+	background: url("images/search-icon.png");
+}
+
+.jq-select-wrapper .jq-select-popup .jq-select-filter-wrapper .jq-select-filter {
 	width: 100%;
 	height: 30px;
 	display: block;
 	box-sizing: border-box;
-	padding: 0 12px;
+	padding: 0 12px 0 30px;
 	line-height: 30px;
 	border: none;
 	border-bottom: 1px solid #E3EAF3;

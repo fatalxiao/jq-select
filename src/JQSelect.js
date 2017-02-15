@@ -38,9 +38,12 @@
 		var wrapTemplate = '<div class="jq-select-wrapper"/>';
 		var dropdownTemplate =
 			'<div class="jq-select-popup">\
-				<input type="text" class="jq-select-filter" placeholder="filter..."/>\
-				<label type="text" class="jq-select-select-all" placeholder="filter...">\
-					<div class="' + options.checkboxIconCls + ' jq-select-select-all-checkbox"></div>\
+				<div class="jq-select-filter-wrapper">\
+					<input type="text" class="jq-select-filter" placeholder="' + options.filterPlaceholder + '"/>\
+					<i class="jq-select-filter-icon ' + options.filterIconCls + '"></i>\
+				</div>\
+				<label type="text" class="jq-select-select-all">\
+					<div class="jq-select-checkbox jq-select-select-all-checkbox ' + options.checkboxIconCls + '"></div>\
 					<span class="jq-select-select-all-name"></span>\
 				</label>\
 				<div class="jq-select-list">\
@@ -55,14 +58,14 @@
 		var groupTemplate =
 			'<div class="jq-select-group">\
 				<label class="jq-select-group-title">\
-					<div class="' + options.checkboxIconCls + ' jq-select-group-checkbox"></div>\
+					<div class="jq-select-checkbox jq-select-group-checkbox ' + options.checkboxIconCls + '"></div>\
 					<span class="jq-select-group-title-name"></span>\
 				</label>\
 				<div class="jq-select-group-children"></div>\
 			 </div>';
 		var itemTemplate =
 			'<label class="jq-select-item">\
-				<div class="' + options.checkboxIconCls + ' jq-select-item-checkbox"></div>\
+				<div class="jq-select-checkbox jq-select-item-checkbox ' + options.checkboxIconCls + '"></div>\
 				<i class="jq-select-item-icon"></i>\
 				<span class="jq-select-item-name"></span>\
 			 </label>';
@@ -537,7 +540,7 @@
 
 			// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- filter -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 			if (options.hideFilter) {
-				dropdown.find('.jq-select-filter').remove();
+				dropdown.find('.jq-select-filter-wrapper').remove();
 			} else {
 
 				if (options.keepFilter) {
@@ -1485,13 +1488,15 @@
 		itemHeight: 30,
 
 		hideFilter: false,
+		filterIconCls: '',
+		filterPlaceholder: 'filter ...',
 		keepFilter: false,
 
 		hideSelectAll: false,
 		selectAllText: 'Select All',
 		deselectAllText: 'Deselect All',
 
-		checkboxIconCls: 'jq-select-checkbox',
+		checkboxIconCls: '',
 		checkboxActivatedCls: 'activated',
 
 		hideOKButton: false,

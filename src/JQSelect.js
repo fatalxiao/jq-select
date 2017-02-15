@@ -5,13 +5,13 @@
 		add: function (select) {
 			this.list.push(select);
 		},
-		destroy: function (trigger) {
+		destroy: function (originSelect) {
 
 			var self = this,
 				i = 0;
 
 			for (var len = self.list.length; i < len; i++) {
-				if (self.list[i].trigger.is(trigger)) {
+				if (self.list[i].originSelect.is(originSelect)) {
 					self.list[i].jQSelect.destroy();
 					break;
 				}
@@ -22,10 +22,10 @@
 		}
 	};
 
-	function JQSelect(trigger, options) {
+	function JQSelect(originSelect, options) {
 
 		var _self = this,
-			wrapper, dropdown;
+			wrapper, trigger, dropdown;
 
 		this._value = !options.group && options.multi ? [] : {};
 		this._selectedValue = !options.group && options.multi ? [] : {};
@@ -36,6 +36,7 @@
 		this._rendering = false;
 
 		var wrapTemplate = '<div class="jq-select-wrapper"/>';
+		var triggerTemplate = '<button type="button" class="jq-select-trigger"></button>';
 		var dropdownTemplate =
 			'<div class="jq-select-popup">\
 				<div class="jq-select-filter-wrapper">\
@@ -94,13 +95,13 @@
 
 		function setLoading(bool) {
 			_self._isLoading = bool;
-			bool ? wrapper.addClass('loading') : wrapper.removeClass('loading');
+			wrapper.toggleClass('loading', bool);
 		}
 
 		function resetPopupPosition(dropdown) {
 
 			dropdown = dropdown || wrapper.find('.jq-select-popup');
-			var offset = trigger.offset();
+			var offset = originSelect.offset();
 
 			var triggerHeight = trigger.height();
 
@@ -1358,8 +1359,7 @@
 
 		function mousedownHandle(e) {
 
-			if ($(e.target).is(trigger)
-				|| $(e.target).parents('.jq-select').is(trigger)) {
+			if ($(e.target).is(trigger) || $(e.target).parents('.jq-select').is(trigger)) {
 
 				e.stopPropagation();
 				removePopup();
@@ -1411,26 +1411,35 @@
 
 		this.init = function () {
 
-			if (!trigger.hasClass('jq-select-formated')) {
-				trigger.addClass('jq-select-formated')
-				.html('<span class="jq-select-text">' + options.noSelectText + '</span>')
-				.wrap(wrapTemplate);
+			// whether select is formated
+			var formated = originSelect.hasClass('jq-select-formated');
+
+			if (!formated) {
+				originSelect.addClass('jq-select-formated').hide().wrap(wrapTemplate);
 			}
-			trigger.css('width', options.triggerWidth);
-			trigger.find('.jq-select-icon').remove();
+
+			wrapper = originSelect.parent()
+			.toggleClass('jq-select-option-multi', options.multi)
+			.toggleClass('jq-select-option-group', options.group);
+
+			if (!formated) {
+				trigger = $(triggerTemplate);
+				wrapper.prepend(trigger);
+			} else {
+				trigger = wrapper.children('.jq-select-trigger');
+			}
+			trigger.css('width', options.triggerWidth)
+			.html('<span class="jq-select-text">' + options.noSelectText + '</span>')
+			.find('.jq-select-icon').remove();
 			if (options.iconCls) {
 				trigger.find('.jq-select-text').before('<i class="jq-select-icon ' + options.iconCls + '"></i>');
 			}
 			initValue();
 
-			wrapper = trigger.parent()
-			.toggleClass('jq-select-option-multi', options.multi)
-			.toggleClass('jq-select-option-group', options.group);
-
 			$(document).on('mousedown', mousedownHandle);
 			$(window).on('resize', resizeHandle);
 
-			trigger.off().on('updateOptions', function () {
+			originSelect.off().on('updateOptions', function () {
 				options = $.extend(true, {}, $.fn.JQSelect.defaults, options);
 				return this;
 			}).on('loadingStart', function () {
@@ -1456,8 +1465,7 @@
 		this.init();
 		return {
 			jQSelect: _self,
-			trigger: trigger,
-			wrapper: wrapper
+			originSelect: originSelect
 		};
 
 	}

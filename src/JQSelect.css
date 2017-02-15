@@ -2,7 +2,7 @@
 	position: relative;
 }
 
-.jq-select {
+.jq-select-trigger {
 	position: relative;
 	width: 200px;
 	height: 40px;
@@ -21,26 +21,26 @@
 	transition: all 100ms ease-in-out;
 }
 
-.jq-select,
-.jq-select:hover,
-.jq-select:focus {
+.jq-select-trigger,
+.jq-select-trigger:hover,
+.jq-select-trigger:focus {
 	outline: none;
 }
 
-.jq-select:hover {
+.jq-select-trigger:hover {
 	background: #ECF2F8;
 }
 
-.jq-select:active {
+.jq-select-trigger:active {
 	background: #E4E9EF;
 	box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 3px, rgba(0, 0, 0, 0.117647) 0px 1px 2px;
 }
 
-.jq-select .jq-select-icon {
+.jq-select-trigger .jq-select-icon {
 	margin-right: 8px;
 }
 
-.jq-select::after {
+.jq-select-trigger::after {
 	content: "";
 	position: absolute;
 	top: calc(50% - 6px);
@@ -58,16 +58,16 @@
 	transition: all 200ms;
 }
 
-.jq-select-wrapper.activated .jq-select::after {
+.jq-select-wrapper.activated .jq-select-trigger::after {
 	transform: rotate(135deg);
 	margin: 5px 3px 0 0;
 }
 
-.jq-select-wrapper.loading .jq-select {
+.jq-select-wrapper.loading .jq-select-trigger {
 	cursor: not-allowed;
 }
 
-.jq-select-wrapper.loading .jq-select::after {
+.jq-select-wrapper.loading .jq-select-trigger::after {
 	width: 14px;
 	height: 14px;
 	border: none;

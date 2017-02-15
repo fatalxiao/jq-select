@@ -243,7 +243,7 @@
 							group.find('.jq-select-group-checkbox').remove();
 						}
 
-						group.find('.jq-select-group-title-name').html(groupName);
+						group.find('.jq-select-group-title-name').html(groupName).attr('title', groupName);
 
 						var children = group.find('.jq-select-group-children'),
 							isFirstItem = true,
@@ -304,7 +304,7 @@
 										itemEl.find('.jq-select-item-icon').remove();
 									}
 
-									itemEl.find('.jq-select-item-name').html(item);
+									itemEl.find('.jq-select-item-name').html(item).attr('title', item);
 
 								} else {
 
@@ -351,7 +351,8 @@
 										itemEl.find('.jq-select-item-icon').remove();
 									}
 
-									itemEl.find('.jq-select-item-name').html(item[options.displayField]);
+									itemEl.find('.jq-select-item-name').html(item[options.displayField])
+									.attr('title', item[options.displayField]);
 
 								}
 
@@ -472,7 +473,7 @@
 								itemEl.find('.jq-select-item-icon').remove();
 							}
 
-							itemEl.find('.jq-select-item-name').html(item);
+							itemEl.find('.jq-select-item-name').html(item).attr('title', item);
 
 						} else {
 
@@ -502,7 +503,8 @@
 								itemEl.find('.jq-select-item-icon').remove();
 							}
 
-							itemEl.find('.jq-select-item-name').html(item[options.displayField]);
+							itemEl.find('.jq-select-item-name').html(item[options.displayField])
+							.attr('title', item[options.displayField]);
 
 						}
 

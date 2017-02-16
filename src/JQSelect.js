@@ -5,13 +5,13 @@
 		add: function (select) {
 			this.list.push(select);
 		},
-		destroy: function (originSelect) {
+		destroy: function (originEl) {
 
 			var self = this,
 				i = 0;
 
 			for (var len = self.list.length; i < len; i++) {
-				if (self.list[i].originSelect.is(originSelect)) {
+				if (self.list[i].originEl.is(originEl)) {
 					self.list[i].jQSelect.destroy();
 					break;
 				}
@@ -22,7 +22,7 @@
 		}
 	};
 
-	function JQSelect(originSelect, options) {
+	function JQSelect(originEl, options) {
 
 		var _self = this,
 			wrapper, trigger, dropdown;
@@ -101,7 +101,7 @@
 		function resetPopupPosition(dropdown) {
 
 			dropdown = dropdown || wrapper.find('.jq-select-popup');
-			var offset = originSelect.offset();
+			var offset = originEl.offset();
 
 			var triggerHeight = trigger.height();
 
@@ -1058,6 +1058,38 @@
 			triggerChange();
 		};
 
+		function initData() {
+
+			// can not generate data in group mode or originEl is not a select
+			if (options.data || options.group || (originEl && !originEl.is('select'))) {
+				return;
+			}
+
+			var selectOptions = originEl.children('option');
+			if (selectOptions.length < 1) {
+				return;
+			}
+
+			// generate data from select options
+			var data = [];
+			selectOptions.each(function () {
+
+				var item = {};
+
+				var value = $(this).val(),
+					display = $(this).html();
+
+				item[options.valueField] = value || display;
+				item[options.displayField] = display;
+
+				data.push(item);
+
+			});
+
+			options.data = data;
+
+		}
+
 		function initValue() {
 
 			if (!options.data || !options.value) {
@@ -1412,13 +1444,13 @@
 		this.init = function () {
 
 			// whether select is formated
-			var formated = originSelect.hasClass('jq-select-formated');
+			var formated = originEl.hasClass('jq-select-formated');
 
 			if (!formated) {
-				originSelect.addClass('jq-select-formated').hide().wrap(wrapTemplate);
+				originEl.addClass('jq-select-formated').hide().wrap(wrapTemplate);
 			}
 
-			wrapper = originSelect.parent()
+			wrapper = originEl.parent()
 			.toggleClass('jq-select-option-multi', options.multi)
 			.toggleClass('jq-select-option-group', options.group);
 
@@ -1434,12 +1466,13 @@
 			if (options.iconCls) {
 				trigger.find('.jq-select-text').before('<i class="jq-select-icon ' + options.iconCls + '"></i>');
 			}
+			initData();
 			initValue();
 
 			$(document).on('mousedown', mousedownHandle);
 			$(window).on('resize', resizeHandle);
 
-			originSelect.off().on('updateOptions', function () {
+			originEl.off().on('updateOptions', function () {
 				options = $.extend(true, {}, $.fn.JQSelect.defaults, options);
 				return this;
 			}).on('loadingStart', function () {
@@ -1465,7 +1498,7 @@
 		this.init();
 		return {
 			jQSelect: _self,
-			originSelect: originSelect
+			originEl: originEl
 		};
 
 	}

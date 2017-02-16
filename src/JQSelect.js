@@ -93,6 +93,35 @@
 
 		}
 
+		function sortPriorityData(data) {
+
+			var temp = [];
+
+			for (var key in data) {
+				temp.push({
+					key: key,
+					priority: data[key].priority
+				});
+			}
+
+			temp.sort(function (a, b) {
+				if (isNaN(a.priority) && !isNaN(b.priority)) {
+					return 1;
+				} else if (!isNaN(a.priority) && isNaN(b.priority)) {
+					return -1;
+				} else if (isNaN(a.priority) && isNaN(b.priority)) {
+					return -1;
+				} else {
+					return b.priority - a.priority;
+				}
+			});
+
+			return temp.map(function (item) {
+				return item.key;
+			});
+
+		}
+
 		function setLoading(bool) {
 			_self._isLoading = bool;
 			wrapper.toggleClass('loading', bool);
@@ -194,7 +223,9 @@
 
 				var isFirstGroup = true;
 
-				for (var groupName in data) {
+				for (var groupIndex = 0, len = _self._sortedGroupName.length; groupIndex < len; groupIndex++) {
+
+					var groupName = _self._sortedGroupName[groupIndex];
 
 					// not render if the group el below the display area
 					if (heightCount > scrollTop + options.listHeight) {
@@ -414,6 +445,10 @@
 					}
 
 				}
+
+				// for (var groupName in data) {
+				//
+				// }
 
 				var listHeight = 0;
 				for (var groupName in filteredData) {
@@ -1060,6 +1095,10 @@
 
 		function initData() {
 
+			if (options.data && options.group) {
+				_self._sortedGroupName = sortPriorityData(options.data);
+			}
+
 			// can not generate data in group mode or originEl is not a select
 			if (options.data || options.group || (originEl && !originEl.is('select'))) {
 				return;
@@ -1464,6 +1503,8 @@
 
 			originEl.off().on('updateOptions', function () {
 				options = $.extend(true, {}, $.fn.JQSelect.defaults, options);
+				initData();
+				initValue();
 				return this;
 			}).on('loadingStart', function () {
 				setLoading(true);

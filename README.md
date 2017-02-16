@@ -47,7 +47,7 @@ $('#select').JQSelect(options);
 ## Get Value
 
 ```js
-$('#select').JQSelect(newOptions).getValue();
+$('#select').getValue();
 ```
 
 ## Updating Options

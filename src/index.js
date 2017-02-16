@@ -97,8 +97,7 @@ function generateGroupObjectArrayDataLargeSize() {
 $(function () {
 
 	// single / option data
-	$('#option-data').JQSelect({
-		multi: false,
+	$('#single-option-data').JQSelect({
 		hideFilter: true,
 		hideOKButton: true,
 		hideCloseButton: true,
@@ -119,8 +118,29 @@ $(function () {
 			console.log('onClose', value);
 		}
 	});
-	$('#option-data-get-value-button').click(function () {
-		alert($('#option-data').val());
+
+	// multi / option data
+	$('#multi-option-data').JQSelect({
+		multi: true,
+		hideFilter: true,
+		hideOKButton: true,
+		hideCloseButton: true,
+		hideClearButton: true,
+		onSelect: function (selectItems) {
+			console.log('onSelect: ', selectItems);
+		},
+		onDeselect: function (selectItems) {
+			console.log('onDeselect: ', selectItems);
+		},
+		onChange: function (value) {
+			console.log('onChange: ', value);
+		},
+		onOK: function (value) {
+			console.log('onOK', value);
+		},
+		onClose: function (value) {
+			console.log('onClose', value);
+		}
 	});
 
 	// single / simple array data

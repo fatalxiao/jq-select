@@ -1073,17 +1073,7 @@
 			// generate data from select options
 			var data = [];
 			selectOptions.each(function () {
-
-				var item = {};
-
-				var value = $(this).val(),
-					display = $(this).html();
-
-				item[options.valueField] = value || display;
-				item[options.displayField] = display;
-
-				data.push(item);
-
+				data.push($(this).val() || $(this).html());
 			});
 
 			options.data = data;
@@ -1500,6 +1490,22 @@
 			jQSelect: _self,
 			originEl: originEl
 		};
+
+	}
+
+	$.fn.getValue = function () {
+
+		if (!$(this).hasClass('jq-select-formated')) {
+			return;
+		}
+
+		for (var i = 0, len = JQSelectList.list.length; i < len; i++) {
+			if (JQSelectList.list[i].originEl.is(this)) {
+				return JQSelectList.list[i].jQSelect._value;
+			}
+		}
+
+		return;
 
 	}
 

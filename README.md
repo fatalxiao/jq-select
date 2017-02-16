@@ -44,6 +44,12 @@ $('#select').JQSelect(options);
 |onOK|Function|null|OK button callback. See demo for details.|
 |onClose|Function|null|Close button callback. See demo for details.|
 
+## Get Value
+
+```js
+$('#select').JQSelect(newOptions).getValue();
+```
+
 ## Updating Options
 
 ```js

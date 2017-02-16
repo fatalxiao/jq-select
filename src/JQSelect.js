@@ -1130,9 +1130,9 @@
 				}
 
 				if (count > 0) {
-					trigger.children('.jq-select-text').html(count + ' selected');
+					trigger.children('.jq-select-text').html(count + ' selected').attr('title', count + ' selected');
 				} else {
-					trigger.children('.jq-select-text').html(options.noSelectText);
+					trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
 				}
 				_self._selectedValue = $.extend(true, {}, result);
 				_self._value = $.extend(true, {}, result);
@@ -1167,9 +1167,9 @@
 				});
 
 				if (count > 0) {
-					trigger.children('.jq-select-text').html(count + ' selected');
+					trigger.children('.jq-select-text').html(count + ' selected').attr('title', count + ' selected');
 				} else {
-					trigger.children('.jq-select-text').html(options.noSelectText);
+					trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText)
 				}
 				_self._selectedValue = $.extend(true, [], result);
 				_self._value = $.extend(true, [], result);
@@ -1223,9 +1223,9 @@
 				}
 
 				if (result) {
-					trigger.children('.jq-select-text').html(display);
+					trigger.children('.jq-select-text').html(display).attr('title', display);
 				} else {
-					trigger.children('.jq-select-text').html(options.noSelectText);
+					trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
 				}
 				_self._selectedValue = $.extend(true, {}, result);
 				_self._value = $.extend(true, {}, result);
@@ -1267,9 +1267,9 @@
 				});
 
 				if (result) {
-					trigger.children('.jq-select-text').html(display);
+					trigger.children('.jq-select-text').html(display).attr('title', display);
 				} else {
-					trigger.children('.jq-select-text').html(options.noSelectText);
+					trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
 				}
 
 				if ($.isPlainObject(result)) {
@@ -1297,9 +1297,9 @@
 					count += _self._selectedValue[groupName].length;
 				}
 				if (count > 0) {
-					trigger.children('.jq-select-text').html(count + ' selected');
+					trigger.children('.jq-select-text').html(count + ' selected').attr('title', count + ' selected');
 				} else {
-					trigger.children('.jq-select-text').html(options.noSelectText);
+					trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
 				}
 
 				if (JSON.stringify(_self._value) != JSON.stringify(_self._selectedValue)) {
@@ -1311,9 +1311,9 @@
 
 				var count = _self._selectedValue.length;
 				if (count > 0) {
-					trigger.children('.jq-select-text').html(count + ' selected');
+					trigger.children('.jq-select-text').html(count + ' selected').attr('title', count + ' selected');
 				} else {
-					trigger.children('.jq-select-text').html(options.noSelectText);
+					trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
 				}
 
 				if (JSON.stringify(_self._value) != JSON.stringify(_self._selectedValue)) {
@@ -1327,12 +1327,12 @@
 				for (var groupName in _self._selectedValue) {
 					item = _self._selectedValue[groupName];
 				}
-				trigger.children('.jq-select-text').html(
-					$.isPlainObject(item) ?
-						(item[options.displayField] ? item[options.displayField] : options.noSelectText)
-						:
-						item
-				);
+
+				var text = $.isPlainObject(item) ?
+					(item[options.displayField] ? item[options.displayField] : options.noSelectText)
+					:
+					item;
+				trigger.children('.jq-select-text').html(text).attr('title', text);
 
 				if (JSON.stringify(_self._value) != JSON.stringify(_self._selectedValue)) {
 					options.onChange && options.onChange(_self._selectedValue);
@@ -1343,10 +1343,10 @@
 
 				if ($.isPlainObject(_self._selectedValue)) {
 
-					trigger.children('.jq-select-text').html(
-						_self._selectedValue[options.displayField] ?
-							_self._selectedValue[options.displayField] : options.noSelectText
-					);
+					var text = _self._selectedValue[options.displayField] ?
+						_self._selectedValue[options.displayField] : options.noSelectText;
+
+					trigger.children('.jq-select-text').html(text).attr('title', text);
 
 					if (JSON.stringify(_self._value) !== JSON.stringify(_self._selectedValue)) {
 						options.onChange && options.onChange(_self._selectedValue);
@@ -1355,7 +1355,7 @@
 
 				} else {
 
-					trigger.children('.jq-select-text').html(_self._selectedValue);
+					trigger.children('.jq-select-text').html(_self._selectedValue).attr('title', _self._selectedValue);
 
 					if (_self._value !== _self._selectedValue) {
 						options.onChange && options.onChange(_self._selectedValue);
@@ -1381,7 +1381,7 @@
 
 		function mousedownHandle(e) {
 
-			if ($(e.target).is(trigger) || $(e.target).parents('.jq-select').is(trigger)) {
+			if ($(e.target).is(trigger) || $(e.target).parents('.jq-select-trigger').is(trigger)) {
 
 				e.stopPropagation();
 				removePopup();
@@ -1451,7 +1451,7 @@
 				trigger = wrapper.children('.jq-select-trigger');
 			}
 			trigger.css('width', options.triggerWidth)
-			.html('<span class="jq-select-text">' + options.noSelectText + '</span>')
+			.html('<span class="jq-select-text" title="' + options.noSelectText + '">' + options.noSelectText + '</span>')
 			.find('.jq-select-icon').remove();
 			if (options.iconCls) {
 				trigger.find('.jq-select-text').before('<i class="jq-select-icon ' + options.iconCls + '"></i>');

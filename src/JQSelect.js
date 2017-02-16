@@ -95,30 +95,24 @@
 
 		function sortPriorityData(data) {
 
-			var temp = [];
+			var groupNames = Object.keys(data);
 
-			for (var key in data) {
-				temp.push({
-					key: key,
-					priority: data[key].priority
+			if (options.groupPriority && options.groupPriority.length > 0) {
+
+				var groupPriority = options.groupPriority;
+				if (typeof groupPriority === 'string') {
+					groupPriority = groupPriority.split(',');
+				}
+
+				groupPriority.forEach(function (groupName, index) {
+					var groupNameIndex = groupNames.indexOf(groupName);
+					groupNames.splice(groupNameIndex, 1);
+					groupNames.splice(index, 0, groupName);
 				});
+
 			}
 
-			temp.sort(function (a, b) {
-				if (isNaN(a.priority) && !isNaN(b.priority)) {
-					return 1;
-				} else if (!isNaN(a.priority) && isNaN(b.priority)) {
-					return -1;
-				} else if (isNaN(a.priority) && isNaN(b.priority)) {
-					return -1;
-				} else {
-					return b.priority - a.priority;
-				}
-			});
-
-			return temp.map(function (item) {
-				return item.key;
-			});
+			return groupNames;
 
 		}
 
@@ -1563,6 +1557,7 @@
 		group: false,
 
 		data: null,
+		groupPriority: null,
 		valueField: 'value',
 		displayField: 'label',
 		iconClsField: 'iconCls',

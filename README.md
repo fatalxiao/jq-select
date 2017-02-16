@@ -13,7 +13,8 @@ $('#select').JQSelect(options);
 |:--|:--|:--|:--|
 |multi|Boolean|false|Multi select or not.|
 |group|Boolean|false|Group or not.|
-|data|Object / Array|null|Object if group, Array if group is not. See demo for details.|
+|data|Object / Array|null|Object if group is true, Array if group is false. See demo for details.|
+|groupPriority|Array / String|null|Group render order.|
 |valueField|String|"value"|Select item value.|
 |displayField|String|"label"|Select item display label.|
 |iconClsField|String|"iconCls"|Select item icon class.|

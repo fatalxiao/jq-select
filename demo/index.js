@@ -51,6 +51,23 @@ function generateGroupObjectArrayData(listSize, groupSize) {
 	return data;
 }
 
+function generateGroupPriorityObjectArrayData(listSize, groupSize) {
+	listSize = listSize || 10;
+	groupSize = groupSize || 10;
+	var data = {};
+	for (var i = 0; i < listSize; i++) {
+		var group = [];
+		for (var j = 0; j < groupSize; j++) {
+			group.push({
+				value: 'value' + i + j,
+				label: 'label' + i + j
+			});
+		}
+		data['group' + i] = group;
+	}
+	return data;
+}
+
 function generateGroupObjectArrayDataWithIcon() {
 	var data = {};
 	var iconClses = ['fa fa-amazon', 'fa fa-android', 'fa fa-apple', 'fa fa-bluetooth', 'fa fa-chrome',
@@ -550,6 +567,33 @@ $(function () {
 		multi: true,
 		group: true,
 		data: generateGroupObjectArrayData(100, 100),
+		onSelect: function (selectItems) {
+			console.log('onSelect: ', selectItems);
+		},
+		onDeselect: function (selectItems) {
+			console.log('onDeselect: ', selectItems);
+		},
+		onChange: function (value) {
+			console.log('onChange: ', value);
+		},
+		onOK: function (value) {
+			console.log('onOK', value);
+		},
+		onClose: function (value) {
+			console.log('onClose', value);
+		}
+	});
+
+	// multi / group / filter / select all / priority
+	$('#multi-group-filter-selectall-priority').JQSelect({
+		multi: true,
+		group: true,
+		data: generateGroupPriorityObjectArrayData(),
+		hideOKButton: true,
+		hideCloseButton: true,
+		hideClearButton: true,
+		groupPriority: ['group5', 'group0', 'group1'],
+		// groupPriority: 'group5,group0,group1',
 		onSelect: function (selectItems) {
 			console.log('onSelect: ', selectItems);
 		},

@@ -217,7 +217,7 @@
 
 				var isFirstGroup = true;
 
-				for (var groupIndex = 0, len = _self._sortedGroupName.length; groupIndex < len; groupIndex++) {
+				for (var groupIndex = 0, groupLen = _self._sortedGroupName.length; groupIndex < groupLen; groupIndex++) {
 
 					var groupName = _self._sortedGroupName[groupIndex];
 

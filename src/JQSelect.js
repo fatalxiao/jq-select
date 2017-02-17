@@ -104,10 +104,12 @@
 					groupPriority = groupPriority.split(',');
 				}
 
-				groupPriority.forEach(function (groupName, index) {
+				groupPriority && groupPriority.forEach(function (groupName, index) {
 					var groupNameIndex = groupNames.indexOf(groupName);
-					groupNames.splice(groupNameIndex, 1);
-					groupNames.splice(index, 0, groupName);
+					if (groupNameIndex > -1) {
+						groupNames.splice(groupNameIndex, 1);
+						groupNames.splice(index, 0, groupName);
+					}
 				});
 
 			}
@@ -243,13 +245,13 @@
 
 								var count = 0;
 								if (isPlainArrayData(filteredData[groupName])) {
-									filteredData[groupName].forEach(function (item) {
+									filteredData[groupName] && filteredData[groupName].forEach(function (item) {
 										if (_self._selectedValue[groupName].indexOf(item) > -1) {
 											count++;
 										}
 									});
 								} else {
-									filteredData[groupName].forEach(function (item) {
+									filteredData[groupName] && filteredData[groupName].forEach(function (item) {
 										for (var i = 0, len = _self._selectedValue[groupName].length; i < len; i++) {
 											if (
 												_self._selectedValue[groupName][i][options.valueField].toString() === item[options.valueField].toString()) {
@@ -702,7 +704,7 @@
 							}
 
 							if (isPlainArrayData(data[groupName])) {
-								data[groupName].forEach(function (item) {
+								data[groupName] && data[groupName].forEach(function (item) {
 									if (_self._selectedValue[groupName].filter(function (selectedItem) {
 											return isValue(item) && isValue(selectedItem) && item.toString() === selectedItem.toString();
 										}).length == 0) {
@@ -710,7 +712,7 @@
 									}
 								});
 							} else {
-								data[groupName].forEach(function (item) {
+								data[groupName] && data[groupName].forEach(function (item) {
 									if (_self._selectedValue[groupName].filter(function (selectedItem) {
 											return isValue(item[options.valueField])
 												&& isValue(selectedItem[options.valueField])
@@ -728,7 +730,7 @@
 						_self._selectedValue = $.extend(true, [], _self._selectedValue);
 
 						if (isPlainArrayData(data)) {
-							data.forEach(function (item) {
+							data && data.forEach(function (item) {
 								if (_self._selectedValue.filter(function (selectedItem) {
 										return isValue(item) && isValue(selectedItem) && item.toString() === selectedItem.toString();
 									}).length == 0) {
@@ -736,7 +738,7 @@
 								}
 							});
 						} else {
-							data.forEach(function (item) {
+							data && data.forEach(function (item) {
 								if (_self._selectedValue.filter(function (selectedItem) {
 										return isValue(item[options.valueField])
 											&& isValue(selectedItem[options.valueField])
@@ -765,7 +767,7 @@
 
 							var ipa = isPlainArrayData(data[groupName]);
 
-							data[groupName].forEach(function (item) {
+							data[groupName] && data[groupName].forEach(function (item) {
 								if (_self._selectedValue[groupName]) {
 									_self._selectedValue[groupName] = _self._selectedValue[groupName].filter(function (selectedItem) {
 										if (ipa) {
@@ -787,13 +789,13 @@
 					} else {
 
 						if (isPlainArrayData(data)) {
-							data.forEach(function (item) {
+							data && data.forEach(function (item) {
 								_self._selectedValue = _self._selectedValue.filter(function (selectedItem) {
 									return isValue(item) && isValue(selectedItem) && item.toString() !== selectedItem.toString();
 								});
 							});
 						} else {
-							data.forEach(function (item) {
+							data && data.forEach(function (item) {
 								_self._selectedValue = _self._selectedValue.filter(function (selectedItem) {
 									return isValue(item[options.valueField])
 										&& isValue(selectedItem[options.valueField])
@@ -844,7 +846,7 @@
 					_self._selectedValue = $.extend(true, [], _self._selectedValue);
 
 					if (isPlainArrayData(data[groupName])) {
-						data[groupName].forEach(function (item) {
+						data[groupName] && data[groupName].forEach(function (item) {
 							if (!_self._selectedValue[groupName] || _self._selectedValue[groupName].length <= 0) {
 								_self._selectedValue[groupName] = [];
 								_self._selectedValue[groupName].push(item);
@@ -855,7 +857,7 @@
 							}
 						});
 					} else {
-						data[groupName].forEach(function (item) {
+						data[groupName] && data[groupName].forEach(function (item) {
 							if (!_self._selectedValue[groupName] || _self._selectedValue[groupName].length <= 0) {
 								_self._selectedValue[groupName] = [];
 								_self._selectedValue[groupName].push(item);
@@ -1131,8 +1133,8 @@
 
 					var group = [];
 
-					options.data[groupName].forEach(function (dataItem) {
-						options.value[groupName].forEach(function (valueItem) {
+					options.data[groupName] && options.data[groupName].forEach(function (dataItem) {
+						options.value[groupName] && options.value[groupName].forEach(function (valueItem) {
 
 							var dataValue, valueValue;
 
@@ -1174,8 +1176,8 @@
 
 				var result = [], count = 0;
 
-				options.data.forEach(function (dataItem) {
-					options.value.forEach(function (valueItem) {
+				options.data && options.data.forEach(function (dataItem) {
+					options.value && options.value.forEach(function (valueItem) {
 
 						var dataValue, valueValue;
 
@@ -1221,7 +1223,7 @@
 						continue;
 					}
 
-					options.data[groupName].forEach(function (dataItem) {
+					options.data[groupName] && options.data[groupName].forEach(function (dataItem) {
 
 						if (breakFlag) {
 							return;
@@ -1267,7 +1269,7 @@
 
 				var result, display = '', breakFlag = false;
 
-				options.data.forEach(function (dataItem) {
+				options.data && options.data.forEach(function (dataItem) {
 
 					if (breakFlag) {
 						return;

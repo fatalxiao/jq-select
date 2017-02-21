@@ -39,6 +39,7 @@ $('#select').JQSelect(options);
 |hideCloseButton|Boolean|false||
 |closeButtonText|String|"Close"||
 |autoClose|Boolean|false|Close the popup when select item if true.|
+|autoChange|Boolean|true|Trigger change immediately when select.|
 |onSelect|Function|null|Select item callback. See demo for details.|
 |onDeselect|Function|null|Deselect item callback. See demo for details.|
 |onChange|Function|null|Select change callback. See demo for details.|

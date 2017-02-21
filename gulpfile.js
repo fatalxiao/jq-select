@@ -19,6 +19,7 @@ gulp.task('dev', function () {
 
 gulp.task('clean', function () {
 	return gulp.src('./dist/**', {read: false})
+	.pipe(plumber())
 	.pipe(clean());
 });
 
@@ -41,17 +42,24 @@ gulp.task('css', function () {
 
 gulp.task('cssmin', function () {
 	return gulp.src(['./dist/JQSelect.css'])
+	.pipe(plumber())
 	.pipe(cssmin())
 	.pipe(rename('JQSelect.min.css'))
 	.pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('jsmin', function () {
+gulp.task('js', function () {
 	return gulp.src(['./src/JQSelect.js'])
+	.pipe(plumber())
+	.pipe(gulp.dest('./dist/'));
+});
+
+gulp.task('jsmin', function () {
+	return gulp.src(['./dist/JQSelect.js'])
 	.pipe(plumber())
 	.pipe(uglify())
 	.pipe(rename('JQSelect.min.js'))
 	.pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('build', gulpSequence('clean', 'images', 'css', 'cssmin', 'jsmin'));
+gulp.task('build', gulpSequence('clean', 'images', 'css', 'cssmin', 'js', 'jsmin'));

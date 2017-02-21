@@ -1047,7 +1047,7 @@
 
 				} else {
 					_self._selectedValue = !options.group && options.multi ? [] : {};
-					triggerChange();
+					options.autoChange && triggerChange();
 				}
 
 				renderPopupList({
@@ -1063,7 +1063,7 @@
 				removePopup();
 				wrapper.removeClass('activated');
 
-				closehandle();
+				closeHandle();
 
 			});
 
@@ -1081,12 +1081,12 @@
 
 		function onSelect(items) {
 			options.onSelect && options.onSelect(items);
-			triggerChange();
+			options.autoChange && triggerChange();
 		};
 
 		function onDeselect(items) {
 			options.onDeselect && options.onDeselect(items);
-			triggerChange();
+			options.autoChange && triggerChange();
 		};
 
 		function initData() {
@@ -1407,7 +1407,7 @@
 
 				if (wrapper.hasClass('activated')) {
 					wrapper.removeClass('activated');
-					closehandle();
+					closeHandle();
 				}
 
 			}
@@ -1423,7 +1423,7 @@
 
 				if (wrapper.hasClass('activated')) {
 					wrapper.removeClass('activated');
-					closehandle();
+					closeHandle();
 					return;
 				}
 
@@ -1450,7 +1450,7 @@
 
 				if (wrapper.hasClass('activated')) {
 					wrapper.removeClass('activated');
-					closehandle();
+					closeHandle();
 				}
 
 			}
@@ -1461,7 +1461,7 @@
 			resetPopupPosition();
 		}
 
-		function closehandle() {
+		function closeHandle() {
 			_self._selectedValue = $.extend(true, !options.group && options.multi ? [] : {}, _self._value);
 			options.onClose && options.onClose(_self._value);
 		}
@@ -1593,6 +1593,7 @@
 		hideCloseButton: false,
 		closeButtonText: 'Close',
 		autoClose: false,
+		autoChange: true,
 
 		onSelect: null,
 		onDeselect: null,

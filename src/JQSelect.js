@@ -126,38 +126,42 @@
 		function resetPopupPosition(dropdown) {
 
 			dropdown = dropdown || wrapper.find('.jq-select-popup');
-			var offset = originEl.offset();
+			var offset = trigger.offset();
 
 			var triggerHeight = trigger.height();
 
 			var dropdownHeight = 0;
-			var data = options.data;
-			if (!options.hideFilter && _self._filterText) {
-				data = getFilteredData();
-			}
+			var data = _self._filterData || options.data;
 
+			// cal dropdown list height
 			if (options.group) {
 				for (var groupName in data) {
 					if (data[groupName].length > 0) {
-						dropdownHeight += (data[groupName].length + 1) * 30;
+						dropdownHeight += options.groupTitleHeight + data[groupName].length * options.itemHeight;
+						if (dropdownHeight > options.listHeight) {
+							dropdownHeight = options.listHeight;
+							break;
+						}
 					}
 				}
 			} else {
 				if (data && data.length > 0) {
-					dropdownHeight = data.length * 30;
+					dropdownHeight = data.length * options.itemHeight;
 				}
 			}
-			dropdownHeight = dropdownHeight > 300 ? 300 : dropdownHeight;
+			dropdownHeight > options.listHeight && (dropdownHeight = options.listHeight);
 
 			if (options.multi && options.hideSelectAll === false) {
-				dropdownHeight += 30;
+				dropdownHeight += options.selectAllHeight;
 			}
 			if (options.hideFilter === false) {
-				dropdownHeight += 30;
+				dropdownHeight += options.filterHeight;
 			}
 			if (options.hideOKButton === false || options.hideCloseButton === false || options.hideClearButton === false) {
-				dropdownHeight += 40;
+				dropdownHeight += options.buttonsHeight;
 			}
+
+			var h = offset.top + triggerHeight + dropdownHeight - $(window).scrollTop();
 
 			if (offset.top + triggerHeight + dropdownHeight - $(window).scrollTop() > $(window).height()) {
 				dropdown.css('top', -dropdownHeight);
@@ -1573,6 +1577,9 @@
 		listHeight: 300,
 		groupTitleHeight: 30,
 		itemHeight: 30,
+		selectAllHeight: 30,
+		filterHeight: 30,
+		buttonsHeight: 40,
 
 		hideFilter: false,
 		filterIconCls: '',

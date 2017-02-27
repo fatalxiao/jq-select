@@ -342,7 +342,7 @@
 
 									if (_self._filterText
 										&& item[options.displayField].toUpperCase()
-										.indexOf(_self._filterText.toUpperCase()) == -1) {
+											.indexOf(_self._filterText.toUpperCase()) == -1) {
 										continue;
 									}
 
@@ -384,7 +384,7 @@
 									}
 
 									itemEl.find('.jq-select-item-name').html(item[options.displayField])
-									.attr('title', item[options.displayField]);
+										.attr('title', item[options.displayField]);
 
 								}
 
@@ -427,7 +427,7 @@
 
 								if (_self._filterText
 									&& item[options.displayField].toUpperCase()
-									.indexOf(_self._filterText.toUpperCase()) == -1) {
+										.indexOf(_self._filterText.toUpperCase()) == -1) {
 									continue;
 								}
 
@@ -540,7 +540,7 @@
 							}
 
 							itemEl.find('.jq-select-item-name').html(item[options.displayField])
-							.attr('title', item[options.displayField]);
+								.attr('title', item[options.displayField]);
 
 						}
 
@@ -1333,7 +1333,7 @@
 
 				var count = 0;
 				for (var groupName in _self._selectedValue) {
-					count += _self._selectedValue[groupName].length;
+					_self._selectedValue.hasOwnProperty(groupName) && (count += _self._selectedValue[groupName].length);
 				}
 				if (count > 0) {
 					trigger.children('.jq-select-text').html(count + ' selected').attr('title', count + ' selected');
@@ -1480,8 +1480,8 @@
 			}
 
 			wrapper = originEl.parent()
-			.toggleClass('jq-select-option-multi', options.multi)
-			.toggleClass('jq-select-option-group', options.group);
+				.toggleClass('jq-select-option-multi', options.multi)
+				.toggleClass('jq-select-option-group', options.group);
 
 			if (!formated) {
 				trigger = $(triggerTemplate);
@@ -1490,8 +1490,8 @@
 				trigger = wrapper.children('.jq-select-trigger');
 			}
 			trigger.css('width', options.triggerWidth)
-			.html('<span class="jq-select-text" title="' + options.noSelectText + '">' + options.noSelectText + '</span>')
-			.find('.jq-select-icon').remove();
+				.html('<span class="jq-select-text" title="' + options.noSelectText + '">' + options.noSelectText + '</span>')
+				.find('.jq-select-icon').remove();
 			if (options.iconCls) {
 				trigger.find('.jq-select-text').before('<i class="jq-select-icon ' + options.iconCls + '"></i>');
 			}

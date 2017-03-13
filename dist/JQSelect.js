@@ -33,7 +33,7 @@
 		this._filterText = '';
 		this._filterData = null;
 		this._listScrollTop = 0;
-		this._rendering = false;
+		this._renderTimeoutIds = null;
 
 		var wrapTemplate = '<div class="jq-select-wrapper"/>';
 		var triggerTemplate = '<button type="button" class="jq-select-trigger"></button>';
@@ -205,9 +205,14 @@
 
 		}
 
-		function renderPopupList(op) {
+		function prepateRenderPopupList(op) {
+			if (this._renderTimeoutIds) {
+				clearTimeout(this._renderTimeoutIds);
+			}
+			this._renderTimeoutIds = setTimeout(renderPopupList.bind(_self, op), 100 / 6);
+		}
 
-			_self._rendering = true;
+		function renderPopupList(op) {
 
 			var data = options.data,
 				filteredData = _self._filterData || options.data,
@@ -558,8 +563,6 @@
 
 			bindSelectEvents();
 
-			_self._rendering = false;
-
 		}
 
 		function showPopup() {
@@ -641,7 +644,7 @@
 			// append to body
 			wrapper.append(dropdown);
 
-			renderPopupList();
+			prepateRenderPopupList();
 
 			bindSelectAllEvents();
 
@@ -658,7 +661,7 @@
 				_self._filterText = e.target.value;
 				_self._filterData = getFilteredData() || options.data;
 
-				renderPopupList();
+				prepateRenderPopupList();
 				resetPopupPosition();
 
 			});
@@ -670,10 +673,6 @@
 			wrapper.find('.jq-select-select-all').click(function (e) {
 
 				e.stopPropagation();
-
-				if (_self._rendering) {
-					return;
-				}
 
 				var data = _self._filterData || options.data;
 
@@ -814,7 +813,7 @@
 
 				}
 
-				renderPopupList({
+				prepateRenderPopupList({
 					scrollTop: _self._listScrollTop
 				});
 
@@ -886,7 +885,7 @@
 
 				}
 
-				renderPopupList({
+				prepateRenderPopupList({
 					scrollTop: _self._listScrollTop
 				});
 
@@ -897,10 +896,6 @@
 				wrapper.find('.jq-select-item').click(function (e) {
 
 					e.stopPropagation();
-
-					if (_self._rendering) {
-						return;
-					}
 
 					if (!options.data) {
 						return;
@@ -964,7 +959,7 @@
 						onDeselect([selectedItem]);
 					}
 
-					renderPopupList({
+					prepateRenderPopupList({
 						scrollTop: _self._listScrollTop
 					});
 
@@ -973,10 +968,6 @@
 				wrapper.find('.jq-select-item').mousedown(function (e) {
 
 					e.stopPropagation();
-
-					if (_self._rendering) {
-						return;
-					}
 
 					if (!options.data) {
 						return;
@@ -1006,7 +997,7 @@
 					$(this).addClass(options.checkboxActivatedCls);
 					onSelect(selectedItem);
 
-					renderPopupList({
+					prepateRenderPopupList({
 						scrollTop: _self._listScrollTop
 					});
 
@@ -1054,7 +1045,7 @@
 					options.autoChange && triggerChange();
 				}
 
-				renderPopupList({
+				prepateRenderPopupList({
 					scrollTop: _self._listScrollTop
 				});
 
@@ -1077,7 +1068,7 @@
 			wrapper.find('.jq-select-list').scroll(function (e) {
 				e.stopPropagation();
 				_self._listScrollTop = e.target.scrollTop;
-				renderPopupList({
+				prepateRenderPopupList({
 					scrollTop: e.target.scrollTop
 				});
 			});

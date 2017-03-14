@@ -209,7 +209,9 @@
 			if (this._renderTimeoutIds) {
 				clearTimeout(this._renderTimeoutIds);
 			}
-			this._renderTimeoutIds = setTimeout(renderPopupList.bind(_self, op), 100 / 6);
+			this._renderTimeoutIds = setTimeout(function () {
+				renderPopupList(op);
+			}, 100 / 6);
 		}
 
 		function renderPopupList(op) {

@@ -512,14 +512,14 @@ $(function () {
         console.log('select "update-options" updated');
     }, 2000);
 
-    // large size
+    // large size / auto popup width
     $('#large-size').JQSelect({
         group: true,
         data: generateGroupObjectArrayDataLargeSize(),
         triggerWidth: 300,
         popupWidth: 'auto',
         minPopupWidth: 200,
-        maxPopupWidth: 400,
+        maxPopupWidth: 600,
         hideOKButton: true,
         hideCloseButton: true,
         hideClearButton: true,

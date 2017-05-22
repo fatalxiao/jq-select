@@ -5,7 +5,8 @@
     "license": "MIT",
     "scripts": {
         "dev": "gulp dev",
-        "build": "rimraf dist && gulp build"
+        "build": "rimraf dist && gulp build",
+        "example":"gulp example"
     },
     "devDependencies": {
         "browser-sync": "^2.18.2",

@@ -22,7 +22,7 @@ gulp.task('example', function () {
         files: ['./docs/**', './src/**'],
         server: {
             baseDir: './',
-            index: 'docs/index.html'
+            index: 'docs/example.html'
         }
     });
 });

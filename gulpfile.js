@@ -1,5 +1,4 @@
 var gulp = require('gulp'),
-    clean = require('gulp-clean'),
     browserSync = require('browser-sync'),
     plumber = require('gulp-plumber'),
     uglify = require('gulp-uglify'),
@@ -15,12 +14,6 @@ gulp.task('dev', function () {
             baseDir: './src'
         }
     });
-});
-
-gulp.task('clean', function () {
-    return gulp.src('./dist/**', {read: false})
-        .pipe(plumber())
-        .pipe(clean());
 });
 
 gulp.task('images', function () {
@@ -62,4 +55,4 @@ gulp.task('jsmin', function () {
         .pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('build', gulpSequence('clean', 'images', 'css', 'cssmin', 'js', 'jsmin'));
+gulp.task('build', gulpSequence('images', 'css', 'cssmin', 'js', 'jsmin'));

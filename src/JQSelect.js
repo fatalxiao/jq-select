@@ -572,7 +572,10 @@
             _self._listScrollTop = 0;
 
             // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- dropdown -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-            dropdown = $(dropdownTemplate).css('min-width', options.triggerWidth);
+            dropdown = $(dropdownTemplate).css({
+                'min-width': options.minPopupWidth,
+                'max-width': options.maxPopupWidth
+            });
 
             if (options.popupWidth === 'auto') {
                 dropdown.css('width', 'auto');
@@ -1568,6 +1571,8 @@
 
         triggerWidth: 200,
         popupWidth: 200,
+        minPopupWidth: 200,
+        maxPopupWidth: 400,
         listHeight: 300,
         groupTitleHeight: 30,
         itemHeight: 30,

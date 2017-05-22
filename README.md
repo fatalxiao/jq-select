@@ -23,6 +23,8 @@ $('#select').JQSelect(options);
 |noSelectText|String|"Please select ..."|Trigger display text if no item select.|
 |triggerWidth|Number|200||
 |popupWidth|Number / String|200|A number or 'auto'.|
+|minPopupWidth|Number|200||
+|maxPopupWidth|Number|400||
 |hideFilter|Boolean|false||
 |filterIconCls|String|""||
 |filterPlaceholder|String|"filter ..."||

@@ -9,21 +9,16 @@ var gulp = require('gulp'),
 
 gulp.task('dev', function () {
     browserSync({
-        files: ['./docs/**', './src/**'],
         server: {
             baseDir: './',
-            index: 'docs/dev.html'
+            index: 'dev.html'
         }
     });
 });
 
 gulp.task('example', function () {
     browserSync({
-        files: ['./docs/**', './src/**'],
-        server: {
-            baseDir: './',
-            index: 'docs/example.html'
-        }
+        server: './'
     });
 });
 

@@ -41,35 +41,35 @@
             '<div class="jq-select-popup">\
                 <div class="jq-select-filter-wrapper">\
                     <input type="text" class="jq-select-filter" placeholder="' + options.filterPlaceholder + '"/>\
-					<i class="jq-select-filter-icon ' + options.filterIconCls + '"></i>\
-				</div>\
-				<label type="text" class="jq-select-select-all">\
-					<div class="jq-select-checkbox jq-select-select-all-checkbox ' + options.checkboxIconCls + '"></div>\
-					<span class="jq-select-select-all-name"></span>\
-				</label>\
-				<div class="jq-select-list">\
-					<div class="jq-select-list-scroller"></div>\
-				</div>\
-				<div class="jq-select-buttons">\
-					<button type="button" class="jq-select-buttons-ok"></button>\
-					<button type="button" class="jq-select-buttons-clear"></button>\
-					<button type="button" class="jq-select-buttons-close"></button>\
-				</div>\
-			 </div>';
+                    <i class="jq-select-filter-icon ' + options.filterIconCls + '"></i>\
+                </div>\
+                <label type="text" class="jq-select-select-all">\
+                    <div class="jq-select-checkbox jq-select-select-all-checkbox ' + options.checkboxIconCls + '"></div>\
+                    <span class="jq-select-select-all-name"></span>\
+                </label>\
+                <div class="jq-select-list">\
+                    <div class="jq-select-list-scroller"></div>\
+                </div>\
+                <div class="jq-select-buttons">\
+                    <button type="button" class="jq-select-buttons-ok"></button>\
+                    <button type="button" class="jq-select-buttons-clear"></button>\
+                    <button type="button" class="jq-select-buttons-close"></button>\
+                </div>\
+             </div>';
         var groupTemplate =
             '<div class="jq-select-group">\
                 <label class="jq-select-group-title">\
                     <div class="jq-select-checkbox jq-select-group-checkbox ' + options.checkboxIconCls + '"></div>\
-					<span class="jq-select-group-title-name"></span>\
-				</label>\
-				<div class="jq-select-group-children"></div>\
-			 </div>';
+                    <span class="jq-select-group-title-name"></span>\
+                </label>\
+                <div class="jq-select-group-children"></div>\
+             </div>';
         var itemTemplate =
             '<label class="jq-select-item">\
                 <div class="jq-select-checkbox jq-select-item-checkbox ' + options.checkboxIconCls + '"></div>\
-				<i class="jq-select-item-icon"></i>\
-				<span class="jq-select-item-name"></span>\
-			 </label>';
+                <i class="jq-select-item-icon"></i>\
+                <span class="jq-select-item-name"></span>\
+             </label>';
 
         function isValue(value) {
             return value !== null && value !== undefined;

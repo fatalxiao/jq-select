@@ -103,7 +103,7 @@ function generateGroupObjectArrayDataLargeSize() {
         for (var j = 0; j < 10; j++) {
             group.push({
                 value: 'value' + i + j,
-                label: randomText(100)
+                label: randomText(~~(Math.random() * 60))
             });
         }
         data['group' + i] = group;

@@ -44,7 +44,7 @@
                     <i class="jq-select-filter-icon ' + options.filterIconCls + '"></i>\
                 </div>\
                 <label type="text" class="jq-select-select-all">\
-                    <div class="jq-select-checkbox jq-select-select-all-checkbox ' + options.checkboxIconCls + '"></div>\
+                    <input type="checkbox" class="jq-select-checkbox jq-select-select-all-checkbox ' + options.checkboxIconCls + '"/>\
                     <span class="jq-select-select-all-name"></span>\
                 </label>\
                 <div class="jq-select-list">\
@@ -56,20 +56,23 @@
                     <button type="button" class="jq-select-buttons-close"></button>\
                 </div>\
              </div>';
+        // <div class="jq-select-checkbox jq-select-select-all-checkbox ' + options.checkboxIconCls + '"></div>\
         var groupTemplate =
             '<div class="jq-select-group">\
                 <label class="jq-select-group-title">\
-                    <div class="jq-select-checkbox jq-select-group-checkbox ' + options.checkboxIconCls + '"></div>\
+                    <input type="checkbox" class="jq-select-checkbox jq-select-group-checkbox ' + options.checkboxIconCls + '"/>\
                     <span class="jq-select-group-title-name"></span>\
                 </label>\
                 <div class="jq-select-group-children"></div>\
              </div>';
+        // <div class="jq-select-checkbox jq-select-group-checkbox ' + options.checkboxIconCls + '"></div>\
         var itemTemplate =
             '<label class="jq-select-item">\
-                <div class="jq-select-checkbox jq-select-item-checkbox ' + options.checkboxIconCls + '"></div>\
+                <input type="checkbox" class="jq-select-checkbox jq-select-item-checkbox ' + options.checkboxIconCls + '"/>\
                 <i class="jq-select-item-icon"></i>\
                 <span class="jq-select-item-name"></span>\
              </label>';
+        // <div class="jq-select-checkbox jq-select-item-checkbox ' + options.checkboxIconCls + '"></div>\
 
         function isValue(value) {
             return value !== null && value !== undefined;
@@ -274,7 +277,8 @@
                                 }
 
                                 if (count === filteredData[groupName].length) {
-                                    group.find('.jq-select-group-checkbox').addClass(options.checkboxActivatedCls);
+                                    group.find('.jq-select-group-checkbox').prop('checked', true);
+                                    // .addClass(options.checkboxActivatedCls);
                                 }
 
                             }
@@ -321,7 +325,8 @@
                                                 return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
                                             }).length == 1
                                         ) {
-                                            itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
+                                            itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+                                            // .addClass(options.checkboxActivatedCls);
                                         }
 
                                     } else {
@@ -365,7 +370,8 @@
                                                     === item[options.valueField].toString();
                                             }).length == 1
                                         ) {
-                                            itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
+                                            itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+                                            // .addClass(options.checkboxActivatedCls);
                                         }
 
                                     } else {
@@ -503,7 +509,8 @@
                             if (options.multi) {
                                 _self._selectedValue.filter(function (_valueItem) {
                                     return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
-                                }).length == 1 && itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
+                                }).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+                                // .addClass(options.checkboxActivatedCls);
                             } else {
                                 itemEl.find('.jq-select-item-checkbox').remove();
                                 isValue(_self._selectedValue) && isValue(item) && _self._selectedValue.toString() === item.toString()
@@ -530,7 +537,8 @@
                                         return isValue(_valueItem[options.valueField]) && isValue(item[options.valueField])
                                             && _valueItem[options.valueField].toString() === item[options.valueField].toString();
                                     }).length == 1) {
-                                    itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
+                                    itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+                                    // .addClass(options.checkboxActivatedCls);
                                 }
                             } else {
                                 itemEl.find('.jq-select-item-checkbox').remove();
@@ -687,8 +695,10 @@
 
                 var selectedItems = [];
                 var checkbox = $(this).children('.jq-select-select-all-checkbox');
-                var checked = !checkbox.hasClass(options.checkboxActivatedCls);
-                checkbox.toggleClass(options.checkboxActivatedCls, checked);
+                var checked = !checkbox.is(':checked');
+                // .hasClass(options.checkboxActivatedCls);
+                // checkbox.toggleClass(options.checkboxActivatedCls, checked);
+                checkbox.prop('checked', checked);
 
                 wrapper.find('.jq-select-select-all-name').html(checked ? options.deselectAllText : options.selectAllText);
 
@@ -829,7 +839,7 @@
         function bindSelectEvents() {
 
             // select group
-            wrapper.find('.jq-select-group-title').click(function (e) {
+            wrapper.find('.jq-select-group-title').mousedown(function (e) {
 
                 e.stopPropagation();
 
@@ -839,7 +849,8 @@
                     return;
                 }
 
-                var checked = !$(this).children('.jq-select-group-checkbox').hasClass(options.checkboxActivatedCls);
+                var checked = !$(this).children('.jq-select-group-checkbox').is(':checked');
+                // .hasClass(options.checkboxActivatedCls);
                 var group = $(this).parents('.jq-select-group');
                 var groupName = group.attr('data-name');
 
@@ -898,7 +909,7 @@
 
             // select item
             if (options.multi) {
-                wrapper.find('.jq-select-item').click(function (e) {
+                wrapper.find('.jq-select-item').mousedown(function (e) {
 
                     e.stopPropagation();
 
@@ -906,7 +917,8 @@
                         return;
                     }
 
-                    var checked = !$(this).children('.jq-select-item-checkbox').hasClass(options.checkboxActivatedCls);
+                    var checked = !$(this).children('.jq-select-item-checkbox').is(':checked');
+                    // .hasClass(options.checkboxActivatedCls);
 
                     var selectedItem;
 

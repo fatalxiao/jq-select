@@ -277,7 +277,8 @@
                                 }
 
                                 if (count === filteredData[groupName].length) {
-                                    group.find('.jq-select-group-checkbox').prop('checked', true);
+                                    group.addClass(options.itemActivatedCls)
+                                        .find('.jq-select-group-checkbox').prop('checked', true);
                                     // .addClass(options.checkboxActivatedCls);
                                 }
 
@@ -325,7 +326,8 @@
                                                 return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
                                             }).length == 1
                                         ) {
-                                            itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+                                            itemEl.addClass(options.itemActivatedCls)
+                                                .find('.jq-select-item-checkbox').prop('checked', true);
                                             // .addClass(options.checkboxActivatedCls);
                                         }
 
@@ -370,7 +372,8 @@
                                                     === item[options.valueField].toString();
                                             }).length == 1
                                         ) {
-                                            itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+                                            itemEl.addClass(options.itemActivatedCls)
+                                                .find('.jq-select-item-checkbox').prop('checked', true);
                                             // .addClass(options.checkboxActivatedCls);
                                         }
 
@@ -507,10 +510,13 @@
                             }
 
                             if (options.multi) {
-                                _self._selectedValue.filter(function (_valueItem) {
-                                    return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
-                                }).length == 1 && itemEl.find('.jq-select-item-checkbox').prop('checked', true);
-                                // .addClass(options.checkboxActivatedCls);
+                                if (_self._selectedValue.filter(function (_valueItem) {
+                                        return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
+                                    }).length == 1) {
+                                    itemEl.addClass(options.itemActivatedCls)
+                                        .find('.jq-select-item-checkbox').prop('checked', true);
+                                    // .addClass(options.checkboxActivatedCls);
+                                }
                             } else {
                                 itemEl.find('.jq-select-item-checkbox').remove();
                                 isValue(_self._selectedValue) && isValue(item) && _self._selectedValue.toString() === item.toString()
@@ -537,7 +543,8 @@
                                         return isValue(_valueItem[options.valueField]) && isValue(item[options.valueField])
                                             && _valueItem[options.valueField].toString() === item[options.valueField].toString();
                                     }).length == 1) {
-                                    itemEl.find('.jq-select-item-checkbox').prop('checked', true);
+                                    itemEl.addClass(options.itemActivatedCls)
+                                        .find('.jq-select-item-checkbox').prop('checked', true);
                                     // .addClass(options.checkboxActivatedCls);
                                 }
                             } else {
@@ -1601,6 +1608,7 @@
         selectAllText: 'Select All',
         deselectAllText: 'Deselect All',
 
+        itemActivatedCls: 'activated',
         checkboxIconCls: '',
         checkboxActivatedCls: 'activated',
 

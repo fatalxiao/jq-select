@@ -223,13 +223,13 @@
     background: #f2f6fa;
 }
 
-.jq-select-wrapper .jq-select-popup .jq-select-item.activated {
-    background: #e8edf4;
-}
+/*.jq-select-wrapper .jq-select-popup .jq-select-item.activated {*/
+/*background: #e8edf4;*/
+/*}*/
 
-.jq-select-wrapper .jq-select-popup .jq-select-item.activated:hover {
-    background: #e8edf4;
-}
+/*.jq-select-wrapper .jq-select-popup .jq-select-item.activated:hover {*/
+/*background: #e8edf4;*/
+/*}*/
 
 .jq-select-wrapper .jq-select-popup .jq-select-item.hidden {
     display: none;

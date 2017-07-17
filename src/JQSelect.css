@@ -47,17 +47,6 @@
     .jq-select-wrapper .jq-select-trigger.activated .jq-select-trigger::after {
       transform: rotate(135deg);
       margin: 5px 3px 0 0; }
-    .jq-select-wrapper .jq-select-trigger.loading .jq-select-trigger {
-      cursor: not-allowed; }
-    .jq-select-wrapper .jq-select-trigger.loading .jq-select-trigger::after {
-      width: 14px;
-      height: 14px;
-      border: none;
-      transform: rotate(0deg);
-      margin: 0;
-      background-image: url("images/loading.gif");
-      background-size: 14px 14px;
-      transition: all 0ms; }
   .jq-select-wrapper.multi .jq-select-item {
     padding: 0 12px; }
 

@@ -90,7 +90,6 @@
         this.visible = false;
         this._value = !this.options.group && this.options.multi ? [] : {};
         this._selectedValue = !this.options.group && this.options.multi ? [] : {};
-        this._isLoading = false;
         this._filterText = '';
         this._filterData = null;
         this._listScrollTop = 0;
@@ -126,8 +125,6 @@
         this.wrapperEl.removeClass('activated');
         this.visible = false;
     };
-
-    JQSelect.prototype.setLoading = function () {};
 
     JQSelect.prototype.mousedownHandler = function (e) {
 
@@ -177,12 +174,6 @@
 
         this.originEl.off().on('updateOptions', function () {
             this.options = $.extend(true, {}, $.fn.JQSelect.defaults, this.options);
-            return this;
-        }).on('loadingStart', function () {
-            this.setLoading(true);
-            return this;
-        }).on('loadingEnd', function () {
-            this.setLoading(false);
             return this;
         });
     };

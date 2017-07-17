@@ -62,24 +62,6 @@
                 margin: 5px 3px 0 0;
             }
         }
-
-        &.loading {
-
-            .jq-select-trigger {
-                cursor: not-allowed;
-            }
-
-            .jq-select-trigger::after {
-                width: 14px;
-                height: 14px;
-                border: none;
-                transform: rotate(0deg);
-                margin: 0;
-                background-image: url("images/loading.gif");
-                background-size: 14px 14px;
-                transition: all 0ms;
-            }
-        }
     }
 
     &.multi {

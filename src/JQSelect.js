@@ -41,7 +41,7 @@
                             class="jq-select-select-all">
                          <input type="checkbox" 
                                 class="jq-select-checkbox jq-select-select-all-checkbox ${options.checkboxIconCls}"/>
-                         <span class="jq-select-select-all-name"></span>
+                         <span class="jq-select-select-all-name">${options.selectAllText}</span>
                      </label>
                      
                      <div class="jq-select-list">
@@ -65,9 +65,9 @@
         }
 
         while (el) {
-            if (el == popupEl) {
+            if ($(el).is(popupEl)) {
                 return currentVisible;
-            } else if (el == triggerEl) {
+            } else if ($(el).is(triggerEl)) {
                 return !currentVisible;
             }
             el = el.parentNode;
@@ -111,12 +111,20 @@
         const offset = this.triggerEl.offset();
 
         this.popupEl.css({
-            transform: `translate(${offset.left}px, ${offset.top}px)`
-        });
+            transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
+        }).appendTo('body');
+        this.wrapperEl.addClass('activated');
     };
 
     JQSelect.prototype.removePopup = function () {
+
+        if (this.popupEl) {
+            this.popupEl.remove();
+            this.popupEl = null;
+        }
+
         this.wrapperEl.removeClass('activated');
+        this.visible = false;
     };
 
     JQSelect.prototype.setLoading = function () {};

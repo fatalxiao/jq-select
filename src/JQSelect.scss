@@ -134,6 +134,12 @@
             white-space: nowrap;
             text-overflow: ellipsis;
             color: #4c637b;
+            outline: none;
+
+            &:hover,
+            &:focus {
+                outline: none;
+            }
         }
     }
 

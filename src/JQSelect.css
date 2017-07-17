@@ -98,7 +98,10 @@
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      color: #4c637b; }
+      color: #4c637b;
+      outline: none; }
+      .jq-select-popup .jq-select-filter-wrapper .jq-select-filter:hover, .jq-select-popup .jq-select-filter-wrapper .jq-select-filter:focus {
+        outline: none; }
   .jq-select-popup .jq-select-select-all {
     display: block;
     height: 30px;

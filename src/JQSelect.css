@@ -141,3 +141,5 @@
           background: #f2f6fa; }
         .jq-select-popup .jq-select-list .jq-select-list-scroller .jq-select-item.hidden {
           display: none; }
+  .jq-select-popup.hidden {
+    left: -99999px; }

@@ -164,14 +164,13 @@
 
     };
 
-    JQSelect.prototype.renderList = function () {
+    JQSelect.prototype.renderList = function (scrollTop = 0) {
 
         if (!this.popupEl || !this.data || this.data.length < 1) {
             return;
         }
 
         const scroller = this.popupEl.find('.jq-select-list-scroller'),
-            scrollTop = scroller[0].scrollTop,
             len = this.data.length,
             itemHeight = this.options.itemHeight,
             {start, stop} = calDisplayIndex(this.data, scrollTop, this.options);
@@ -216,24 +215,27 @@
             return;
         }
 
-        this.popupEl = $(getPopupTemplate(this.options));
+        if (!this.popupEl) {
+            this.popupEl = $(getPopupTemplate(this.options)).appendTo('body');
+            this.popupEl.children('.jq-select-list').on('scroll', this.scrollHandler.bind(this));
+        } else {
+            this.popupEl.removeClass('hidden');
+        }
 
         const offset = this.triggerEl.offset();
-
-        this.renderList();
-
         this.popupEl.css({
             transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
-        }).appendTo('body');
+        });
         this.wrapperEl.addClass('activated');
+
+        this.renderList();
 
     };
 
     JQSelect.prototype.removePopup = function () {
 
         if (this.popupEl) {
-            this.popupEl.remove();
-            this.popupEl = null;
+            this.popupEl.addClass('hidden');
         }
 
         this.wrapperEl.removeClass('activated');
@@ -254,6 +256,10 @@
             this.showPopup();
         }
 
+    };
+
+    JQSelect.prototype.scrollHandler = function (e) {
+        this.renderList(e.target.scrollTop);
     };
 
     JQSelect.prototype.resizeHandler = function () {

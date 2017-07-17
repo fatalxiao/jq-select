@@ -1,0 +1,211 @@
+.jq-select-wrapper {
+    position: relative;
+
+    .jq-select-trigger {
+        position: relative;
+        width: 200px;
+        height: 40px;
+        border: none;
+        cursor: pointer;
+        background: #e8edf4;
+        border-radius: 2px;
+        color: #758697;
+        padding: 0 36px 0 12px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        text-align: left;
+        outline: none;
+        user-select: none;
+        box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;
+        transition: all 100ms ease-in-out;
+
+        .jq-select-icon {
+            margin-right: 8px;
+        }
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: calc(50% - 6px);
+            right: 12px;
+            display: block;
+            float: right;
+            width: 8px;
+            height: 8px;
+            border-left: 1px solid #758697;
+            border-bottom: 1px solid #758697;
+            transform: rotate(-45deg);
+            box-sizing: border-box;
+            margin: 1px 3px 0 0;
+            vertical-align: middle;
+            transition: all 200ms;
+        }
+
+        &:hover {
+            outline: none;
+            background: #ecf2f8;
+        }
+
+        &:focus {
+            outline: none;
+        }
+
+        &:active {
+            background: #e4e9ef;
+            box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 3px, rgba(0, 0, 0, 0.117647) 0px 1px 2px;
+        }
+
+        &.activated {
+            .jq-select-trigger::after {
+                transform: rotate(135deg);
+                margin: 5px 3px 0 0;
+            }
+        }
+
+        &.loading {
+
+            .jq-select-trigger {
+                cursor: not-allowed;
+            }
+
+            .jq-select-trigger::after {
+                width: 14px;
+                height: 14px;
+                border: none;
+                transform: rotate(0deg);
+                margin: 0;
+                background-image: url("images/loading.gif");
+                background-size: 14px 14px;
+                transition: all 0ms;
+            }
+        }
+    }
+
+    &.multi {
+        .jq-select-item {
+            padding: 0 12px;
+        }
+    }
+
+}
+
+.jq-select-popup {
+    position: absolute;
+    left: 0;
+    top: 0;
+    min-width: 200px;
+    overflow: hidden;
+    background: #fff;
+    font-size: 14px;
+    box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;
+    z-index: 99;
+
+    .jq-select-checkbox {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    .jq-select-filter-wrapper {
+        position: relative;
+
+        .jq-select-filter-icon {
+            position: absolute;
+            left: 10px;
+            top: 9px;
+            width: 12px;
+            height: 12px;
+            background: url("images/search-icon.png");
+        }
+
+        .jq-select-filter {
+            width: 100%;
+            height: 30px;
+            display: block;
+            box-sizing: border-box;
+            padding: 0 12px 0 30px;
+            line-height: 30px;
+            border: none;
+            border-bottom: 1px solid #e3eaf3;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            color: #4c637b;
+        }
+    }
+
+    .jq-select-select-all {
+        display: block;
+        height: 30px;
+        line-height: 30px;
+        background: #e8edf4;
+        color: #758697;
+        cursor: pointer;
+        user-select: none;
+        overflow: hidden;
+        padding: 0 12px;
+
+        .jq-select-select-all-name {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    }
+
+    .jq-select-list {
+        width: 100%;
+        max-height: 300px;
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        .jq-select-list-scroller {
+            position: relative;
+            width: 100%;
+
+            .jq-select-item {
+                display: block;
+                height: 30px;
+                line-height: 30px;
+                cursor: pointer;
+                user-select: none;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                color: #4c637b;
+                box-sizing: border-box;
+                padding: 0 12px;
+                position: relative;
+                width: calc(100% + 20px);
+                margin-right: 20px;
+                left: 0;
+
+                input[type="checkbox"] {
+                    vertical-align: middle;
+                }
+
+                .jq-select-item-icon {
+                    width: 16px;
+                    height: 16px;
+                    line-height: 16px;
+                    text-align: center;
+                }
+
+                .jq-select-item-name {
+                    vertical-align: middle;
+                }
+
+                &:hover {
+                    background: #f2f6fa;
+                }
+
+                &.hidden {
+                    display: none;
+                }
+
+            }
+        }
+    }
+}

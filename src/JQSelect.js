@@ -155,12 +155,15 @@
         }
 
         const scroller = this.popupEl.find('.jq-select-list-scroller'),
-              len = this.data.length,
               itemHeight = this.options.itemHeight,
               { start, stop } = calDisplayIndex(this.data, scrollTop, this.options);
 
         const list = [];
         for (let i = start; i <= stop; i++) {
+
+            if (scroller.children(`.jq-select-item[jq-select-item-id=${i}]`)[0]) {
+                continue;
+            }
 
             item = $(getItemTemplate(this.options)).attr('jq-select-item-id', i).css({
                 height: itemHeight,
@@ -184,9 +187,14 @@
             list.push(item);
         }
 
-        scroller.css({
-            height: len * this.options.itemHeight
-        }).html(list);
+        scroller.children().each(function () {
+            const id = parseInt($(this).attr('jq-select-item-id'));
+            if (id < start || id > stop) {
+                $(this).remove();
+            }
+        });
+
+        scroller.append(list);
     };
 
     JQSelect.prototype.showPopup = function () {
@@ -205,6 +213,8 @@
         const offset = this.triggerEl.offset();
         this.popupEl.css({
             transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
+        }).find('.jq-select-list-scroller').css({
+            height: this.data.length * this.options.itemHeight
         });
         this.wrapperEl.addClass('activated');
 
@@ -310,7 +320,7 @@
 
         listHeight: 300,
         itemHeight: 30,
-        renderBuffer: 3,
+        renderBuffer: 6,
 
         enableFilter: false,
         filterIconCls: '',

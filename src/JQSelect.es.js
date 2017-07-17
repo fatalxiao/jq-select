@@ -21,14 +21,18 @@
             }
 
             self.list.splice(i, 1);
+
         }
 
     };
 
     const wrapTemplate = '<div class="jq-select-wrapper"/>',
-          triggerTemplate = '<button type="button" class="jq-select-trigger"></button>',
-          getPopupTemplate = options => {
-        return `<div class="jq-select-popup">
+
+        triggerTemplate = '<button type="button" class="jq-select-trigger"></button>',
+
+        getPopupTemplate = (options) => {
+            return (
+                `<div class="jq-select-popup">
 
                      <div class="jq-select-filter-wrapper">
                          <input type="text" 
@@ -48,33 +52,39 @@
                          <div class="jq-select-list-scroller"></div>
                      </div>
                      
-                 </div>`;
-    },
-          getItemTemplate = options => {
-        return `<label class="jq-select-item">
+                 </div>`
+            );
+        },
+
+        getItemTemplate = (options) => {
+            return (
+                `<label class="jq-select-item">
                      <input type="checkbox" 
                             class="jq-select-checkbox jq-select-item-checkbox ${options.checkboxIconCls}"/>
                      <i class="jq-select-item-icon"></i>
                      <span class="jq-select-item-name"></span>
-                 </label>`;
-    },
-          triggerPopupEventHandle = (el, triggerEl, popupEl, currentVisible) => {
+                 </label>`
+            );
+        },
 
-        if (!triggerEl) {
-            return true;
-        }
+        triggerPopupEventHandle = (el, triggerEl, popupEl, currentVisible) => {
 
-        while (el) {
-            if (el == popupEl) {
-                return currentVisible;
-            } else if (el == triggerEl) {
-                return !currentVisible;
+            if (!triggerEl) {
+                return true;
             }
-            el = el.parentNode;
-        }
 
-        return false;
-    };
+            while (el) {
+                if (el == popupEl) {
+                    return currentVisible;
+                } else if (el == triggerEl) {
+                    return !currentVisible;
+                }
+                el = el.parentNode;
+            }
+
+            return false;
+
+        };
 
     function JQSelect(originEl, options) {
 
@@ -102,6 +112,7 @@
             jQSelect: _self,
             originEl: originEl
         };
+
     }
 
     JQSelect.prototype.showPopup = function () {
@@ -113,13 +124,16 @@
         this.popupEl.css({
             transform: `translate(${offset.left}px, ${offset.top}px)`
         });
+
     };
 
     JQSelect.prototype.removePopup = function () {
         this.wrapperEl.removeClass('activated');
     };
 
-    JQSelect.prototype.setLoading = function () {};
+    JQSelect.prototype.setLoading = function () {
+
+    };
 
     JQSelect.prototype.mousedownHandler = function (e) {
 
@@ -133,9 +147,12 @@
         if (!this.wrapperEl.hasClass('activated')) {
             this.showPopup();
         }
+
     };
 
-    JQSelect.prototype.resizeHandler = function () {};
+    JQSelect.prototype.resizeHandler = function () {
+
+    };
 
     JQSelect.prototype.init = function () {
 
@@ -156,7 +173,11 @@
         }
 
         // trigger text
-        this.triggerEl.html('<span class="jq-select-text" title="' + this.options.noSelectText + '">' + this.options.noSelectText + '</span>');
+        this.triggerEl.html(
+            '<span class="jq-select-text" title="'
+            + this.options.noSelectText + '">'
+            + this.options.noSelectText + '</span>'
+        );
 
         // trigger icon
         this.triggerEl.find('.jq-select-icon').remove();
@@ -177,6 +198,7 @@
             this.setLoading(false);
             return this;
         });
+
     };
 
     JQSelect.prototype.destroy = function () {
@@ -186,6 +208,7 @@
 
         $(document).off('mousedown', this.mousedownHandler);
         $(window).off('resize', this.resizeHandler);
+
     };
 
     $.fn.JQSelect = function (options) {
@@ -236,4 +259,5 @@
         onChange: null
 
     };
-})(jQuery);
+
+}(jQuery));

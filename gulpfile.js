@@ -57,11 +57,6 @@ gulp.task('watch:sass', function () {
     gulp.watch('./src/JQSelect.scss', ['compile:sass']);
 });
 
-gulp.task('watch', function () {
-    gulp.watch('./src/JQSelect.es.js', ['compile:es']);
-    gulp.watch('./src/JQSelect.scss', ['compile:sass']);
-});
-
 
 /** -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- build -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
 gulp.task('build:images', function () {

@@ -26,9 +26,9 @@
     };
 
     const wrapTemplate = '<div class="jq-select-wrapper"/>',
-        triggerTemplate = '<button type="button" class="jq-select-trigger"></button>',
-        getPopupTemplate = options => {
-            return `<div class="jq-select-popup">
+          triggerTemplate = '<button type="button" class="jq-select-trigger"></button>',
+          getPopupTemplate = options => {
+        return `<div class="jq-select-popup">
 
                      <div class="jq-select-filter-wrapper">
                          <input type="text" 
@@ -49,32 +49,32 @@
                      </div>
                      
                  </div>`;
-        },
-        getItemTemplate = options => {
-            return `<label class="jq-select-item">
+    },
+          getItemTemplate = options => {
+        return `<label class="jq-select-item">
                      <input type="checkbox" 
                             class="jq-select-checkbox jq-select-item-checkbox ${options.checkboxIconCls}"/>
                      <i class="jq-select-item-icon"></i>
                      <span class="jq-select-item-name"></span>
                  </label>`;
-        },
-        triggerPopupEventHandle = (el, triggerEl, popupEl, currentVisible) => {
+    },
+          triggerPopupEventHandle = (el, triggerEl, popupEl, currentVisible) => {
 
-            if (!triggerEl) {
-                return true;
+        if (!triggerEl) {
+            return true;
+        }
+
+        while (el) {
+            if (el == popupEl) {
+                return currentVisible;
+            } else if (el == triggerEl) {
+                return !currentVisible;
             }
+            el = el.parentNode;
+        }
 
-            while (el) {
-                if (el.is(popupEl)) {
-                    return currentVisible;
-                } else if (el.is(triggerEl)) {
-                    return !currentVisible;
-                }
-                el = el.parentNode;
-            }
-
-            return false;
-        };
+        return false;
+    };
 
     function JQSelect(originEl, options) {
 
@@ -111,24 +111,19 @@
         const offset = this.triggerEl.offset();
 
         this.popupEl.css({
-            transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
-        }).appendTo('body');
-
+            transform: `translate(${offset.left}px, ${offset.top}px)`
+        });
     };
 
     JQSelect.prototype.removePopup = function () {
         this.wrapperEl.removeClass('activated');
-        this.popupEl.remove();
-        this.popupEl = null;
-        this.visible = false;
     };
 
-    JQSelect.prototype.setLoading = function () {
-    };
+    JQSelect.prototype.setLoading = function () {};
 
     JQSelect.prototype.mousedownHandler = function (e) {
 
-        this.visible = triggerPopupEventHandle($(e.target), this.triggerEl, this.popupEl, this.visible);
+        this.visible = triggerPopupEventHandle(e.target, this.triggerEl, this.popupEl, this.visible);
 
         if (!this.visible) {
             this.removePopup();
@@ -140,8 +135,7 @@
         }
     };
 
-    JQSelect.prototype.resizeHandler = function () {
-    };
+    JQSelect.prototype.resizeHandler = function () {};
 
     JQSelect.prototype.init = function () {
 

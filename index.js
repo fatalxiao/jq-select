@@ -24923,6 +24923,8 @@ $(function () {
         enableFilter: true,
         enableSelectAll: true,
         data: data,
+        valueField: 'id',
+        displayField: 'hotelName',
         onSelect: function (selectItems) {
             console.log('onSelect: ', selectItems);
         },

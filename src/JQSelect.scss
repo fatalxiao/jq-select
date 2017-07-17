@@ -64,12 +64,6 @@
         }
     }
 
-    &.multi {
-        .jq-select-item {
-            padding: 0 12px;
-        }
-    }
-
 }
 
 .jq-select-popup {
@@ -89,6 +83,12 @@
         height: 12px;
         margin-right: 8px;
         vertical-align: middle;
+        outline: none;
+
+        &:hover,
+        &:focus {
+            outline: none;
+        }
     }
 
     .jq-select-filter-wrapper {
@@ -154,7 +154,12 @@
             width: 100%;
 
             .jq-select-item {
+                position: absolute;
+                left: 0;
+                top: 0;
                 display: block;
+                box-sizing: border-box;
+                width: 100%;
                 height: 30px;
                 line-height: 30px;
                 cursor: pointer;
@@ -163,16 +168,7 @@
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 color: #4c637b;
-                box-sizing: border-box;
                 padding: 0 12px;
-                position: relative;
-                width: calc(100% + 20px);
-                margin-right: 20px;
-                left: 0;
-
-                input[type="checkbox"] {
-                    vertical-align: middle;
-                }
 
                 .jq-select-item-icon {
                     width: 16px;

@@ -60,11 +60,17 @@
             return (
                 `<label class="jq-select-item">
                      <input type="checkbox" 
-                            class="jq-select-checkbox jq-select-item-checkbox ${options.checkboxIconCls}"/>
+                            class="jq-select-checkbox jq-select-item-checkbox"/>
                      <i class="jq-select-item-icon"></i>
                      <span class="jq-select-item-name"></span>
                  </label>`
             );
+        },
+
+        rangeValid = (value, min, max) => {
+            max !== undefined && (value = value > max ? max : value);
+            min !== undefined && (value = value < min ? min : value);
+            return value;
         },
 
         triggerPopupEventHandle = (el, triggerEl, popupEl, currentVisible) => {
@@ -84,6 +90,23 @@
 
             return false;
 
+        },
+
+        calDisplayIndex = (data, scrollTop, options) => {
+
+            const len = data.length;
+
+            let start = Math.floor(scrollTop / options.itemHeight),
+                stop = start + Math.ceil(options.listHeight / options.itemHeight);
+
+            start -= options.renderBuffer;
+            stop += options.renderBuffer;
+
+            return {
+                start: rangeValid(start, 0, len),
+                stop: rangeValid(stop, 0, len)
+            };
+
         };
 
     function JQSelect(originEl, options) {
@@ -97,6 +120,7 @@
         this.triggerEl = null;
         this.popupEl = null;
 
+        this.data = null;
         this.visible = false;
         this._value = !this.options.group && this.options.multi ? [] : {};
         this._selectedValue = !this.options.group && this.options.multi ? [] : {};
@@ -114,11 +138,89 @@
 
     }
 
+    JQSelect.prototype.initData = function () {
+
+        if (this.options.data) {
+            this.data = this.options.data;
+        }
+
+        if (!this.originEl) {
+            return;
+        }
+
+        const options = this.originEl.children('option');
+        if (options && options.length > 0) {
+
+            this.data = [];
+
+            options.each(() => {
+                this.data.push({
+                    [this.options.valueField]: $(this).val(),
+                    [this.options.displayField]: $(this).html()
+                });
+            });
+
+        }
+
+    };
+
+    JQSelect.prototype.renderList = function () {
+
+        if (!this.popupEl || !this.data || this.data.length < 1) {
+            return;
+        }
+
+        const scroller = this.popupEl.find('.jq-select-list-scroller'),
+            scrollTop = scroller[0].scrollTop,
+            len = this.data.length,
+            itemHeight = this.options.itemHeight,
+            {start, stop} = calDisplayIndex(this.data, scrollTop, this.options);
+
+        const list = [];
+        for (let i = start; i <= stop; i++) {
+
+            item = $(getItemTemplate(this.options))
+                .attr('jq-select-item-id', i)
+                .css({
+                    height: itemHeight,
+                    lineHeight: `${itemHeight}px`,
+                    transform: `translate(0, ${i * itemHeight}px)`
+                });
+
+            if (!this.options.multi) {
+                item.children('.jq-select-checkbox').remove();
+            }
+
+            const iconCls = this.data[this.options.iconClsField];
+            if (iconCls) {
+                item.children('.jq-select-item-icon').addClass(iconCls);
+            } else {
+                item.children('.jq-select-item-icon').remove();
+            }
+
+            item.children('.jq-select-item-name').html(this.data[i][this.options.displayField]);
+
+            list.push(item);
+
+        }
+
+        scroller.css({
+            height: len * this.options.itemHeight
+        }).html(list);
+
+    };
+
     JQSelect.prototype.showPopup = function () {
+
+        if (!this.triggerEl) {
+            return;
+        }
 
         this.popupEl = $(getPopupTemplate(this.options));
 
         const offset = this.triggerEl.offset();
+
+        this.renderList();
 
         this.popupEl.css({
             transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
@@ -183,6 +285,8 @@
             + this.options.noSelectText + '</span>'
         );
 
+        this.initData();
+
         // trigger icon
         this.triggerEl.find('.jq-select-icon').remove();
         if (this.options.iconCls) {
@@ -229,15 +333,9 @@
         iconCls: '',
         noSelectText: 'Please select ...',
 
-        popupWidth: 200,
-        minPopupWidth: 200,
-        maxPopupWidth: 400,
         listHeight: 300,
-        groupTitleHeight: 30,
         itemHeight: 30,
-        selectAllHeight: 30,
-        filterHeight: 30,
-        buttonsHeight: 40,
+        renderBuffer: 3,
 
         enableFilter: false,
         filterIconCls: '',

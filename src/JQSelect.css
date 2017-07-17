@@ -47,8 +47,6 @@
     .jq-select-wrapper .jq-select-trigger.activated .jq-select-trigger::after {
       transform: rotate(135deg);
       margin: 5px 3px 0 0; }
-  .jq-select-wrapper.multi .jq-select-item {
-    padding: 0 12px; }
 
 .jq-select-popup {
   position: absolute;
@@ -65,7 +63,10 @@
     width: 12px;
     height: 12px;
     margin-right: 8px;
-    vertical-align: middle; }
+    vertical-align: middle;
+    outline: none; }
+    .jq-select-popup .jq-select-checkbox:hover, .jq-select-popup .jq-select-checkbox:focus {
+      outline: none; }
   .jq-select-popup .jq-select-filter-wrapper {
     position: relative; }
     .jq-select-popup .jq-select-filter-wrapper .jq-select-filter-icon {
@@ -114,7 +115,12 @@
       position: relative;
       width: 100%; }
       .jq-select-popup .jq-select-list .jq-select-list-scroller .jq-select-item {
+        position: absolute;
+        left: 0;
+        top: 0;
         display: block;
+        box-sizing: border-box;
+        width: 100%;
         height: 30px;
         line-height: 30px;
         cursor: pointer;
@@ -123,14 +129,7 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         color: #4c637b;
-        box-sizing: border-box;
-        padding: 0 12px;
-        position: relative;
-        width: calc(100% + 20px);
-        margin-right: 20px;
-        left: 0; }
-        .jq-select-popup .jq-select-list .jq-select-list-scroller .jq-select-item input[type="checkbox"] {
-          vertical-align: middle; }
+        padding: 0 12px; }
         .jq-select-popup .jq-select-list .jq-select-list-scroller .jq-select-item .jq-select-item-icon {
           width: 16px;
           height: 16px;

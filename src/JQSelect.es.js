@@ -351,6 +351,7 @@
         }).find('.jq-select-list-scroller').css({
             height: this.filteredData.length * this.options.itemHeight
         });
+        this.popupEl.children('.jq-select-list')[0].scrollTop = 0;
         this.wrapperEl.addClass('activated');
 
         // filter

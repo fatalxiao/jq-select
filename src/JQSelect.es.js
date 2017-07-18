@@ -188,6 +188,8 @@
 
     JQSelect.prototype.renderList = function (scrollTop = 0) {
 
+        const startTime = new Date().getTime();
+
         if (!this.popupEl || !this.data || this.data.length < 1) {
             return;
         }
@@ -258,6 +260,8 @@
 
         scroller.append(list);
 
+        console.log('render spend:', new Date().getTime() - startTime, 'ms');
+
     };
 
     JQSelect.prototype.showPopup = function () {
@@ -280,6 +284,24 @@
             height: this.data.length * this.options.itemHeight
         });
         this.wrapperEl.addClass('activated');
+
+        // select all
+        const selectAllEl = this.popupEl.find('.jq-select-select-all');
+        if (this.options.enableSelectAll) {
+
+            const checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
+
+            checkboxEl.prop('checked', this.value.length === this.data.length);
+
+            selectAllEl.mousedown(() => {
+                const checked = !checkboxEl.is(':checked');
+                this.value = checked ? this.data.slice() : [];
+                this.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
+            });
+
+        } else {
+            selectAllEl.remove();
+        }
 
         this.renderList();
 

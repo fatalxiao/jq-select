@@ -193,6 +193,73 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
     };
 
+    JQSelect.prototype.initValue = function () {
+
+        if (!this.options.data || this.options.data.length < 1 || !this.options.value || this.options.value.length < 1) {
+            return;
+        }
+
+        var result = [];
+
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+            for (var _iterator2 = this.options.value[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                var item = _step2.value;
+                var _options = this.options,
+                    valueField = _options.valueField,
+                    displayField = _options.displayField,
+                    value = getValue(item, valueField, displayField);
+                var _iteratorNormalCompletion3 = true;
+                var _didIteratorError3 = false;
+                var _iteratorError3 = undefined;
+
+                try {
+
+                    for (var _iterator3 = this.options.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                        var dataItem = _step3.value;
+
+                        if (getValue(dataItem, valueField, displayField) === value) {
+                            result.push(dataItem);
+                            break;
+                        }
+                    }
+                } catch (err) {
+                    _didIteratorError3 = true;
+                    _iteratorError3 = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                            _iterator3.return();
+                        }
+                    } finally {
+                        if (_didIteratorError3) {
+                            throw _iteratorError3;
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            _didIteratorError2 = true;
+            _iteratorError2 = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                    _iterator2.return();
+                }
+            } finally {
+                if (_didIteratorError2) {
+                    throw _iteratorError2;
+                }
+            }
+        }
+
+        this.value = result;
+        this.updateValue();
+    };
+
     JQSelect.prototype.updateValue = function () {
         var _this2 = this;
 
@@ -408,7 +475,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.renderList(e.target.scrollTop);
     };
 
-    JQSelect.prototype.resizeHandler = function () {};
+    JQSelect.prototype.resizeHandler = function () {
+        //
+    };
 
     JQSelect.prototype.init = function () {
 
@@ -432,6 +501,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.triggerEl.html('<span class="jq-select-text" title="' + this.options.noSelectText + '">' + this.options.noSelectText + '</span>');
 
         this.initData();
+        this.initValue();
 
         // trigger icon
         this.triggerEl.find('.jq-select-icon').remove();

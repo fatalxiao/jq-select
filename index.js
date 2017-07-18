@@ -24924,7 +24924,8 @@ $(function () {
         enableSelectAll: true,
         data: data,
         valueField: 'id',
-        displayField: 'hotelName'
+        displayField: 'hotelName',
+        value: [3, 103]
     });
 
     $('#show-value-button').click(function () {

@@ -218,6 +218,34 @@
 
     };
 
+    JQSelect.prototype.initValue = function () {
+
+        if (!this.options.data || this.options.data.length < 1
+            || !this.options.value || this.options.value.length < 1) {
+            return;
+        }
+
+        const result = [];
+
+        for (let item of this.options.value) {
+
+            const {valueField, displayField} = this.options,
+                value = getValue(item, valueField, displayField);
+
+            for (let dataItem of this.options.data) {
+                if (getValue(dataItem, valueField, displayField) === value) {
+                    result.push(dataItem);
+                    break;
+                }
+            }
+
+        }
+
+        this.value = result;
+        this.updateValue();
+
+    };
+
     JQSelect.prototype.updateValue = function () {
 
         const value = this.value.map(item =>
@@ -432,7 +460,7 @@
     };
 
     JQSelect.prototype.resizeHandler = function () {
-
+        //
     };
 
     JQSelect.prototype.init = function () {
@@ -461,6 +489,7 @@
         );
 
         this.initData();
+        this.initValue();
 
         // trigger icon
         this.triggerEl.find('.jq-select-icon').remove();

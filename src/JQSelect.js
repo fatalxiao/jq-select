@@ -98,6 +98,9 @@
           getValue = (data, valueField, displayField) => {
         return typeof data == 'object' ? data[valueField] || data[displayField] : data;
     },
+          getDisplay = (data, valueField, displayField) => {
+        return typeof data == 'object' ? data[displayField] || data[valueField] : data;
+    },
           isChecked = (value, data, valueField, displayField) => {
 
         if (!value || value.length < 1 || !data) {
@@ -118,7 +121,7 @@
             return data;
         }
 
-        return data.filter(item => {});
+        return data.filter(item => getDisplay(item, valueField, displayField).toString().toUpperCase().includes(filterText.toString().toUpperCase()));
     };
 
     function JQSelect(originEl, options) {
@@ -174,15 +177,20 @@
 
         const startTime = new Date().getTime();
 
-        const filteredData = filterData(this.data, this.filterText, this.options.valueField, this.options.displayField);
-
-        if (!this.popupEl || !this.data || this.data.length < 1) {
+        if (!this.popupEl) {
             return;
         }
 
         const scroller = this.popupEl.find('.jq-select-list-scroller'),
-              itemHeight = this.options.itemHeight,
-              { start, stop } = calDisplayIndex(this.data, scrollTop, this.options),
+              filteredData = filterData(this.data, this.filterText, this.options.valueField, this.options.displayField);
+
+        if (!filteredData || filteredData.length < 1) {
+            scroller.html('');
+            return;
+        }
+
+        const itemHeight = this.options.itemHeight,
+              { start, stop } = calDisplayIndex(filteredData, scrollTop, this.options),
               list = [];
 
         for (let i = start; i <= stop; i++) {
@@ -199,7 +207,7 @@
             });
 
             // icon
-            const iconCls = this.data[this.options.iconClsField];
+            const iconCls = filteredData[this.options.iconClsField];
             if (iconCls) {
                 item.children('.jq-select-item-icon').addClass(iconCls);
             } else {
@@ -209,24 +217,24 @@
             // checked
             if (!this.options.multi) {
                 item.children('.jq-select-checkbox').remove();
-            } else if (isChecked(this.value, this.data[i], this.options.valueField, this.options.displayField)) {
+            } else if (isChecked(this.value, filteredData[i], this.options.valueField, this.options.displayField)) {
                 item.children('.jq-select-item-checkbox').prop('checked', true);
             }
 
             // display text
-            item.children('.jq-select-item-name').html(this.data[i][this.options.displayField]);
+            item.children('.jq-select-item-name').html(filteredData[i][this.options.displayField]);
 
             item.mousedown(() => {
 
-                if (!this.value || this.value.length < 1 || !this.data[i]) {
-                    this.value = [this.data[i]];
-                } else if (isChecked(this.value, this.data[i], this.options.valueField, this.options.displayField)) {
+                if (!this.value || this.value.length < 1 || !filteredData[i]) {
+                    this.value = [filteredData[i]];
+                } else if (isChecked(this.value, filteredData[i], this.options.valueField, this.options.displayField)) {
                     this.value.splice(i, 1);
                 } else {
-                    this.value.push(this.data[i]);
+                    this.value.push(filteredData[i]);
                 }
 
-                this.popupEl.find('.jq-select-select-all-checkbox').prop('checked', this.value.length === this.data.length);
+                this.popupEl.find('.jq-select-select-all-checkbox').prop('checked', this.value.length === filteredData.length);
             });
 
             list.push(item);
@@ -239,7 +247,9 @@
             }
         });
 
-        scroller.append(list);
+        scroller.css({
+            height: filteredData.length * this.options.itemHeight
+        }).append(list);
 
         console.log('render spend:', new Date().getTime() - startTime, 'ms');
     };
@@ -260,8 +270,6 @@
         const offset = this.triggerEl.offset();
         this.popupEl.css({
             transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
-        }).find('.jq-select-list-scroller').css({
-            height: this.data.length * this.options.itemHeight
         });
         this.wrapperEl.addClass('activated');
 

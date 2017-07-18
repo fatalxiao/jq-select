@@ -302,7 +302,7 @@
 
             const index = parseInt($(this).attr('jq-select-index'));
 
-            const data = self.filteredData.slice(start, stop);
+            const data = self.filteredData.slice(start, stop + 1);
             let flag = false;
 
             for (let i = 0, len = data.length; i < len; i++) {

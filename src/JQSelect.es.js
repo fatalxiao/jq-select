@@ -248,11 +248,22 @@
 
     JQSelect.prototype.updateValue = function () {
 
-        const value = this.value.map(item =>
-            getValue(item, this.options.valueField, this.options.displayField)
-        ).join(',');
+        const len = this.value.length;
 
-        this.originEl.html(`<option value="${value}" checked="checked"></option>`);
+        if (len > 0) {
+
+            this.triggerEl.html(`${this.value.length} selected`);
+
+            const value = this.value.map(item =>
+                getValue(item, this.options.valueField, this.options.displayField)
+            ).join(',');
+
+            this.originEl.html(`<option value="${value}" checked="checked"></option>`);
+
+        } else {
+            this.triggerEl.html(this.options.noSelectText);
+            this.originEl.html('');
+        }
 
     };
 

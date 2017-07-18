@@ -263,11 +263,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     JQSelect.prototype.updateValue = function () {
         var _this2 = this;
 
-        var value = this.value.map(function (item) {
-            return getValue(item, _this2.options.valueField, _this2.options.displayField);
-        }).join(',');
+        var len = this.value.length;
 
-        this.originEl.html('<option value="' + value + '" checked="checked"></option>');
+        if (len > 0) {
+
+            this.triggerEl.html(this.value.length + ' selected');
+
+            var value = this.value.map(function (item) {
+                return getValue(item, _this2.options.valueField, _this2.options.displayField);
+            }).join(',');
+
+            this.originEl.html('<option value="' + value + '" checked="checked"></option>');
+        } else {
+            this.triggerEl.html(this.options.noSelectText);
+            this.originEl.html('');
+        }
     };
 
     JQSelect.prototype.renderList = function () {

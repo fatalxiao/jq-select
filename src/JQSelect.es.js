@@ -432,15 +432,18 @@
         const selectAllEl = this.popupEl.children('.jq-select-select-all');
         if (this.options.enableSelectAll) {
 
-            const checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
+            const checked = this.value.length === this.data.length,
+                checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
 
-            checkboxEl.prop('checked', this.value.length === this.data.length);
+            selectAllEl.toggleClass('activated', checked);
+            checkboxEl.prop('checked', checked);
 
             selectAllEl.mousedown(() => {
 
                 const checked = !checkboxEl.is(':checked');
 
                 this.value = checked ? this.data.map(item => item.rawValue) : [];
+                this.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
                 this.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
 
                 this.updateValue();

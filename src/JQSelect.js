@@ -450,9 +450,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var selectAllEl = this.popupEl.children('.jq-select-select-all');
         if (this.options.enableSelectAll) {
 
-            var checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
+            var checked = this.value.length === this.data.length,
+                checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
 
-            checkboxEl.prop('checked', this.value.length === this.data.length);
+            selectAllEl.toggleClass('activated', checked);
+            checkboxEl.prop('checked', checked);
 
             selectAllEl.mousedown(function () {
 
@@ -461,6 +463,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                 _this4.value = checked ? _this4.data.map(function (item) {
                     return item.rawValue;
                 }) : [];
+                _this4.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
                 _this4.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
 
                 _this4.updateValue();

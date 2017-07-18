@@ -80,6 +80,13 @@
 
         return false;
     },
+          formatData = data => {
+        let index = 0;
+        return data.map(item => ({
+            rawValue: item,
+            jqSelectIndex: index++
+        }));
+    },
           calDisplayIndex = (data, scrollTop, options) => {
 
         const len = data.length;
@@ -152,7 +159,8 @@
     JQSelect.prototype.initData = function () {
 
         if (this.options.data) {
-            this.data = this.options.data;
+            this.data = formatData(this.options.data);
+            return;
         }
 
         if (!this.originEl) {
@@ -163,11 +171,15 @@
         if (options && options.length > 0) {
 
             this.data = [];
+            let i = 0;
 
             options.each(() => {
                 this.data.push({
-                    [this.options.valueField]: $(this).val(),
-                    [this.options.displayField]: $(this).html()
+                    rawValue: {
+                        [this.options.valueField]: $(this).val(),
+                        [this.options.displayField]: $(this).html()
+                    },
+                    jqSelectIndex: i++
                 });
             });
         }
@@ -181,14 +193,8 @@
             return;
         }
 
-        let index = 0;
-        const formatedData = this.data.map(item => ({
-            rawValue: item,
-            jqSelectIndex: index++
-        }));
-
         const scroller = this.popupEl.find('.jq-select-list-scroller'),
-              filteredData = filterData(formatedData, this.filterText, this.options.valueField, this.options.displayField);
+              filteredData = filterData(this.data, this.filterText, this.options.valueField, this.options.displayField);
 
         if (!filteredData || filteredData.length < 1) {
             scroller.html('');
@@ -320,7 +326,7 @@
 
             selectAllEl.mousedown(() => {
                 const checked = !checkboxEl.is(':checked');
-                this.value = checked ? this.data.slice() : [];
+                this.value = checked ? this.data.map(item => item.rawValue) : [];
                 this.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
             });
         } else {

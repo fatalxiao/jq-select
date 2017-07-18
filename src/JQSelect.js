@@ -302,6 +302,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             _calDisplayIndex = calDisplayIndex(this.filteredData, scrollTop, this.options),
             start = _calDisplayIndex.start,
             stop = _calDisplayIndex.stop,
+            _options2 = this.options,
+            valueField = _options2.valueField,
+            displayField = _options2.displayField,
             list = [];
 
         var _loop = function _loop(i) {
@@ -336,19 +339,24 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             // checked
             if (!_this3.options.multi) {
                 item.children('.jq-select-checkbox').remove();
-            } else if (isChecked(_this3.value, rawValue, _this3.options.valueField, _this3.options.displayField)) {
+            } else if (isChecked(_this3.value, rawValue, valueField, displayField)) {
                 item.children('.jq-select-item-checkbox').prop('checked', true);
             }
 
             // display text
-            item.children('.jq-select-item-name').html(rawValue[_this3.options.displayField]);
+            item.children('.jq-select-item-name').html(rawValue[displayField]);
 
             item.mousedown(function () {
 
                 if (!_this3.value || _this3.value.length < 1 || !rawValue) {
                     _this3.value = [rawValue];
-                } else if (isChecked(_this3.value, rawValue, _this3.options.valueField, _this3.options.displayField)) {
-                    _this3.value.splice(i, 1);
+                } else if (isChecked(_this3.value, rawValue, valueField, displayField)) {
+                    for (var _i = 0, len = _this3.value.length; _i < len; _i++) {
+                        if (getValue(_this3.value[_i], valueField, displayField) === getValue(rawValue, valueField, displayField)) {
+                            _this3.value.splice(_i, 1);
+                            break;
+                        }
+                    }
                 } else {
                     _this3.value.push(rawValue);
                 }

@@ -283,6 +283,7 @@
 
         const itemHeight = this.options.itemHeight,
             {start, stop} = calDisplayIndex(this.filteredData, scrollTop, this.options),
+            {valueField, displayField} = this.options,
             list = [];
 
         for (let i = start; i <= stop; i++) {
@@ -319,19 +320,25 @@
             // checked
             if (!this.options.multi) {
                 item.children('.jq-select-checkbox').remove();
-            } else if (isChecked(this.value, rawValue, this.options.valueField, this.options.displayField)) {
+            } else if (isChecked(this.value, rawValue, valueField, displayField)) {
                 item.children('.jq-select-item-checkbox').prop('checked', true);
             }
 
             // display text
-            item.children('.jq-select-item-name').html(rawValue[this.options.displayField]);
+            item.children('.jq-select-item-name').html(rawValue[displayField]);
 
             item.mousedown(() => {
 
                 if (!this.value || this.value.length < 1 || !rawValue) {
                     this.value = [rawValue];
-                } else if (isChecked(this.value, rawValue, this.options.valueField, this.options.displayField)) {
-                    this.value.splice(i, 1);
+                } else if (isChecked(this.value, rawValue, valueField, displayField)) {
+                    for (let i = 0, len = this.value.length; i < len; i++) {
+                        if (getValue(this.value[i], valueField, displayField)
+                            === getValue(rawValue, valueField, displayField)) {
+                            this.value.splice(i, 1);
+                            break;
+                        }
+                    }
                 } else {
                     this.value.push(rawValue);
                 }

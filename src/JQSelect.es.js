@@ -513,21 +513,12 @@
         renderBuffer: 3,
 
         enableFilter: false,
-        filterIconCls: '',
         filterPlaceholder: 'filter ...',
-        keepFilter: false,
 
         enableSelectAll: false,
         selectAllText: 'Select All',
-        deselectAllText: 'Deselect All',
 
-        itemActivatedCls: 'activated',
-
-        autoClose: false,
-
-        onSelect: null,
-        onDeselect: null,
-        onChange: null
+        itemActivatedCls: 'activated'
 
     };
 

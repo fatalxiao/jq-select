@@ -111,6 +111,14 @@
         }
 
         return false;
+    },
+          filterData = (data, filterText, valueField, displayField) => {
+
+        if (!filterText) {
+            return data;
+        }
+
+        return data.filter(item => {});
     };
 
     function JQSelect(originEl, options) {
@@ -127,10 +135,8 @@
         this.data = null;
         this.visible = false;
         this.value = [];
-        this._filterText = '';
-        this._filterData = null;
-        this._listScrollTop = 0;
-        this._renderTimeoutIds = null;
+        this.filterText = '';
+        this.filteredData = null;
 
         this.init();
 
@@ -167,6 +173,8 @@
     JQSelect.prototype.renderList = function (scrollTop = 0) {
 
         const startTime = new Date().getTime();
+
+        const filteredData = filterData(this.data, this.filterText, this.options.valueField, this.options.displayField);
 
         if (!this.popupEl || !this.data || this.data.length < 1) {
             return;
@@ -257,8 +265,19 @@
         });
         this.wrapperEl.addClass('activated');
 
+        // filter
+        const filterEl = this.popupEl.children('.jq-select-filter-wrapper');
+        if (this.options.enableFilter) {
+            filterEl.children('.jq-select-filter').on('input', e => {
+                this.filterText = e.target.value;
+                this.renderList();
+            });
+        } else {
+            filterEl.remove();
+        }
+
         // select all
-        const selectAllEl = this.popupEl.find('.jq-select-select-all');
+        const selectAllEl = this.popupEl.children('.jq-select-select-all');
         if (this.options.enableSelectAll) {
 
             const checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');

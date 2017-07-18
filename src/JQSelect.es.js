@@ -107,6 +107,29 @@
                 stop: rangeValid(stop, 0, len)
             };
 
+        },
+
+        getValue = (data, valueField, displayField) => {
+            return typeof data == 'object' ?
+                (data[valueField] || data[displayField])
+                :
+                data;
+        },
+
+        isChecked = (value, data, valueField, displayField) => {
+
+            if (!value || value.length < 1 || !data) {
+                return false;
+            }
+
+            for (let item of value) {
+                if (getValue(item, valueField, displayField) === getValue(data, valueField, displayField)) {
+                    return true;
+                }
+            }
+
+            return false;
+
         };
 
     function JQSelect(originEl, options) {
@@ -122,8 +145,7 @@
 
         this.data = null;
         this.visible = false;
-        this._value = !this.options.group && this.options.multi ? [] : {};
-        this._selectedValue = !this.options.group && this.options.multi ? [] : {};
+        this.value = [];
         this._filterText = '';
         this._filterData = null;
         this._listScrollTop = 0;
@@ -172,16 +194,17 @@
 
         const scroller = this.popupEl.find('.jq-select-list-scroller'),
             itemHeight = this.options.itemHeight,
-            {start, stop} = calDisplayIndex(this.data, scrollTop, this.options);
+            {start, stop} = calDisplayIndex(this.data, scrollTop, this.options),
+            list = [];
 
-        const list = [];
         for (let i = start; i <= stop; i++) {
 
+            // if exist
             if (scroller.children(`.jq-select-item[jq-select-item-id=${i}]`)[0]) {
                 continue;
             }
 
-            item = $(getItemTemplate(this.options))
+            const item = $(getItemTemplate(this.options))
                 .attr('jq-select-item-id', i)
                 .css({
                     height: itemHeight,
@@ -189,10 +212,7 @@
                     transform: `translate(0, ${i * itemHeight}px)`
                 });
 
-            if (!this.options.multi) {
-                item.children('.jq-select-checkbox').remove();
-            }
-
+            // icon
             const iconCls = this.data[this.options.iconClsField];
             if (iconCls) {
                 item.children('.jq-select-item-icon').addClass(iconCls);
@@ -200,7 +220,30 @@
                 item.children('.jq-select-item-icon').remove();
             }
 
+            // checked
+            if (!this.options.multi) {
+                item.children('.jq-select-checkbox').remove();
+            } else if (isChecked(this.value, this.data[i], this.options.valueField, this.options.displayField)) {
+                item.children('.jq-select-item-checkbox').prop('checked', true);
+            }
+
+            // display text
             item.children('.jq-select-item-name').html(this.data[i][this.options.displayField]);
+
+            item.mousedown(() => {
+
+                if (!this.value || this.value.length < 1 || !this.data[i]) {
+                    this.value = [this.data[i]];
+                } else if (isChecked(this.value, this.data[i], this.options.valueField, this.options.displayField)) {
+                    this.value.splice(i, 1);
+                } else {
+                    this.value.push(this.data[i]);
+                }
+
+                this.popupEl.find('.jq-select-select-all-checkbox')
+                    .prop('checked', this.value.length === this.data.length);
+
+            });
 
             list.push(item);
 
@@ -351,7 +394,7 @@
 
         listHeight: 300,
         itemHeight: 30,
-        renderBuffer: 6,
+        renderBuffer: 3,
 
         enableFilter: false,
         filterIconCls: '',

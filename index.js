@@ -24918,7 +24918,7 @@ const data = [
 
 $(function () {
 
-    $('#example').JQSelect({
+    $('#example1').JQSelect({
         multi: true,
         enableFilter: true,
         enableSelectAll: true,

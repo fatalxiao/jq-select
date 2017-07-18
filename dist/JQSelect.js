@@ -171,6 +171,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
 
         if (!this.originEl) {
+            this.filteredData = this.data = null;
             return;
         }
 
@@ -193,14 +194,93 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
     };
 
+    JQSelect.prototype.initValue = function () {
+
+        if (!this.options.data || this.options.data.length < 1 || !this.options.value || this.options.value.length < 1) {
+            this.value = [];
+        } else {
+
+            var result = [];
+
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = this.options.value[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var item = _step2.value;
+                    var _options = this.options,
+                        valueField = _options.valueField,
+                        displayField = _options.displayField,
+                        value = getValue(item, valueField, displayField);
+                    var _iteratorNormalCompletion3 = true;
+                    var _didIteratorError3 = false;
+                    var _iteratorError3 = undefined;
+
+                    try {
+
+                        for (var _iterator3 = this.options.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                            var dataItem = _step3.value;
+
+                            if (getValue(dataItem, valueField, displayField) === value) {
+                                result.push(dataItem);
+                                break;
+                            }
+                        }
+                    } catch (err) {
+                        _didIteratorError3 = true;
+                        _iteratorError3 = err;
+                    } finally {
+                        try {
+                            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                                _iterator3.return();
+                            }
+                        } finally {
+                            if (_didIteratorError3) {
+                                throw _iteratorError3;
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+
+            this.value = result;
+        }
+
+        this.updateValue();
+    };
+
     JQSelect.prototype.updateValue = function () {
         var _this2 = this;
 
-        var value = this.value.map(function (item) {
-            return getValue(item, _this2.options.valueField, _this2.options.displayField);
-        }).join(',');
+        var len = this.value.length;
 
-        this.originEl.html('<option value="' + value + '" checked="checked"></option>');
+        if (len > 0) {
+
+            this.triggerEl.html(this.value.length + ' selected');
+
+            var value = this.value.map(function (item) {
+                return getValue(item, _this2.options.valueField, _this2.options.displayField);
+            }).join(',');
+
+            this.originEl.html('<option value="' + value + '" checked="checked"></option>');
+        } else {
+            this.triggerEl.html(this.options.noSelectText);
+            this.originEl.html('');
+        }
     };
 
     JQSelect.prototype.renderList = function () {
@@ -225,6 +305,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             _calDisplayIndex = calDisplayIndex(this.filteredData, scrollTop, this.options),
             start = _calDisplayIndex.start,
             stop = _calDisplayIndex.stop,
+            _options2 = this.options,
+            valueField = _options2.valueField,
+            displayField = _options2.displayField,
             list = [];
 
         var _loop = function _loop(i) {
@@ -259,21 +342,30 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             // checked
             if (!_this3.options.multi) {
                 item.children('.jq-select-checkbox').remove();
-            } else if (isChecked(_this3.value, rawValue, _this3.options.valueField, _this3.options.displayField)) {
+            } else if (isChecked(_this3.value, rawValue, valueField, displayField)) {
                 item.children('.jq-select-item-checkbox').prop('checked', true);
+                item.addClass('activated');
             }
 
             // display text
-            item.children('.jq-select-item-name').html(rawValue[_this3.options.displayField]);
+            item.children('.jq-select-item-name').html(getDisplay(rawValue, valueField, displayField));
 
             item.mousedown(function () {
 
                 if (!_this3.value || _this3.value.length < 1 || !rawValue) {
                     _this3.value = [rawValue];
-                } else if (isChecked(_this3.value, rawValue, _this3.options.valueField, _this3.options.displayField)) {
-                    _this3.value.splice(i, 1);
+                    item.addClass('activated');
+                } else if (isChecked(_this3.value, rawValue, valueField, displayField)) {
+                    for (var _i = 0, len = _this3.value.length; _i < len; _i++) {
+                        if (getValue(_this3.value[_i], valueField, displayField) === getValue(rawValue, valueField, displayField)) {
+                            _this3.value.splice(_i, 1);
+                            break;
+                        }
+                    }
+                    item.removeClass('activated');
                 } else {
                     _this3.value.push(rawValue);
+                    item.addClass('activated');
                 }
 
                 _this3.popupEl.find('.jq-select-select-all-checkbox').prop('checked', _this3.value.length === _this3.filteredData.length);
@@ -358,9 +450,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var selectAllEl = this.popupEl.children('.jq-select-select-all');
         if (this.options.enableSelectAll) {
 
-            var checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
+            var checked = this.value.length === this.data.length,
+                checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
 
-            checkboxEl.prop('checked', this.value.length === this.data.length);
+            selectAllEl.toggleClass('activated', checked);
+            checkboxEl.prop('checked', checked);
 
             selectAllEl.mousedown(function () {
 
@@ -369,6 +463,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                 _this4.value = checked ? _this4.data.map(function (item) {
                     return item.rawValue;
                 }) : [];
+                _this4.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
+                _this4.popupEl.find('.jq-select-item').toggleClass('activated', checked);
                 _this4.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
 
                 _this4.updateValue();
@@ -380,7 +476,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.renderList();
     };
 
-    JQSelect.prototype.removePopup = function () {
+    JQSelect.prototype.hidePopup = function () {
 
         if (this.popupEl) {
             this.popupEl.addClass('hidden');
@@ -395,7 +491,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.visible = triggerPopupEventHandle(e.target, this.triggerEl, this.popupEl, this.visible);
 
         if (!this.visible) {
-            this.removePopup();
+            this.hidePopup();
             return;
         }
 
@@ -408,7 +504,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.renderList(e.target.scrollTop);
     };
 
-    JQSelect.prototype.resizeHandler = function () {};
+    JQSelect.prototype.resizeHandler = function () {
+        //
+    };
 
     JQSelect.prototype.init = function () {
 
@@ -428,10 +526,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             this.triggerEl = this.wrapperEl.children('.jq-select-trigger');
         }
 
-        // trigger text
-        this.triggerEl.html('<span class="jq-select-text" title="' + this.options.noSelectText + '">' + this.options.noSelectText + '</span>');
-
         this.initData();
+        this.initValue();
 
         // trigger icon
         this.triggerEl.find('.jq-select-icon').remove();
@@ -441,20 +537,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         $(document).on('mousedown', this.mousedownHandler.bind(this));
         $(window).on('resize', this.resizeHandler.bind(this));
-
-        this.originEl.off().on('updateOptions', function () {
-            this.options = $.extend(true, {}, $.fn.JQSelect.defaults, this.options);
-            return this;
-        });
     };
 
     JQSelect.prototype.destroy = function () {
 
-        this.removePopup();
-        this.wrapperEl.removeClass('activated');
+        this.triggerEl.remove();
 
-        $(document).off('mousedown', this.mousedownHandler);
-        $(window).off('resize', this.resizeHandler);
+        this.originEl.removeClass('jq-select-formated').unwrap();
+
+        this.popupEl && this.popupEl.remove();
+        this.popupEl = null;
     };
 
     $.fn.JQSelect = function (options) {
@@ -482,21 +574,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         renderBuffer: 3,
 
         enableFilter: false,
-        filterIconCls: '',
         filterPlaceholder: 'filter ...',
-        keepFilter: false,
 
         enableSelectAll: false,
         selectAllText: 'Select All',
-        deselectAllText: 'Deselect All',
 
-        itemActivatedCls: 'activated',
-
-        autoClose: false,
-
-        onSelect: null,
-        onDeselect: null,
-        onChange: null
+        itemActivatedCls: 'activated'
 
     };
 })(jQuery);

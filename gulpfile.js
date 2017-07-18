@@ -31,7 +31,7 @@ gulp.task('example', function () {
 gulp.task('compile:es', function () {
     return gulp.src('./src/JQSelect.es.js')
         .pipe(babel({
-            plugins: ['transform-runtime']
+            presets: ['env']
         }))
         .on('error', function (e) {
             console.error(e.toString());

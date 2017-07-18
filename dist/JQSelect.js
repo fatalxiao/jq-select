@@ -1,11 +1,20 @@
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 (function ($) {
 
     var JQSelectList = {
+
         list: [],
-        add: function (select) {
+
+        add: function add(select) {
             this.list.push(select);
         },
-        destroy: function (originEl) {
+
+        destroy: function destroy(originEl) {
 
             var self = this,
                 i = 0;
@@ -18,1533 +27,433 @@
             }
 
             self.list.splice(i, 1);
-
         }
+
+    };
+
+    var wrapTemplate = '<div class="jq-select-wrapper"/>',
+        triggerTemplate = '<button type="button" class="jq-select-trigger"></button>',
+        getPopupTemplate = function getPopupTemplate(options) {
+        return '<div class="jq-select-popup">\n\n                     <div class="jq-select-filter-wrapper">\n                         <input type="text" \n                                class="jq-select-filter" \n                                placeholder="' + options.filterPlaceholder + '"/>\n                         <i class="jq-select-filter-icon ' + options.filterIconCls + '"></i>\n                     </div>\n                     \n                     <label type="text" \n                            class="jq-select-select-all">\n                         <input type="checkbox" \n                                class="jq-select-checkbox jq-select-select-all-checkbox ' + options.checkboxIconCls + '"/>\n                         <span class="jq-select-select-all-name">' + options.selectAllText + '</span>\n                     </label>\n                     \n                     <div class="jq-select-list">\n                         <div class="jq-select-list-scroller"></div>\n                     </div>\n                     \n                 </div>';
+    },
+        getItemTemplate = function getItemTemplate(options) {
+        return '<label class="jq-select-item">\n                     <input type="checkbox" \n                            class="jq-select-checkbox jq-select-item-checkbox"/>\n                     <i class="jq-select-item-icon"></i>\n                     <span class="jq-select-item-name"></span>\n                 </label>';
+    },
+        rangeValid = function rangeValid(value, min, max) {
+        max !== undefined && (value = value > max ? max : value);
+        min !== undefined && (value = value < min ? min : value);
+        return value;
+    },
+        triggerPopupEventHandle = function triggerPopupEventHandle(el, triggerEl, popupEl, currentVisible) {
+
+        if (!triggerEl) {
+            return true;
+        }
+
+        while (el) {
+            if ($(el).is(popupEl)) {
+                return currentVisible;
+            } else if ($(el).is(triggerEl)) {
+                return !currentVisible;
+            }
+            el = el.parentNode;
+        }
+
+        return false;
+    },
+        formatData = function formatData(data) {
+        var index = 0;
+        return data.map(function (item) {
+            return {
+                rawValue: item,
+                jqSelectIndex: index++
+            };
+        });
+    },
+        calDisplayIndex = function calDisplayIndex(data, scrollTop, options) {
+
+        var len = data.length;
+
+        var start = Math.floor(scrollTop / options.itemHeight),
+            stop = start + Math.ceil(options.listHeight / options.itemHeight);
+
+        start -= options.renderBuffer;
+        stop += options.renderBuffer;
+
+        return {
+            start: rangeValid(start, 0, len - 1),
+            stop: rangeValid(stop, 0, len - 1)
+        };
+    },
+        getValue = function getValue(data, valueField, displayField) {
+        return (typeof data === 'undefined' ? 'undefined' : _typeof(data)) == 'object' ? data[valueField] || data[displayField] : data;
+    },
+        getDisplay = function getDisplay(data, valueField, displayField) {
+        return (typeof data === 'undefined' ? 'undefined' : _typeof(data)) == 'object' ? data[displayField] || data[valueField] : data;
+    },
+        isChecked = function isChecked(value, data, valueField, displayField) {
+
+        if (!value || value.length < 1 || !data) {
+            return false;
+        }
+
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = value[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var item = _step.value;
+
+                if (getValue(item, valueField, displayField) === getValue(data, valueField, displayField)) {
+                    return true;
+                }
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+
+        return false;
+    },
+        filterData = function filterData(data, filterText, valueField, displayField) {
+
+        if (!filterText) {
+            return data;
+        }
+
+        return data.filter(function (item) {
+            return getDisplay(item.rawValue, valueField, displayField).toString().toUpperCase().includes(filterText.toString().toUpperCase());
+        });
     };
 
     function JQSelect(originEl, options) {
 
-        var _self = this,
-            wrapper, trigger, dropdown;
-
-        this._value = !options.group && options.multi ? [] : {};
-        this._selectedValue = !options.group && options.multi ? [] : {};
-        this._isLoading = false;
-        this._filterText = '';
-        this._filterData = null;
-        this._listScrollTop = 0;
-        this._renderTimeoutIds = null;
-
-        var wrapTemplate = '<div class="jq-select-wrapper"/>';
-        var triggerTemplate = '<button type="button" class="jq-select-trigger"></button>';
-        var dropdownTemplate =
-            '<div class="jq-select-popup">\
-                <div class="jq-select-filter-wrapper">\
-                    <input type="text" class="jq-select-filter" placeholder="' + options.filterPlaceholder + '"/>\
-                    <i class="jq-select-filter-icon ' + options.filterIconCls + '"></i>\
-                </div>\
-                <label type="text" class="jq-select-select-all">\
-                    <div class="jq-select-checkbox jq-select-select-all-checkbox ' + options.checkboxIconCls + '"></div>\
-                    <span class="jq-select-select-all-name"></span>\
-                </label>\
-                <div class="jq-select-list">\
-                    <div class="jq-select-list-scroller"></div>\
-                </div>\
-                <div class="jq-select-buttons">\
-                    <button type="button" class="jq-select-buttons-ok"></button>\
-                    <button type="button" class="jq-select-buttons-clear"></button>\
-                    <button type="button" class="jq-select-buttons-close"></button>\
-                </div>\
-             </div>';
-        var groupTemplate =
-            '<div class="jq-select-group">\
-                <label class="jq-select-group-title">\
-                    <div class="jq-select-checkbox jq-select-group-checkbox ' + options.checkboxIconCls + '"></div>\
-                    <span class="jq-select-group-title-name"></span>\
-                </label>\
-                <div class="jq-select-group-children"></div>\
-             </div>';
-        var itemTemplate =
-            '<label class="jq-select-item">\
-                <div class="jq-select-checkbox jq-select-item-checkbox ' + options.checkboxIconCls + '"></div>\
-                <i class="jq-select-item-icon"></i>\
-                <span class="jq-select-item-name"></span>\
-             </label>';
-
-        function isValue(value) {
-            return value !== null && value !== undefined;
-        }
-
-        function isPlainArrayData(data) {
-
-            data = data || options.data;
-
-            if (!$.isArray(data)) {
-                return false;
-            }
-
-            if (data.filter(function (item) {
-                    return $.isPlainObject(item);
-                }).length == 0) {
-                return true;
-            }
-
-            return false;
-
-        }
-
-        function sortPriorityData(data) {
-
-            var groupNames = Object.keys(data);
-
-            if (options.groupPriority && options.groupPriority.length > 0) {
-
-                var groupPriority = options.groupPriority;
-                if (typeof groupPriority === 'string') {
-                    groupPriority = groupPriority.split(',');
-                }
-
-                groupPriority && groupPriority.forEach(function (groupName, index) {
-                    var groupNameIndex = groupNames.indexOf(groupName);
-                    if (groupNameIndex > -1) {
-                        groupNames.splice(groupNameIndex, 1);
-                        groupNames.splice(index, 0, groupName);
-                    }
-                });
-
-            }
-
-            return groupNames;
-
-        }
-
-        function setLoading(bool) {
-            _self._isLoading = bool;
-            wrapper.toggleClass('loading', bool);
-        }
-
-        function resetPopupPosition(dropdown) {
-
-            dropdown = dropdown || wrapper.find('.jq-select-popup');
-            var offset = trigger.offset();
-
-            var triggerHeight = trigger.height();
-
-            var dropdownHeight = 0;
-            var data = _self._filterData || options.data;
-
-            // cal dropdown list height
-            if (options.group) {
-                for (var groupName in data) {
-                    if (data[groupName].length > 0) {
-                        dropdownHeight += options.groupTitleHeight + data[groupName].length * options.itemHeight;
-                        if (dropdownHeight > options.listHeight) {
-                            dropdownHeight = options.listHeight;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                if (data && data.length > 0) {
-                    dropdownHeight = data.length * options.itemHeight;
-                }
-            }
-            dropdownHeight > options.listHeight && (dropdownHeight = options.listHeight);
-
-            if (options.multi && options.hideSelectAll === false) {
-                dropdownHeight += options.selectAllHeight;
-            }
-            if (options.hideFilter === false) {
-                dropdownHeight += options.filterHeight;
-            }
-            if (options.hideOKButton === false || options.hideCloseButton === false || options.hideClearButton === false) {
-                dropdownHeight += options.buttonsHeight;
-            }
-
-            var h = offset.top + triggerHeight + dropdownHeight - $(window).scrollTop();
-
-            if (offset.top + triggerHeight + dropdownHeight - $(window).scrollTop() > $(window).height()) {
-                dropdown.css('top', -dropdownHeight);
-            } else {
-                dropdown.css('top', triggerHeight);
-            }
-
-        }
-
-        function getFilteredData() {
-
-            var result;
-
-            if (options.group) {
-                result = {};
-                for (var groupName in options.data) {
-                    var data = options.data[groupName].filter(function (item) {
-                        if ($.isPlainObject(item)) {
-                            return isValue(item) && isValue(item[options.displayField])
-                                && item[options.displayField].toString().toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
-                        } else {
-                            return isValue(item) && item.toString().toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
-                        }
-                    });
-                    if (data.length > 0) {
-                        result[groupName] = data;
-                    }
-                }
-            } else {
-                result = options.data.filter(function (item) {
-                    if ($.isPlainObject(item)) {
-                        return isValue(item) && isValue(item[options.displayField])
-                            && item[options.displayField].toString().toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
-                    } else {
-                        return isValue(item) && item.toString().toUpperCase().indexOf(_self._filterText.toUpperCase()) > -1;
-                    }
-                });
-            }
-
-            return result;
-
-        }
-
-        function prepateRenderPopupList(op) {
-            if (this._renderTimeoutIds) {
-                clearTimeout(this._renderTimeoutIds);
-            }
-            this._renderTimeoutIds = setTimeout(function () {
-                renderPopupList(op);
-            }, 100 / 6);
-        }
-
-        function renderPopupList(op) {
-
-            var data = options.data,
-                filteredData = _self._filterData || options.data,
-                scrollTop = op && op.scrollTop || 0,
-                list = wrapper.find('.jq-select-list-scroller').html('');
-            heightCount = 0;
-
-            if (options.group) { // group
-
-                if ($.isEmptyObject(data)) {
-                    return;
-                }
-
-                var isFirstGroup = true;
-
-                for (var groupIndex = 0, groupLen = _self._sortedGroupName.length; groupIndex < groupLen; groupIndex++) {
-
-                    var groupName = _self._sortedGroupName[groupIndex];
-
-                    // not render if the group el below the display area
-                    if (heightCount > scrollTop + options.listHeight) {
-                        break;
-                    }
-
-                    if (heightCount <= scrollTop + options.listHeight
-                        && heightCount + options.groupTitleHeight + options.itemHeight * data[groupName].length >= scrollTop) {
-
-                        var group = $(groupTemplate).attr('data-name', groupName);
-
-                        if (isFirstGroup) {
-                            list.append('<div style="height:' + heightCount + 'px"></div>');
-                            isFirstGroup = false;
-                        }
-                        heightCount += options.groupTitleHeight;
-
-                        if (options.multi) {
-                            if (_self._selectedValue && filteredData
-                                && _self._selectedValue[groupName] && filteredData[groupName]) {
-
-                                var count = 0;
-                                if (isPlainArrayData(filteredData[groupName])) {
-                                    filteredData[groupName] && filteredData[groupName].forEach(function (item) {
-                                        if (_self._selectedValue[groupName].indexOf(item) > -1) {
-                                            count++;
-                                        }
-                                    });
-                                } else {
-                                    filteredData[groupName] && filteredData[groupName].forEach(function (item) {
-                                        for (var i = 0, len = _self._selectedValue[groupName].length; i < len; i++) {
-                                            if (
-                                                _self._selectedValue[groupName][i][options.valueField].toString() === item[options.valueField].toString()) {
-                                                count++;
-                                                break;
-                                            }
-                                        }
-                                    });
-                                }
-
-                                if (count === filteredData[groupName].length) {
-                                    group.find('.jq-select-group-checkbox').addClass(options.checkboxActivatedCls);
-                                }
-
-                            }
-                        } else {
-                            group.find('.jq-select-group-checkbox').remove();
-                        }
-
-                        group.find('.jq-select-group-title-name').html(groupName).attr('title', groupName);
-
-                        var children = group.find('.jq-select-group-children'),
-                            isFirstItem = true,
-                            count = 0;
-
-                        for (var i = 0, len = data[groupName].length; i < len; i++) {
-
-                            if (data[groupName][i] === undefined) {
-                                continue;
-                            }
-
-                            var item = data[groupName][i];
-
-                            if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
-
-                                var itemEl = $(itemTemplate).attr('data-index', i);
-
-                                if (isFirstItem) {
-                                    children.append('<div style="height:' + options.itemHeight * i + 'px"></div>');
-                                    isFirstItem = false;
-                                }
-
-                                if (isPlainArrayData(data[groupName])) {
-
-                                    if (_self._filterText
-                                        && item.toUpperCase().indexOf(_self._filterText.toUpperCase()) == -1) {
-                                        continue;
-                                    }
-
-                                    if (options.multi) {
-
-                                        if (
-                                            _self._selectedValue[groupName]
-                                            &&
-                                            _self._selectedValue[groupName].filter(function (_valueItem) {
-                                                return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
-                                            }).length == 1
-                                        ) {
-                                            itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
-                                        }
-
-                                    } else {
-
-                                        itemEl.find('.jq-select-item-checkbox').remove();
-
-                                        if (
-                                            isValue(_self._selectedValue[groupName]) && isValue(item)
-                                            && _self._selectedValue[groupName].toString() === item.toString()
-                                        ) {
-                                            itemEl.addClass(options.checkboxActivatedCls);
-                                        }
-
-                                    }
-
-                                    if (item[options.iconClsField]) {
-                                        itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
-                                    } else {
-                                        itemEl.find('.jq-select-item-icon').remove();
-                                    }
-
-                                    itemEl.find('.jq-select-item-name').html(item).attr('title', item);
-
-                                } else {
-
-                                    if (_self._filterText
-                                        && item[options.displayField].toUpperCase()
-                                            .indexOf(_self._filterText.toUpperCase()) == -1) {
-                                        continue;
-                                    }
-
-                                    if (options.multi) {
-
-                                        if (
-                                            _self._selectedValue[groupName]
-                                            &&
-                                            _self._selectedValue[groupName].filter(function (_valueItem) {
-                                                return isValue(_valueItem[options.valueField])
-                                                    && isValue(item[options.valueField])
-                                                    && _valueItem[options.valueField].toString()
-                                                    === item[options.valueField].toString();
-                                            }).length == 1
-                                        ) {
-                                            itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
-                                        }
-
-                                    } else {
-
-                                        itemEl.find('.jq-select-item-checkbox').remove();
-
-                                        if (
-                                            isValue(_self._selectedValue[groupName])
-                                            && isValue(_self._selectedValue[groupName][options.valueField])
-                                            && isValue(item) && item[options.valueField]
-                                            && _self._selectedValue[groupName][options.valueField].toString()
-                                            === item[options.valueField].toString()
-                                        ) {
-                                            itemEl.addClass(options.checkboxActivatedCls);
-                                        }
-
-                                    }
-
-                                    if (item[options.iconClsField]) {
-                                        itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
-                                    } else {
-                                        itemEl.find('.jq-select-item-icon').remove();
-                                    }
-
-                                    itemEl.find('.jq-select-item-name').html(item[options.displayField])
-                                        .attr('title', item[options.displayField]);
-
-                                }
-
-                                children.append(itemEl);
-                                count++;
-
-                            }
-
-                            heightCount += options.itemHeight;
-
-                        }
-
-                        if (count > 0) {
-                            list.append(group);
-                        } else {
-                            heightCount -= options.groupTitleHeight;
-                        }
-
-                    } else {
-
-                        heightCount += options.groupTitleHeight;
-                        var count = 0;
-
-                        for (var i = 0, len = data[groupName].length; i < len; i++) {
-
-                            if (data[groupName][i] === undefined) {
-                                continue;
-                            }
-
-                            var item = data[groupName][i];
-
-                            if (isPlainArrayData(data[groupName])) {
-
-                                if (_self._filterText
-                                    && item.toUpperCase().indexOf(_self._filterText.toUpperCase()) == -1) {
-                                    continue;
-                                }
-
-                            } else {
-
-                                if (_self._filterText
-                                    && item[options.displayField].toUpperCase()
-                                        .indexOf(_self._filterText.toUpperCase()) == -1) {
-                                    continue;
-                                }
-
-                            }
-
-                            count++;
-                            heightCount += options.itemHeight;
-
-                        }
-
-                        if (count == 0) {
-                            heightCount -= options.groupTitleHeight;
-                        }
-
-                    }
-
-                }
-
-                // for (var groupName in data) {
-                //
-                // }
-
-                var listHeight = 0;
-                for (var groupName in filteredData) {
-                    listHeight += options.groupTitleHeight + options.itemHeight * filteredData[groupName].length;
-                }
-                list.height(listHeight);
-
-            } else { // not group
-
-                if (!$.isArray(data)) {
-                    return;
-                }
-
-                var ipa = isPlainArrayData(data),
-                    isFirstItem = true;
-
-                for (var i = 0, len = data.length; i < len; i++) {
-
-                    if (data[i] === undefined) {
-                        continue;
-                    }
-
-                    if (heightCount > scrollTop + options.listHeight) {
-                        break;
-                    }
-
-                    if (heightCount + options.itemHeight >= scrollTop && heightCount <= scrollTop + options.listHeight) {
-
-                        var item = data[i];
-
-                        var itemEl = $(itemTemplate).attr('data-index', i);
-
-                        if (isFirstItem) {
-                            heightCount > 0 && list.append('<div style="height:' + heightCount + 'px"></div>');
-                            isFirstItem = false;
-                        }
-
-                        if (ipa) {
-
-                            if (_self._filterText
-                                && item.toString().toUpperCase().indexOf(_self._filterText.toUpperCase()) == -1) {
-                                continue;
-                            }
-
-                            if (options.multi) {
-                                _self._selectedValue.filter(function (_valueItem) {
-                                    return isValue(_valueItem) && isValue(item) && _valueItem.toString() === item.toString();
-                                }).length == 1 && itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
-                            } else {
-                                itemEl.find('.jq-select-item-checkbox').remove();
-                                isValue(_self._selectedValue) && isValue(item) && _self._selectedValue.toString() === item.toString()
-                                && itemEl.addClass(options.checkboxActivatedCls);
-                            }
-
-                            if (item[options.iconClsField]) {
-                                itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
-                            } else {
-                                itemEl.find('.jq-select-item-icon').remove();
-                            }
-
-                            itemEl.find('.jq-select-item-name').html(item).attr('title', item);
-
-                        } else {
-
-                            if (_self._filterText
-                                && item[options.displayField].toUpperCase().indexOf(_self._filterText.toUpperCase()) == -1) {
-                                continue;
-                            }
-
-                            if (options.multi) {
-                                if (_self._selectedValue.filter(function (_valueItem) {
-                                        return isValue(_valueItem[options.valueField]) && isValue(item[options.valueField])
-                                            && _valueItem[options.valueField].toString() === item[options.valueField].toString();
-                                    }).length == 1) {
-                                    itemEl.find('.jq-select-item-checkbox').addClass(options.checkboxActivatedCls);
-                                }
-                            } else {
-                                itemEl.find('.jq-select-item-checkbox').remove();
-                                isValue(_self._selectedValue[options.valueField])
-                                && isValue(item[options.valueField])
-                                && _self._selectedValue[options.valueField].toString() === item[options.valueField].toString()
-                                && itemEl.addClass(options.checkboxActivatedCls);
-                            }
-
-                            if (item[options.iconClsField]) {
-                                itemEl.find('.jq-select-item-icon').addClass(item[options.iconClsField]);
-                            } else {
-                                itemEl.find('.jq-select-item-icon').remove();
-                            }
-
-                            itemEl.find('.jq-select-item-name').html(item[options.displayField])
-                                .attr('title', item[options.displayField]);
-
-                        }
-
-                        list.append(itemEl);
-
-                    }
-
-                    heightCount += options.itemHeight;
-
-                }
-
-                list.height(filteredData.length * options.itemHeight);
-
-            }
-
-            bindSelectEvents();
-
-        }
-
-        function showPopup() {
-
-            _self._listScrollTop = 0;
-
-            // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- dropdown -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-            dropdown = $(dropdownTemplate).css({
-                'min-width': options.minPopupWidth,
-                'max-width': options.maxPopupWidth
-            });
-
-            if (options.popupWidth === 'auto') {
-                dropdown.css('width', 'auto');
-            } else if (!isNaN(options.popupWidth)) {
-                dropdown.width(options.popupWidth);
-            }
-            // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- dropdown -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-            // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- filter -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-            if (options.hideFilter) {
-                dropdown.find('.jq-select-filter-wrapper').remove();
-            } else {
-
-                if (options.keepFilter) {
-                    dropdown.find('.jq-select-filter').val(_self._filterText);
-                } else {
-                    _self._filterText = '';
-                    _self._filterData = null;
-                }
-            }
-            // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- filter -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-            // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Select All -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-            if (!options.multi || options.hideSelectAll) {
-                dropdown.find('.jq-select-select-all').remove();
-            } else {
-                dropdown.find('.jq-select-select-all-name').html(options.selectAllText);
-            }
-            // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Select All -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-            // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-            var buttons = dropdown.find('.jq-select-buttons'),
-                okButton = dropdown.find('.jq-select-buttons-ok'),
-                clearButton = dropdown.find('.jq-select-buttons-clear'),
-                closeButton = dropdown.find('.jq-select-buttons-close'),
-                buttonsCount = 0;
-
-            // ok button
-            if (options.hideOKButton) {
-                okButton.remove();
-            } else {
-                okButton.html(options.okButtonText);
-                buttonsCount++;
-            }
-
-            // clear button
-            if (options.hideClearButton) {
-                clearButton.remove();
-            } else {
-                clearButton.html(options.clearButtonText);
-                buttonsCount++;
-            }
-
-            // close button
-            if (options.hideCloseButton) {
-                closeButton.remove();
-            } else {
-                closeButton.html(options.closeButtonText);
-                buttonsCount++;
-            }
-
-            if (buttonsCount === 0) {
-                buttons.remove();
-            } else {
-                buttons.addClass('buttons-' + buttonsCount);
-            }
-            // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- buttons -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-            resetPopupPosition(dropdown);
-
-            // append to body
-            wrapper.append(dropdown);
-
-            prepateRenderPopupList();
-
-            bindSelectAllEvents();
-
-        };
-
-        function removePopup() {
-            wrapper.children('.jq-select-popup').remove();
-        };
-
-        function bindFilterEvents() {
-
-            wrapper.find('.jq-select-filter').bind('input', function (e) {
-
-                _self._filterText = e.target.value;
-                _self._filterData = getFilteredData() || options.data;
-
-                prepateRenderPopupList();
-                resetPopupPosition();
-
-            });
-
-        };
-
-        function bindSelectAllEvents() {
-
-            wrapper.find('.jq-select-select-all').click(function (e) {
-
-                e.stopPropagation();
-
-                var data = _self._filterData || options.data;
-
-                if (!data || !options.multi) {
-                    return;
-                }
-
-                var selectedItems = [];
-                var checkbox = $(this).children('.jq-select-select-all-checkbox');
-                var checked = !checkbox.hasClass(options.checkboxActivatedCls);
-                checkbox.toggleClass(options.checkboxActivatedCls, checked);
-
-                wrapper.find('.jq-select-select-all-name').html(checked ? options.deselectAllText : options.selectAllText);
-
-                if (options.group) {
-                    data = $.extend(true, {}, data);
-                    for (var i in data) {
-                        selectedItems = selectedItems.concat(data[i]);
-                    }
-                } else {
-                    selectedItems = $.extend(true, [], data);
-                }
-
-                if (checked) {
-
-                    if (options.group) {
-
-                        for (var groupName in data) {
-
-                            if (!_self._selectedValue[groupName]) {
-                                _self._selectedValue[groupName] = [];
-                            }
-
-                            if (isPlainArrayData(data[groupName])) {
-                                data[groupName] && data[groupName].forEach(function (item) {
-                                    if (_self._selectedValue[groupName].filter(function (selectedItem) {
-                                            return isValue(item) && isValue(selectedItem) && item.toString() === selectedItem.toString();
-                                        }).length == 0) {
-                                        _self._selectedValue[groupName].push(item);
-                                    }
-                                });
-                            } else {
-                                data[groupName] && data[groupName].forEach(function (item) {
-                                    if (_self._selectedValue[groupName].filter(function (selectedItem) {
-                                            return isValue(item[options.valueField])
-                                                && isValue(selectedItem[options.valueField])
-                                                && item[options.valueField].toString() === selectedItem[options.valueField].toString();
-                                        }).length == 0) {
-                                        _self._selectedValue[groupName].push(item);
-                                    }
-                                });
-                            }
-
-                        }
-
-                    } else {
-
-                        _self._selectedValue = $.extend(true, [], _self._selectedValue);
-
-                        if (isPlainArrayData(data)) {
-                            data && data.forEach(function (item) {
-                                if (_self._selectedValue.filter(function (selectedItem) {
-                                        return isValue(item) && isValue(selectedItem) && item.toString() === selectedItem.toString();
-                                    }).length == 0) {
-                                    _self._selectedValue.push(item);
-                                }
-                            });
-                        } else {
-                            data && data.forEach(function (item) {
-                                if (_self._selectedValue.filter(function (selectedItem) {
-                                        return isValue(item[options.valueField])
-                                            && isValue(selectedItem[options.valueField])
-                                            && item[options.valueField].toString() === selectedItem[options.valueField].toString();
-                                    }).length == 0) {
-                                    _self._selectedValue.push(item);
-                                }
-                            });
-                        }
-
-                    }
-
-                    onSelect(selectedItems);
-
-                } else {
-
-                    _self._selectedValue = $.extend(true, [], _self._selectedValue);
-
-                    if (options.group) {
-
-                        for (var groupName in data) {
-
-                            if (!_self._selectedValue[groupName] || !data[groupName]) {
-                                continue;
-                            }
-
-                            var ipa = isPlainArrayData(data[groupName]);
-
-                            data[groupName] && data[groupName].forEach(function (item) {
-                                if (_self._selectedValue[groupName]) {
-                                    _self._selectedValue[groupName] = _self._selectedValue[groupName].filter(function (selectedItem) {
-                                        if (ipa) {
-                                            return isValue(item) && isValue(selectedItem) && item.toString() !== selectedItem.toString();
-                                        } else {
-                                            return isValue(item[options.valueField])
-                                                && isValue(selectedItem[options.valueField])
-                                                && item[options.valueField].toString() !== selectedItem[options.valueField].toString();
-                                        }
-                                    });
-                                    if (_self._selectedValue[groupName].length < 1) {
-                                        delete _self._selectedValue[groupName];
-                                    }
-                                }
-                            });
-
-                        }
-
-                    } else {
-
-                        if (isPlainArrayData(data)) {
-                            data && data.forEach(function (item) {
-                                _self._selectedValue = _self._selectedValue.filter(function (selectedItem) {
-                                    return isValue(item) && isValue(selectedItem) && item.toString() !== selectedItem.toString();
-                                });
-                            });
-                        } else {
-                            data && data.forEach(function (item) {
-                                _self._selectedValue = _self._selectedValue.filter(function (selectedItem) {
-                                    return isValue(item[options.valueField])
-                                        && isValue(selectedItem[options.valueField])
-                                        && item[options.valueField].toString() !== selectedItem[options.valueField].toString();
-                                });
-                            });
-                        }
-
-                    }
-
-                    onDeselect(selectedItems);
-
-                }
-
-                prepateRenderPopupList({
-                    scrollTop: _self._listScrollTop
-                });
-
-            });
-
-        }
-
-        function bindSelectEvents() {
-
-            // select group
-            wrapper.find('.jq-select-group-title').click(function (e) {
-
-                e.stopPropagation();
-
-                var data = _self._filterData || options.data;
-
-                if (!data) {
-                    return;
-                }
-
-                var checked = !$(this).children('.jq-select-group-checkbox').hasClass(options.checkboxActivatedCls);
-                var group = $(this).parents('.jq-select-group');
-                var groupName = group.attr('data-name');
-
-                if (!data[groupName]) {
-                    return;
-                }
-
-                var selectedItems = $.extend(true, [], data[groupName]);
-
-                if (checked) {
-
-                    _self._selectedValue = $.extend(true, [], _self._selectedValue);
-
-                    if (isPlainArrayData(data[groupName])) {
-                        data[groupName] && data[groupName].forEach(function (item) {
-                            if (!_self._selectedValue[groupName] || _self._selectedValue[groupName].length <= 0) {
-                                _self._selectedValue[groupName] = [];
-                                _self._selectedValue[groupName].push(item);
-                            } else if (_self._selectedValue[groupName].filter(function (selectedItem) {
-                                    return isValue(item) && isValue(selectedItem) && item.toString() === selectedItem.toString();
-                                }).length == 0) {
-                                _self._selectedValue[groupName].push(item);
-                            }
-                        });
-                    } else {
-                        data[groupName] && data[groupName].forEach(function (item) {
-                            if (!_self._selectedValue[groupName] || _self._selectedValue[groupName].length <= 0) {
-                                _self._selectedValue[groupName] = [];
-                                _self._selectedValue[groupName].push(item);
-                            } else if (_self._selectedValue[groupName].filter(function (selectedItem) {
-                                    return isValue(item[options.valueField])
-                                        && isValue(selectedItem[options.valueField])
-                                        && item[options.valueField].toString() === selectedItem[options.valueField].toString();
-                                }).length == 0) {
-                                _self._selectedValue[groupName].push(item);
-                            }
-                        });
-                    }
-
-                    onSelect(selectedItems);
-
-                } else {
-
-                    _self._selectedValue = $.extend(true, [], _self._selectedValue);
-                    _self._selectedValue[groupName] && delete _self._selectedValue[groupName];
-
-                    onDeselect(selectedItems);
-
-                }
-
-                prepateRenderPopupList({
-                    scrollTop: _self._listScrollTop
-                });
-
-            });
-
-            // select item
-            if (options.multi) {
-                wrapper.find('.jq-select-item').click(function (e) {
-
-                    e.stopPropagation();
-
-                    if (!options.data) {
-                        return;
-                    }
-
-                    var checked = !$(this).children('.jq-select-item-checkbox').hasClass(options.checkboxActivatedCls);
-
-                    var selectedItem;
-
-                    if (options.group) {
-
-                        var group = $(this).parents('.jq-select-group');
-                        var groupName = group.attr('data-name');
-
-                        if (!options.data[groupName]) {
-                            return;
-                        }
-
-                        var index = $(this).attr('data-index');
-                        selectedItem = options.data[groupName][index];
-
-                        if (checked) {
-                            if (!_self._selectedValue[groupName]) {
-                                _self._selectedValue[groupName] = [];
-                            }
-                            _self._selectedValue[groupName].push(selectedItem);
-                        } else {
-                            if (_self._selectedValue[groupName]) {
-                                _self._selectedValue[groupName] = _self._selectedValue[groupName].filter(function (item) {
-                                    if (isPlainArrayData(_self._selectedValue[groupName])) {
-                                        return item !== selectedItem;
-                                    } else {
-                                        return item[options.valueField] !== selectedItem[options.valueField];
-                                    }
-                                });
-                            }
-                        }
-
-                    } else {
-
-                        var index = $(this).attr('data-index');
-                        selectedItem = options.data[index];
-
-                        if (checked) {
-                            _self._selectedValue.push(selectedItem);
-                        } else {
-                            _self._selectedValue = _self._selectedValue.filter(function (item) {
-                                if (isPlainArrayData(_self._selectedValue)) {
-                                    return item !== selectedItem;
-                                } else {
-                                    return item[options.valueField] !== selectedItem[options.valueField];
-                                }
-                            });
-                        }
-
-                    }
-
-                    if (checked) {
-                        onSelect([selectedItem]);
-                    } else {
-                        onDeselect([selectedItem]);
-                    }
-
-                    prepateRenderPopupList({
-                        scrollTop: _self._listScrollTop
-                    });
-
-                });
-            } else {
-                wrapper.find('.jq-select-item').mousedown(function (e) {
-
-                    e.stopPropagation();
-
-                    if (!options.data) {
-                        return;
-                    }
-
-                    var selectedItem;
-
-                    if (options.group) {
-
-                        var group = $(this).parents('.jq-select-group');
-                        var groupName = group.attr('data-name');
-
-                        if (!options.data[groupName]) {
-                            return;
-                        }
-
-                        selectedItem = options.data[groupName][$(this).attr('data-index')];
-                        _self._selectedValue = {};
-                        _self._selectedValue[groupName] = selectedItem;
-
-                    } else {
-                        selectedItem = options.data[$(this).attr('data-index')];
-                        _self._selectedValue = selectedItem;
-                    }
-
-                    wrapper.find('.jq-select-item').removeClass(options.checkboxActivatedCls);
-                    $(this).addClass(options.checkboxActivatedCls);
-                    onSelect(selectedItem);
-
-                    prepateRenderPopupList({
-                        scrollTop: _self._listScrollTop
-                    });
-
-                });
-            }
-
-        };
-
-        function bindButtonsEvents() {
-
-            wrapper.find('.jq-select-buttons-ok').mousedown(function (e) {
-
-                e.stopPropagation();
-
-                triggerChange();
-
-                removePopup();
-                wrapper.removeClass('activated');
-
-                options.onOK && options.onOK(_self._value);
-
-            });
-
-            wrapper.find('.jq-select-buttons-clear').mousedown(function (e) {
-
-                e.stopPropagation();
-
-                if (options.multi) {
-
-                    var selectedItems = [];
-
-                    if (options.group) {
-                        for (var groupName in _self._selectedValue) {
-                            selectedItems = selectedItems.concat(_self._selectedValue[groupName]);
-                        }
-                    } else {
-                        selectedItems = _self._selectedValue;
-                    }
-
-                    _self._selectedValue = !options.group && options.multi ? [] : {};
-                    onDeselect(selectedItems);
-
-                } else {
-                    _self._selectedValue = !options.group && options.multi ? [] : {};
-                    options.autoChange && triggerChange();
-                }
-
-                prepateRenderPopupList({
-                    scrollTop: _self._listScrollTop
-                });
-
-            });
-
-            wrapper.find('.jq-select-buttons-close').mousedown(function (e) {
-
-                e.stopPropagation();
-
-                removePopup();
-                wrapper.removeClass('activated');
-
-                closeHandle();
-
-            });
-
-        };
-
-        function bindScrollEvents() {
-            wrapper.find('.jq-select-list').scroll(function (e) {
-                e.stopPropagation();
-                _self._listScrollTop = e.target.scrollTop;
-                prepateRenderPopupList({
-                    scrollTop: e.target.scrollTop
-                });
-            });
-        }
-
-        function onSelect(items) {
-            options.onSelect && options.onSelect(items);
-            options.autoChange && triggerChange();
-        };
-
-        function onDeselect(items) {
-            options.onDeselect && options.onDeselect(items);
-            options.autoChange && triggerChange();
-        };
-
-        function initData() {
-
-            if (options.data && options.group) {
-                _self._sortedGroupName = sortPriorityData(options.data);
-            }
-
-            // can not generate data in group mode or originEl is not a select
-            if (options.data || options.group || (originEl && !originEl.is('select'))) {
-                return;
-            }
-
-            var selectOptions = originEl.children('option');
-            if (selectOptions.length < 1) {
-                return;
-            }
-
-            // generate data from select options
-            var data = [];
-            selectOptions.each(function () {
-                data.push($(this).val() || $(this).html());
-            });
-
-            options.data = data;
-
-        }
-
-        function initValue() {
-
-            if (!options.data || !options.value) {
-                return;
-            }
-
-            if (options.multi && options.group) { // multi & group
-
-                var result = {}, count = 0;
-
-                for (var groupName in options.data) {
-
-                    if (!options.value[groupName]) {
-                        continue;
-                    }
-
-                    var group = [];
-
-                    options.data[groupName] && options.data[groupName].forEach(function (dataItem) {
-                        options.value[groupName] && options.value[groupName].forEach(function (valueItem) {
-
-                            var dataValue, valueValue;
-
-                            if ($.isPlainObject(dataItem)) {
-                                dataValue = dataItem[options.valueField].toString();
-                            } else {
-                                dataValue = dataItem.toString();
-                            }
-
-                            if ($.isPlainObject(valueItem)) {
-                                valueValue = valueItem[options.valueField].toString();
-                            } else {
-                                valueValue = valueItem.toString();
-                            }
-
-                            if (dataValue && valueValue && dataValue === valueValue) {
-                                group.push(dataItem);
-                                count++;
-                            }
-
-                        });
-                    });
-
-                    if (group.length > 0) {
-                        result[groupName] = group;
-                    }
-
-                }
-
-                if (count > 0) {
-                    trigger.children('.jq-select-text').html(count + ' selected').attr('title', count + ' selected');
-                } else {
-                    trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
-                }
-                _self._selectedValue = $.extend(true, {}, result);
-                _self._value = $.extend(true, {}, result);
-
-            } else if (options.multi && !options.group) { // multi & not group
-
-                var result = [], count = 0;
-
-                options.data && options.data.forEach(function (dataItem) {
-                    options.value && options.value.forEach(function (valueItem) {
-
-                        var dataValue, valueValue;
-
-                        if ($.isPlainObject(dataItem)) {
-                            dataValue = dataItem[options.valueField].toString();
-                        } else {
-                            dataValue = dataItem.toString();
-                        }
-
-                        if ($.isPlainObject(valueItem)) {
-                            valueValue = valueItem[options.valueField].toString();
-                        } else {
-                            valueValue = valueItem.toString();
-                        }
-
-                        if (dataValue && valueValue && dataValue === valueValue) {
-                            result.push(dataItem);
-                            count++;
-                        }
-
-                    });
-                });
-
-                if (count > 0) {
-                    trigger.children('.jq-select-text').html(count + ' selected').attr('title', count + ' selected');
-                } else {
-                    trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
-                }
-                _self._selectedValue = $.extend(true, [], result);
-                _self._value = $.extend(true, [], result);
-
-            } else if (!options.multi && options.group) { // single & group
-
-                var result = {}, display = '', breakFlag = false;
-
-                for (var groupName in options.data) {
-
-                    if (breakFlag) {
-                        break;
-                    }
-
-                    if (!options.value[groupName]) {
-                        continue;
-                    }
-
-                    options.data[groupName] && options.data[groupName].forEach(function (dataItem) {
-
-                        if (breakFlag) {
-                            return;
-                        }
-
-                        var valueItem = options.value[groupName],
-                            dataValue, dataDisplay, valueValue;
-
-                        if ($.isPlainObject(dataItem)) {
-                            dataValue = dataItem[options.valueField].toString();
-                            dataDisplay = dataItem[options.displayField].toString();
-                        } else {
-                            dataValue = dataItem.toString();
-                            dataDisplay = dataItem.toString();
-                        }
-
-                        if ($.isPlainObject(valueItem)) {
-                            valueValue = valueItem[options.valueField].toString();
-                        } else {
-                            valueValue = valueItem.toString();
-                        }
-
-                        if (dataValue && valueValue && dataValue === valueValue) {
-                            display = dataDisplay;
-                            result[groupName] = dataItem;
-                            breakFlag = true;
-                            return;
-                        }
-
-                    });
-
-                }
-
-                if (result) {
-                    trigger.children('.jq-select-text').html(display).attr('title', display);
-                } else {
-                    trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
-                }
-                _self._selectedValue = $.extend(true, {}, result);
-                _self._value = $.extend(true, {}, result);
-
-            } else { // single & not group
-
-                var result, display = '', breakFlag = false;
-
-                options.data && options.data.forEach(function (dataItem) {
-
-                    if (breakFlag) {
-                        return;
-                    }
-
-                    var valueItem = options.value,
-                        dataValue, dataDisplay, valueValue;
-
-                    if ($.isPlainObject(dataItem)) {
-                        dataValue = dataItem[options.valueField].toString();
-                        dataDisplay = dataItem[options.displayField].toString();
-                    } else {
-                        dataValue = dataItem.toString();
-                        dataDisplay = dataItem.toString();
-                    }
-
-                    if ($.isPlainObject(valueItem)) {
-                        valueValue = valueItem[options.valueField].toString();
-                    } else {
-                        valueValue = valueItem.toString();
-                    }
-
-                    if (dataValue && valueValue && dataValue === valueValue) {
-                        display = dataDisplay;
-                        result = dataItem;
-                        breakFlag = true;
-                        return;
-                    }
-
-                });
-
-                if (result) {
-                    trigger.children('.jq-select-text').html(display).attr('title', display);
-                } else {
-                    trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
-                }
-
-                if ($.isPlainObject(result)) {
-                    _self._selectedValue = $.extend(true, {}, result);
-                    _self._value = $.extend(true, {}, result);
-                } else {
-                    _self._selectedValue = result;
-                    _self._value = result;
-                }
-
-            }
-
-        }
-
-        function triggerChange() {
-
-            if (!options.data) {
-                return;
-            }
-
-            if (options.multi && options.group) { // multi & group
-
-                var count = 0;
-                for (var groupName in _self._selectedValue) {
-                    _self._selectedValue.hasOwnProperty(groupName) && typeof groupName !== 'function'
-                    && (count += _self._selectedValue[groupName].length);
-                }
-                if (count > 0) {
-                    trigger.children('.jq-select-text').html(count + ' selected').attr('title', count + ' selected');
-                } else {
-                    trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
-                }
-
-                if (JSON.stringify(_self._value) != JSON.stringify(_self._selectedValue)) {
-                    options.onChange && options.onChange(_self._selectedValue);
-                    _self._value = $.extend(true, {}, _self._selectedValue);
-                }
-
-            } else if (options.multi && !options.group) { // multi & not group
-
-                var count = _self._selectedValue.length;
-                if (count > 0) {
-                    trigger.children('.jq-select-text').html(count + ' selected').attr('title', count + ' selected');
-                } else {
-                    trigger.children('.jq-select-text').html(options.noSelectText).attr('title', options.noSelectText);
-                }
-
-                if (JSON.stringify(_self._value) != JSON.stringify(_self._selectedValue)) {
-                    options.onChange && options.onChange(_self._selectedValue);
-                    _self._value = $.extend(true, [], _self._selectedValue);
-                }
-
-            } else if (!options.multi && options.group) { // single & group
-
-                var item;
-                for (var groupName in _self._selectedValue) {
-                    item = _self._selectedValue[groupName];
-                }
-
-                var text = $.isPlainObject(item) ?
-                    (item[options.displayField] ? item[options.displayField] : options.noSelectText)
-                    :
-                    item;
-                trigger.children('.jq-select-text').html(text).attr('title', text);
-
-                if (JSON.stringify(_self._value) != JSON.stringify(_self._selectedValue)) {
-                    options.onChange && options.onChange(_self._selectedValue);
-                    _self._value = $.extend(true, {}, _self._selectedValue);
-                }
-
-            } else { // single & not group
-
-                if ($.isPlainObject(_self._selectedValue)) {
-
-                    var text = _self._selectedValue[options.displayField] ?
-                        _self._selectedValue[options.displayField] : options.noSelectText;
-
-                    trigger.children('.jq-select-text').html(text).attr('title', text);
-
-                    if (JSON.stringify(_self._value) !== JSON.stringify(_self._selectedValue)) {
-                        options.onChange && options.onChange(_self._selectedValue);
-                        _self._value = $.extend(true, {}, _self._selectedValue);
-                    }
-
-                } else {
-
-                    trigger.children('.jq-select-text').html(_self._selectedValue).attr('title', _self._selectedValue);
-
-                    if (_self._value !== _self._selectedValue) {
-                        options.onChange && options.onChange(_self._selectedValue);
-                        _self._value = _self._selectedValue;
-                    }
-
-                }
-
-            }
-
-            if (options.autoClose) {
-
-                removePopup();
-
-                if (wrapper.hasClass('activated')) {
-                    wrapper.removeClass('activated');
-                    closeHandle();
-                }
-
-            }
-
-        };
-
-        function mousedownHandle(e) {
-
-            if ($(e.target).is(trigger) || $(e.target).parents('.jq-select-trigger').is(trigger)) {
-
-                e.stopPropagation();
-                removePopup();
-
-                if (wrapper.hasClass('activated')) {
-                    wrapper.removeClass('activated');
-                    closeHandle();
-                    return;
-                }
-
-                if (!_self._isLoading) {
-
-                    wrapper.addClass('activated');
-
-                    showPopup();
-
-                    bindFilterEvents();
-
-                    bindButtonsEvents();
-
-                    bindScrollEvents();
-
-                }
-
-            } else if ($(e.target).parents('.jq-select-wrapper').length == 0
-                || !$(e.target).parents('.jq-select-wrapper').is(wrapper)) {
-
-                e.stopPropagation();
-
-                removePopup();
-
-                if (wrapper.hasClass('activated')) {
-                    wrapper.removeClass('activated');
-                    closeHandle();
-                }
-
-            }
-
-        }
-
-        function resizeHandle() {
-            resetPopupPosition();
-        }
-
-        function closeHandle() {
-            _self._selectedValue = $.extend(true, !options.group && options.multi ? [] : {}, _self._value);
-            options.onClose && options.onClose(_self._value);
-        }
-
-        this.init = function () {
-
-            // whether select is formated
-            var formated = originEl.hasClass('jq-select-formated');
-
-            if (!formated) {
-                originEl.addClass('jq-select-formated').hide().wrap(wrapTemplate);
-            }
-
-            wrapper = originEl.parent()
-                .toggleClass('jq-select-option-multi', options.multi)
-                .toggleClass('jq-select-option-group', options.group);
-
-            if (!formated) {
-                trigger = $(triggerTemplate);
-                wrapper.prepend(trigger);
-            } else {
-                trigger = wrapper.children('.jq-select-trigger');
-            }
-            trigger.css('width', options.triggerWidth)
-                .html('<span class="jq-select-text" title="' + options.noSelectText + '">' + options.noSelectText + '</span>')
-                .find('.jq-select-icon').remove();
-            if (options.iconCls) {
-                trigger.find('.jq-select-text').before('<i class="jq-select-icon ' + options.iconCls + '"></i>');
-            }
-            initData();
-            initValue();
-
-            $(document).on('mousedown', mousedownHandle);
-            $(window).on('resize', resizeHandle);
-
-            originEl.off().on('updateOptions', function () {
-                options = $.extend(true, {}, $.fn.JQSelect.defaults, options);
-                initData();
-                initValue();
-                return this;
-            }).on('loadingStart', function () {
-                setLoading(true);
-                return this;
-            }).on('loadingEnd', function () {
-                setLoading(false);
-                return this;
-            });
-
-        };
-
-        this.destroy = function () {
-
-            removePopup();
-            wrapper.removeClass('activated');
-
-            $(document).off('mousedown', mousedownHandle);
-            $(window).off('resize', resizeHandle);
-
-        };
+        var _self = this;
+
+        this.originEl = originEl;
+        this.options = options;
+
+        this.wrapperEl = null;
+        this.triggerEl = null;
+        this.popupEl = null;
+
+        this.data = null;
+        this.visible = false;
+        this.value = [];
+        this.filterText = '';
+        this.filteredData = null;
 
         this.init();
+
         return {
             jQSelect: _self,
             originEl: originEl
         };
-
     }
 
-    $.fn.getValue = function () {
+    JQSelect.prototype.initData = function () {
+        var _this = this;
 
-        if (!$(this).hasClass('jq-select-formated')) {
+        if (this.options.data) {
+            this.filteredData = this.data = formatData(this.options.data);
             return;
         }
 
-        for (var i = 0, len = JQSelectList.list.length; i < len; i++) {
-            if (JQSelectList.list[i].originEl.is(this)) {
-                return JQSelectList.list[i].jQSelect._value;
-            }
+        if (!this.originEl) {
+            return;
         }
 
-        return;
+        var options = this.originEl.children('option');
+        if (options && options.length > 0) {
 
+            var data = [];
+            var i = 0;
+
+            options.each(function () {
+                var _rawValue;
+
+                data.push({
+                    rawValue: (_rawValue = {}, _defineProperty(_rawValue, _this.options.valueField, $(_this).val()), _defineProperty(_rawValue, _this.options.displayField, $(_this).html()), _rawValue),
+                    jqSelectIndex: i++
+                });
+            });
+
+            this.filteredData = this.data = data;
+        }
+    };
+
+    JQSelect.prototype.updateValue = function () {
+        var _this2 = this;
+
+        var value = this.value.map(function (item) {
+            return getValue(item, _this2.options.valueField, _this2.options.displayField);
+        }).join(',');
+
+        this.originEl.html('<option value="' + value + '" checked="checked"></option>');
+    };
+
+    JQSelect.prototype.renderList = function () {
+        var _this3 = this;
+
+        var scrollTop = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+
+
+        if (!this.popupEl) {
+            return;
+        }
+
+        var self = this,
+            scroller = this.popupEl.find('.jq-select-list-scroller');
+
+        if (!this.filteredData || this.filteredData.length < 1) {
+            scroller.html('');
+            return;
+        }
+
+        var itemHeight = this.options.itemHeight,
+            _calDisplayIndex = calDisplayIndex(this.filteredData, scrollTop, this.options),
+            start = _calDisplayIndex.start,
+            stop = _calDisplayIndex.stop,
+            list = [];
+
+        var _loop = function _loop(i) {
+
+            var rawValue = _this3.filteredData[i].rawValue,
+                index = _this3.filteredData[i].jqSelectIndex;
+
+            var item = scroller.children('.jq-select-item[jq-select-index=' + index + ']');
+
+            // if exist
+            if (item[0]) {
+                item.css({
+                    transform: 'translate(0, ' + i * itemHeight + 'px)'
+                });
+                return 'continue';
+            }
+
+            item = $(getItemTemplate(_this3.options)).attr('jq-select-index', index).css({
+                height: itemHeight,
+                lineHeight: itemHeight + 'px',
+                transform: 'translate(0, ' + i * itemHeight + 'px)'
+            });
+
+            // icon
+            var iconCls = rawValue[_this3.options.iconClsField];
+            if (iconCls) {
+                item.children('.jq-select-item-icon').addClass(iconCls);
+            } else {
+                item.children('.jq-select-item-icon').remove();
+            }
+
+            // checked
+            if (!_this3.options.multi) {
+                item.children('.jq-select-checkbox').remove();
+            } else if (isChecked(_this3.value, rawValue, _this3.options.valueField, _this3.options.displayField)) {
+                item.children('.jq-select-item-checkbox').prop('checked', true);
+            }
+
+            // display text
+            item.children('.jq-select-item-name').html(rawValue[_this3.options.displayField]);
+
+            item.mousedown(function () {
+
+                if (!_this3.value || _this3.value.length < 1 || !rawValue) {
+                    _this3.value = [rawValue];
+                } else if (isChecked(_this3.value, rawValue, _this3.options.valueField, _this3.options.displayField)) {
+                    _this3.value.splice(i, 1);
+                } else {
+                    _this3.value.push(rawValue);
+                }
+
+                _this3.popupEl.find('.jq-select-select-all-checkbox').prop('checked', _this3.value.length === _this3.filteredData.length);
+
+                _this3.updateValue();
+            });
+
+            list.push(item);
+        };
+
+        for (var i = start; i <= stop; i++) {
+            var _ret = _loop(i);
+
+            if (_ret === 'continue') continue;
+        }
+
+        scroller.children().each(function () {
+
+            var index = parseInt($(this).attr('jq-select-index'));
+
+            var data = self.filteredData.slice(start, stop + 1);
+            var flag = false;
+
+            for (var i = 0, len = data.length; i < len; i++) {
+                if (index === data[i].jqSelectIndex) {
+                    flag = true;
+                    break;
+                }
+            }
+
+            if (!flag) {
+                $(this).remove();
+            }
+        });
+
+        scroller.append(list);
+    };
+
+    JQSelect.prototype.showPopup = function () {
+        var _this4 = this;
+
+        if (!this.triggerEl) {
+            return;
+        }
+
+        if (!this.popupEl) {
+            this.popupEl = $(getPopupTemplate(this.options)).appendTo('body');
+            this.popupEl.children('.jq-select-list').on('scroll', this.scrollHandler.bind(this));
+        } else {
+            this.popupEl.removeClass('hidden');
+        }
+
+        var offset = this.triggerEl.offset();
+        this.popupEl.css({
+            transform: 'translate(' + offset.left + 'px, ' + (offset.top + this.triggerEl.height()) + 'px)'
+        }).find('.jq-select-list-scroller').css({
+            height: this.filteredData.length * this.options.itemHeight
+        });
+        this.wrapperEl.addClass('activated');
+
+        // filter
+        var filterEl = this.popupEl.children('.jq-select-filter-wrapper');
+        if (this.options.enableFilter) {
+            filterEl.children('.jq-select-filter').on('input', function (e) {
+
+                _this4.filterText = e.target.value;
+                _this4.filteredData = filterData(_this4.data, _this4.filterText, _this4.options.valueField, _this4.options.displayField);
+
+                _this4.popupEl.children('.jq-select-list')[0].scrollTop = 0;
+                _this4.popupEl.find('.jq-select-list-scroller').css({
+                    height: _this4.filteredData.length * _this4.options.itemHeight
+                });
+
+                _this4.renderList();
+            });
+        } else {
+            filterEl.remove();
+        }
+
+        // select all
+        var selectAllEl = this.popupEl.children('.jq-select-select-all');
+        if (this.options.enableSelectAll) {
+
+            var checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
+
+            checkboxEl.prop('checked', this.value.length === this.data.length);
+
+            selectAllEl.mousedown(function () {
+
+                var checked = !checkboxEl.is(':checked');
+
+                _this4.value = checked ? _this4.data.map(function (item) {
+                    return item.rawValue;
+                }) : [];
+                _this4.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
+
+                _this4.updateValue();
+            });
+        } else {
+            selectAllEl.remove();
+        }
+
+        this.renderList();
+    };
+
+    JQSelect.prototype.removePopup = function () {
+
+        if (this.popupEl) {
+            this.popupEl.addClass('hidden');
+        }
+
+        this.wrapperEl.removeClass('activated');
+        this.visible = false;
+    };
+
+    JQSelect.prototype.mousedownHandler = function (e) {
+
+        this.visible = triggerPopupEventHandle(e.target, this.triggerEl, this.popupEl, this.visible);
+
+        if (!this.visible) {
+            this.removePopup();
+            return;
+        }
+
+        if (!this.wrapperEl.hasClass('activated')) {
+            this.showPopup();
+        }
+    };
+
+    JQSelect.prototype.scrollHandler = function (e) {
+        this.renderList(e.target.scrollTop);
+    };
+
+    JQSelect.prototype.resizeHandler = function () {};
+
+    JQSelect.prototype.init = function () {
+
+        // whether select is formated
+        var formated = this.originEl.hasClass('jq-select-formated');
+
+        if (!formated) {
+            this.originEl.addClass('jq-select-formated').hide().wrap(wrapTemplate);
+        }
+
+        this.wrapperEl = this.originEl.parent().toggleClass('multi', this.options.multi);
+
+        if (!formated) {
+            this.triggerEl = $(triggerTemplate);
+            this.wrapperEl.prepend(this.triggerEl);
+        } else {
+            this.triggerEl = this.wrapperEl.children('.jq-select-trigger');
+        }
+
+        // trigger text
+        this.triggerEl.html('<span class="jq-select-text" title="' + this.options.noSelectText + '">' + this.options.noSelectText + '</span>');
+
+        this.initData();
+
+        // trigger icon
+        this.triggerEl.find('.jq-select-icon').remove();
+        if (this.options.iconCls) {
+            this.triggerEl.find('.jq-select-text').before('<i class="jq-select-icon ' + this.options.iconCls + '"></i>');
+        }
+
+        $(document).on('mousedown', this.mousedownHandler.bind(this));
+        $(window).on('resize', this.resizeHandler.bind(this));
+
+        this.originEl.off().on('updateOptions', function () {
+            this.options = $.extend(true, {}, $.fn.JQSelect.defaults, this.options);
+            return this;
+        });
+    };
+
+    JQSelect.prototype.destroy = function () {
+
+        this.removePopup();
+        this.wrapperEl.removeClass('activated');
+
+        $(document).off('mousedown', this.mousedownHandler);
+        $(window).off('resize', this.resizeHandler);
     };
 
     $.fn.JQSelect = function (options) {
@@ -1557,10 +466,8 @@
     $.fn.JQSelect.defaults = {
 
         multi: false,
-        group: false,
 
         data: null,
-        groupPriority: null,
         valueField: 'value',
         displayField: 'label',
         iconClsField: 'iconCls',
@@ -1569,44 +476,26 @@
         iconCls: '',
         noSelectText: 'Please select ...',
 
-        triggerWidth: 200,
-        popupWidth: 200,
-        minPopupWidth: 200,
-        maxPopupWidth: 400,
         listHeight: 300,
-        groupTitleHeight: 30,
         itemHeight: 30,
-        selectAllHeight: 30,
-        filterHeight: 30,
-        buttonsHeight: 40,
+        renderBuffer: 3,
 
-        hideFilter: false,
+        enableFilter: false,
         filterIconCls: '',
         filterPlaceholder: 'filter ...',
         keepFilter: false,
 
-        hideSelectAll: false,
+        enableSelectAll: false,
         selectAllText: 'Select All',
         deselectAllText: 'Deselect All',
 
-        checkboxIconCls: '',
-        checkboxActivatedCls: 'activated',
+        itemActivatedCls: 'activated',
 
-        hideOKButton: false,
-        okButtonText: 'OK',
-        hideClearButton: false,
-        clearButtonText: 'Clear',
-        hideCloseButton: false,
-        closeButtonText: 'Close',
         autoClose: false,
-        autoChange: true,
 
         onSelect: null,
         onDeselect: null,
-        onChange: null,
-        onOK: null,
-        onClose: null
+        onChange: null
 
     };
-
-}(jQuery));
+})(jQuery);

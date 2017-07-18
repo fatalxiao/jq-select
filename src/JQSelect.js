@@ -1,14 +1,20 @@
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 (function ($) {
 
-    const JQSelectList = {
+    var JQSelectList = {
 
         list: [],
 
-        add: function (select) {
+        add: function add(select) {
             this.list.push(select);
         },
 
-        destroy: function (originEl) {
+        destroy: function destroy(originEl) {
 
             var self = this,
                 i = 0;
@@ -25,45 +31,20 @@
 
     };
 
-    const wrapTemplate = '<div class="jq-select-wrapper"/>',
-          triggerTemplate = '<button type="button" class="jq-select-trigger"></button>',
-          getPopupTemplate = options => {
-        return `<div class="jq-select-popup">
-
-                     <div class="jq-select-filter-wrapper">
-                         <input type="text" 
-                                class="jq-select-filter" 
-                                placeholder="${options.filterPlaceholder}"/>
-                         <i class="jq-select-filter-icon ${options.filterIconCls}"></i>
-                     </div>
-                     
-                     <label type="text" 
-                            class="jq-select-select-all">
-                         <input type="checkbox" 
-                                class="jq-select-checkbox jq-select-select-all-checkbox ${options.checkboxIconCls}"/>
-                         <span class="jq-select-select-all-name">${options.selectAllText}</span>
-                     </label>
-                     
-                     <div class="jq-select-list">
-                         <div class="jq-select-list-scroller"></div>
-                     </div>
-                     
-                 </div>`;
+    var wrapTemplate = '<div class="jq-select-wrapper"/>',
+        triggerTemplate = '<button type="button" class="jq-select-trigger"></button>',
+        getPopupTemplate = function getPopupTemplate(options) {
+        return '<div class="jq-select-popup">\n\n                     <div class="jq-select-filter-wrapper">\n                         <input type="text" \n                                class="jq-select-filter" \n                                placeholder="' + options.filterPlaceholder + '"/>\n                         <i class="jq-select-filter-icon ' + options.filterIconCls + '"></i>\n                     </div>\n                     \n                     <label type="text" \n                            class="jq-select-select-all">\n                         <input type="checkbox" \n                                class="jq-select-checkbox jq-select-select-all-checkbox ' + options.checkboxIconCls + '"/>\n                         <span class="jq-select-select-all-name">' + options.selectAllText + '</span>\n                     </label>\n                     \n                     <div class="jq-select-list">\n                         <div class="jq-select-list-scroller"></div>\n                     </div>\n                     \n                 </div>';
     },
-          getItemTemplate = options => {
-        return `<label class="jq-select-item">
-                     <input type="checkbox" 
-                            class="jq-select-checkbox jq-select-item-checkbox"/>
-                     <i class="jq-select-item-icon"></i>
-                     <span class="jq-select-item-name"></span>
-                 </label>`;
+        getItemTemplate = function getItemTemplate(options) {
+        return '<label class="jq-select-item">\n                     <input type="checkbox" \n                            class="jq-select-checkbox jq-select-item-checkbox"/>\n                     <i class="jq-select-item-icon"></i>\n                     <span class="jq-select-item-name"></span>\n                 </label>';
     },
-          rangeValid = (value, min, max) => {
+        rangeValid = function rangeValid(value, min, max) {
         max !== undefined && (value = value > max ? max : value);
         min !== undefined && (value = value < min ? min : value);
         return value;
     },
-          triggerPopupEventHandle = (el, triggerEl, popupEl, currentVisible) => {
+        triggerPopupEventHandle = function triggerPopupEventHandle(el, triggerEl, popupEl, currentVisible) {
 
         if (!triggerEl) {
             return true;
@@ -80,18 +61,20 @@
 
         return false;
     },
-          formatData = data => {
-        let index = 0;
-        return data.map(item => ({
-            rawValue: item,
-            jqSelectIndex: index++
-        }));
+        formatData = function formatData(data) {
+        var index = 0;
+        return data.map(function (item) {
+            return {
+                rawValue: item,
+                jqSelectIndex: index++
+            };
+        });
     },
-          calDisplayIndex = (data, scrollTop, options) => {
+        calDisplayIndex = function calDisplayIndex(data, scrollTop, options) {
 
-        const len = data.length;
+        var len = data.length;
 
-        let start = Math.floor(scrollTop / options.itemHeight),
+        var start = Math.floor(scrollTop / options.itemHeight),
             stop = start + Math.ceil(options.listHeight / options.itemHeight);
 
         start -= options.renderBuffer;
@@ -102,33 +85,56 @@
             stop: rangeValid(stop, 0, len - 1)
         };
     },
-          getValue = (data, valueField, displayField) => {
-        return typeof data == 'object' ? data[valueField] || data[displayField] : data;
+        getValue = function getValue(data, valueField, displayField) {
+        return (typeof data === 'undefined' ? 'undefined' : _typeof(data)) == 'object' ? data[valueField] || data[displayField] : data;
     },
-          getDisplay = (data, valueField, displayField) => {
-        return typeof data == 'object' ? data[displayField] || data[valueField] : data;
+        getDisplay = function getDisplay(data, valueField, displayField) {
+        return (typeof data === 'undefined' ? 'undefined' : _typeof(data)) == 'object' ? data[displayField] || data[valueField] : data;
     },
-          isChecked = (value, data, valueField, displayField) => {
+        isChecked = function isChecked(value, data, valueField, displayField) {
 
         if (!value || value.length < 1 || !data) {
             return false;
         }
 
-        for (let item of value) {
-            if (getValue(item, valueField, displayField) === getValue(data, valueField, displayField)) {
-                return true;
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = value[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var item = _step.value;
+
+                if (getValue(item, valueField, displayField) === getValue(data, valueField, displayField)) {
+                    return true;
+                }
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
             }
         }
 
         return false;
     },
-          filterData = (data, filterText, valueField, displayField) => {
+        filterData = function filterData(data, filterText, valueField, displayField) {
 
         if (!filterText) {
             return data;
         }
 
-        return data.filter(item => getDisplay(item.rawValue, valueField, displayField).toString().toUpperCase().includes(filterText.toString().toUpperCase()));
+        return data.filter(function (item) {
+            return getDisplay(item.rawValue, valueField, displayField).toString().toUpperCase().includes(filterText.toString().toUpperCase());
+        });
     };
 
     function JQSelect(originEl, options) {
@@ -157,6 +163,7 @@
     }
 
     JQSelect.prototype.initData = function () {
+        var _this = this;
 
         if (this.options.data) {
             this.filteredData = this.data = formatData(this.options.data);
@@ -167,18 +174,17 @@
             return;
         }
 
-        const options = this.originEl.children('option');
+        var options = this.originEl.children('option');
         if (options && options.length > 0) {
 
-            const data = [];
-            let i = 0;
+            var data = [];
+            var i = 0;
 
-            options.each(() => {
+            options.each(function () {
+                var _rawValue;
+
                 data.push({
-                    rawValue: {
-                        [this.options.valueField]: $(this).val(),
-                        [this.options.displayField]: $(this).html()
-                    },
+                    rawValue: (_rawValue = {}, _defineProperty(_rawValue, _this.options.valueField, $(_this).val()), _defineProperty(_rawValue, _this.options.displayField, $(_this).html()), _rawValue),
                     jqSelectIndex: i++
                 });
             });
@@ -188,53 +194,62 @@
     };
 
     JQSelect.prototype.updateValue = function () {
+        var _this2 = this;
 
-        const value = this.value.map(item => getValue(item, this.options.valueField, this.options.displayField)).join(',');
+        var value = this.value.map(function (item) {
+            return getValue(item, _this2.options.valueField, _this2.options.displayField);
+        }).join(',');
 
-        this.originEl.html(`<option value="${value}" checked="checked"></option>`);
+        this.originEl.html('<option value="' + value + '" checked="checked"></option>');
     };
 
-    JQSelect.prototype.renderList = function (scrollTop = 0) {
+    JQSelect.prototype.renderList = function () {
+        var _this3 = this;
+
+        var scrollTop = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+
 
         if (!this.popupEl) {
             return;
         }
 
-        const self = this,
-              scroller = this.popupEl.find('.jq-select-list-scroller');
+        var self = this,
+            scroller = this.popupEl.find('.jq-select-list-scroller');
 
         if (!this.filteredData || this.filteredData.length < 1) {
             scroller.html('');
             return;
         }
 
-        const itemHeight = this.options.itemHeight,
-              { start, stop } = calDisplayIndex(this.filteredData, scrollTop, this.options),
-              list = [];
+        var itemHeight = this.options.itemHeight,
+            _calDisplayIndex = calDisplayIndex(this.filteredData, scrollTop, this.options),
+            start = _calDisplayIndex.start,
+            stop = _calDisplayIndex.stop,
+            list = [];
 
-        for (let i = start; i <= stop; i++) {
+        var _loop = function _loop(i) {
 
-            const rawValue = this.filteredData[i].rawValue,
-                  index = this.filteredData[i].jqSelectIndex;
+            var rawValue = _this3.filteredData[i].rawValue,
+                index = _this3.filteredData[i].jqSelectIndex;
 
-            let item = scroller.children(`.jq-select-item[jq-select-index=${index}]`);
+            var item = scroller.children('.jq-select-item[jq-select-index=' + index + ']');
 
             // if exist
             if (item[0]) {
                 item.css({
-                    transform: `translate(0, ${i * itemHeight}px)`
+                    transform: 'translate(0, ' + i * itemHeight + 'px)'
                 });
-                continue;
+                return 'continue';
             }
 
-            item = $(getItemTemplate(this.options)).attr('jq-select-index', index).css({
+            item = $(getItemTemplate(_this3.options)).attr('jq-select-index', index).css({
                 height: itemHeight,
-                lineHeight: `${itemHeight}px`,
-                transform: `translate(0, ${i * itemHeight}px)`
+                lineHeight: itemHeight + 'px',
+                transform: 'translate(0, ' + i * itemHeight + 'px)'
             });
 
             // icon
-            const iconCls = rawValue[this.options.iconClsField];
+            var iconCls = rawValue[_this3.options.iconClsField];
             if (iconCls) {
                 item.children('.jq-select-item-icon').addClass(iconCls);
             } else {
@@ -242,41 +257,47 @@
             }
 
             // checked
-            if (!this.options.multi) {
+            if (!_this3.options.multi) {
                 item.children('.jq-select-checkbox').remove();
-            } else if (isChecked(this.value, rawValue, this.options.valueField, this.options.displayField)) {
+            } else if (isChecked(_this3.value, rawValue, _this3.options.valueField, _this3.options.displayField)) {
                 item.children('.jq-select-item-checkbox').prop('checked', true);
             }
 
             // display text
-            item.children('.jq-select-item-name').html(rawValue[this.options.displayField]);
+            item.children('.jq-select-item-name').html(rawValue[_this3.options.displayField]);
 
-            item.mousedown(() => {
+            item.mousedown(function () {
 
-                if (!this.value || this.value.length < 1 || !rawValue) {
-                    this.value = [rawValue];
-                } else if (isChecked(this.value, rawValue, this.options.valueField, this.options.displayField)) {
-                    this.value.splice(i, 1);
+                if (!_this3.value || _this3.value.length < 1 || !rawValue) {
+                    _this3.value = [rawValue];
+                } else if (isChecked(_this3.value, rawValue, _this3.options.valueField, _this3.options.displayField)) {
+                    _this3.value.splice(i, 1);
                 } else {
-                    this.value.push(rawValue);
+                    _this3.value.push(rawValue);
                 }
 
-                this.popupEl.find('.jq-select-select-all-checkbox').prop('checked', this.value.length === this.filteredData.length);
+                _this3.popupEl.find('.jq-select-select-all-checkbox').prop('checked', _this3.value.length === _this3.filteredData.length);
 
-                this.updateValue();
+                _this3.updateValue();
             });
 
             list.push(item);
+        };
+
+        for (var i = start; i <= stop; i++) {
+            var _ret = _loop(i);
+
+            if (_ret === 'continue') continue;
         }
 
         scroller.children().each(function () {
 
-            const index = parseInt($(this).attr('jq-select-index'));
+            var index = parseInt($(this).attr('jq-select-index'));
 
-            const data = self.filteredData.slice(start, stop + 1);
-            let flag = false;
+            var data = self.filteredData.slice(start, stop + 1);
+            var flag = false;
 
-            for (let i = 0, len = data.length; i < len; i++) {
+            for (var i = 0, len = data.length; i < len; i++) {
                 if (index === data[i].jqSelectIndex) {
                     flag = true;
                     break;
@@ -292,6 +313,7 @@
     };
 
     JQSelect.prototype.showPopup = function () {
+        var _this4 = this;
 
         if (!this.triggerEl) {
             return;
@@ -304,49 +326,51 @@
             this.popupEl.removeClass('hidden');
         }
 
-        const offset = this.triggerEl.offset();
+        var offset = this.triggerEl.offset();
         this.popupEl.css({
-            transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
+            transform: 'translate(' + offset.left + 'px, ' + (offset.top + this.triggerEl.height()) + 'px)'
         }).find('.jq-select-list-scroller').css({
             height: this.filteredData.length * this.options.itemHeight
         });
         this.wrapperEl.addClass('activated');
 
         // filter
-        const filterEl = this.popupEl.children('.jq-select-filter-wrapper');
+        var filterEl = this.popupEl.children('.jq-select-filter-wrapper');
         if (this.options.enableFilter) {
-            filterEl.children('.jq-select-filter').on('input', e => {
+            filterEl.children('.jq-select-filter').on('input', function (e) {
 
-                this.filterText = e.target.value;
-                this.filteredData = filterData(this.data, this.filterText, this.options.valueField, this.options.displayField);
+                _this4.filterText = e.target.value;
+                _this4.filteredData = filterData(_this4.data, _this4.filterText, _this4.options.valueField, _this4.options.displayField);
 
-                this.popupEl.children('.jq-select-list')[0].scrollTop = 0;
-                this.popupEl.find('.jq-select-list-scroller').css({
-                    height: this.filteredData.length * this.options.itemHeight
+                _this4.popupEl.children('.jq-select-list')[0].scrollTop = 0;
+                _this4.popupEl.find('.jq-select-list-scroller').css({
+                    height: _this4.filteredData.length * _this4.options.itemHeight
                 });
 
-                this.renderList();
+                _this4.renderList();
             });
         } else {
             filterEl.remove();
         }
 
         // select all
-        const selectAllEl = this.popupEl.children('.jq-select-select-all');
+        var selectAllEl = this.popupEl.children('.jq-select-select-all');
         if (this.options.enableSelectAll) {
 
-            const checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
+            var checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
 
             checkboxEl.prop('checked', this.value.length === this.data.length);
 
-            selectAllEl.mousedown(() => {
+            selectAllEl.mousedown(function () {
 
-                const checked = !checkboxEl.is(':checked');
+                var checked = !checkboxEl.is(':checked');
 
-                this.value = checked ? this.data.map(item => item.rawValue) : [];
-                this.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
+                _this4.value = checked ? _this4.data.map(function (item) {
+                    return item.rawValue;
+                }) : [];
+                _this4.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
 
-                this.updateValue();
+                _this4.updateValue();
             });
         } else {
             selectAllEl.remove();

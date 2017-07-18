@@ -322,6 +322,7 @@
                 item.children('.jq-select-checkbox').remove();
             } else if (isChecked(this.value, rawValue, valueField, displayField)) {
                 item.children('.jq-select-item-checkbox').prop('checked', true);
+                item.addClass('activated');
             }
 
             // display text
@@ -331,6 +332,7 @@
 
                 if (!this.value || this.value.length < 1 || !rawValue) {
                     this.value = [rawValue];
+                    item.addClass('activated');
                 } else if (isChecked(this.value, rawValue, valueField, displayField)) {
                     for (let i = 0, len = this.value.length; i < len; i++) {
                         if (getValue(this.value[i], valueField, displayField)
@@ -339,8 +341,10 @@
                             break;
                         }
                     }
+                    item.removeClass('activated');
                 } else {
                     this.value.push(rawValue);
+                    item.addClass('activated');
                 }
 
                 this.popupEl.find('.jq-select-select-all-checkbox')

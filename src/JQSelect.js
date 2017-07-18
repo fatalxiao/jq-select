@@ -341,6 +341,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                 item.children('.jq-select-checkbox').remove();
             } else if (isChecked(_this3.value, rawValue, valueField, displayField)) {
                 item.children('.jq-select-item-checkbox').prop('checked', true);
+                item.addClass('activated');
             }
 
             // display text
@@ -350,6 +351,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
                 if (!_this3.value || _this3.value.length < 1 || !rawValue) {
                     _this3.value = [rawValue];
+                    item.addClass('activated');
                 } else if (isChecked(_this3.value, rawValue, valueField, displayField)) {
                     for (var _i = 0, len = _this3.value.length; _i < len; _i++) {
                         if (getValue(_this3.value[_i], valueField, displayField) === getValue(rawValue, valueField, displayField)) {
@@ -357,8 +359,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                             break;
                         }
                     }
+                    item.removeClass('activated');
                 } else {
                     _this3.value.push(rawValue);
+                    item.addClass('activated');
                 }
 
                 _this3.popupEl.find('.jq-select-select-all-checkbox').prop('checked', _this3.value.length === _this3.filteredData.length);

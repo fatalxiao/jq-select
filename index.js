@@ -24924,16 +24924,7 @@ $(function () {
         enableSelectAll: true,
         data: data,
         valueField: 'id',
-        displayField: 'hotelName',
-        onSelect: function (selectItems) {
-            console.log('onSelect: ', selectItems);
-        },
-        onDeselect: function (selectItems) {
-            console.log('onDeselect: ', selectItems);
-        },
-        onChange: function (value) {
-            console.log('onChange: ', value);
-        }
+        displayField: 'hotelName'
     });
 
     $('#show-value-button').click(function () {

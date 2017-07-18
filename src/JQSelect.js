@@ -464,6 +464,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                     return item.rawValue;
                 }) : [];
                 _this4.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
+                _this4.popupEl.find('.jq-select-item').toggleClass('activated', checked);
                 _this4.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
 
                 _this4.updateValue();

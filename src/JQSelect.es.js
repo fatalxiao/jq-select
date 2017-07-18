@@ -444,6 +444,7 @@
 
                 this.value = checked ? this.data.map(item => item.rawValue) : [];
                 this.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
+                this.popupEl.find('.jq-select-item').toggleClass('activated', checked);
                 this.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
 
                 this.updateValue();

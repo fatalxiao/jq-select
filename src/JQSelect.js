@@ -171,6 +171,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
 
         if (!this.originEl) {
+            this.filteredData = this.data = null;
             return;
         }
 
@@ -196,67 +197,69 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     JQSelect.prototype.initValue = function () {
 
         if (!this.options.data || this.options.data.length < 1 || !this.options.value || this.options.value.length < 1) {
-            return;
-        }
+            this.value = [];
+        } else {
 
-        var result = [];
+            var result = [];
 
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
 
-        try {
-            for (var _iterator2 = this.options.value[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                var item = _step2.value;
-                var _options = this.options,
-                    valueField = _options.valueField,
-                    displayField = _options.displayField,
-                    value = getValue(item, valueField, displayField);
-                var _iteratorNormalCompletion3 = true;
-                var _didIteratorError3 = false;
-                var _iteratorError3 = undefined;
-
-                try {
-
-                    for (var _iterator3 = this.options.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                        var dataItem = _step3.value;
-
-                        if (getValue(dataItem, valueField, displayField) === value) {
-                            result.push(dataItem);
-                            break;
-                        }
-                    }
-                } catch (err) {
-                    _didIteratorError3 = true;
-                    _iteratorError3 = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                            _iterator3.return();
-                        }
-                    } finally {
-                        if (_didIteratorError3) {
-                            throw _iteratorError3;
-                        }
-                    }
-                }
-            }
-        } catch (err) {
-            _didIteratorError2 = true;
-            _iteratorError2 = err;
-        } finally {
             try {
-                if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                    _iterator2.return();
+                for (var _iterator2 = this.options.value[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var item = _step2.value;
+                    var _options = this.options,
+                        valueField = _options.valueField,
+                        displayField = _options.displayField,
+                        value = getValue(item, valueField, displayField);
+                    var _iteratorNormalCompletion3 = true;
+                    var _didIteratorError3 = false;
+                    var _iteratorError3 = undefined;
+
+                    try {
+
+                        for (var _iterator3 = this.options.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                            var dataItem = _step3.value;
+
+                            if (getValue(dataItem, valueField, displayField) === value) {
+                                result.push(dataItem);
+                                break;
+                            }
+                        }
+                    } catch (err) {
+                        _didIteratorError3 = true;
+                        _iteratorError3 = err;
+                    } finally {
+                        try {
+                            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                                _iterator3.return();
+                            }
+                        } finally {
+                            if (_didIteratorError3) {
+                                throw _iteratorError3;
+                            }
+                        }
+                    }
                 }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
             } finally {
-                if (_didIteratorError2) {
-                    throw _iteratorError2;
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
                 }
             }
+
+            this.value = result;
         }
 
-        this.value = result;
         this.updateValue();
     };
 
@@ -345,7 +348,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             }
 
             // display text
-            item.children('.jq-select-item-name').html(rawValue[displayField]);
+            item.children('.jq-select-item-name').html(getDisplay(rawValue, valueField, displayField));
 
             item.mousedown(function () {
 
@@ -469,7 +472,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.renderList();
     };
 
-    JQSelect.prototype.removePopup = function () {
+    JQSelect.prototype.hidePopup = function () {
 
         if (this.popupEl) {
             this.popupEl.addClass('hidden');
@@ -484,7 +487,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.visible = triggerPopupEventHandle(e.target, this.triggerEl, this.popupEl, this.visible);
 
         if (!this.visible) {
-            this.removePopup();
+            this.hidePopup();
             return;
         }
 
@@ -519,9 +522,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             this.triggerEl = this.wrapperEl.children('.jq-select-trigger');
         }
 
-        // trigger text
-        this.triggerEl.html('<span class="jq-select-text" title="' + this.options.noSelectText + '">' + this.options.noSelectText + '</span>');
-
         this.initData();
         this.initValue();
 
@@ -533,20 +533,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         $(document).on('mousedown', this.mousedownHandler.bind(this));
         $(window).on('resize', this.resizeHandler.bind(this));
-
-        this.originEl.off().on('updateOptions', function () {
-            this.options = $.extend(true, {}, $.fn.JQSelect.defaults, this.options);
-            return this;
-        });
     };
 
     JQSelect.prototype.destroy = function () {
 
-        this.removePopup();
-        this.wrapperEl.removeClass('activated');
+        this.triggerEl.remove();
 
-        $(document).off('mousedown', this.mousedownHandler);
-        $(window).off('resize', this.resizeHandler);
+        this.originEl.removeClass('jq-select-formated').unwrap();
+
+        this.popupEl && this.popupEl.remove();
+        this.popupEl = null;
     };
 
     $.fn.JQSelect = function (options) {

@@ -193,6 +193,7 @@
         }
 
         if (!this.originEl) {
+            this.filteredData = this.data = null;
             return;
         }
 
@@ -222,26 +223,29 @@
 
         if (!this.options.data || this.options.data.length < 1
             || !this.options.value || this.options.value.length < 1) {
-            return;
-        }
+            this.value = [];
+        } else {
 
-        const result = [];
+            const result = [];
 
-        for (let item of this.options.value) {
+            for (let item of this.options.value) {
 
-            const {valueField, displayField} = this.options,
-                value = getValue(item, valueField, displayField);
+                const {valueField, displayField} = this.options,
+                    value = getValue(item, valueField, displayField);
 
-            for (let dataItem of this.options.data) {
-                if (getValue(dataItem, valueField, displayField) === value) {
-                    result.push(dataItem);
-                    break;
+                for (let dataItem of this.options.data) {
+                    if (getValue(dataItem, valueField, displayField) === value) {
+                        result.push(dataItem);
+                        break;
+                    }
                 }
+
             }
 
+            this.value = result;
+
         }
 
-        this.value = result;
         this.updateValue();
 
     };
@@ -326,7 +330,7 @@
             }
 
             // display text
-            item.children('.jq-select-item-name').html(rawValue[displayField]);
+            item.children('.jq-select-item-name').html(getDisplay(rawValue, valueField, displayField));
 
             item.mousedown(() => {
 
@@ -451,7 +455,7 @@
 
     };
 
-    JQSelect.prototype.removePopup = function () {
+    JQSelect.prototype.hidePopup = function () {
 
         if (this.popupEl) {
             this.popupEl.addClass('hidden');
@@ -467,7 +471,7 @@
         this.visible = triggerPopupEventHandle(e.target, this.triggerEl, this.popupEl, this.visible);
 
         if (!this.visible) {
-            this.removePopup();
+            this.hidePopup();
             return;
         }
 
@@ -503,13 +507,6 @@
             this.triggerEl = this.wrapperEl.children('.jq-select-trigger');
         }
 
-        // trigger text
-        this.triggerEl.html(
-            '<span class="jq-select-text" title="'
-            + this.options.noSelectText + '">'
-            + this.options.noSelectText + '</span>'
-        );
-
         this.initData();
         this.initValue();
 
@@ -522,20 +519,16 @@
         $(document).on('mousedown', this.mousedownHandler.bind(this));
         $(window).on('resize', this.resizeHandler.bind(this));
 
-        this.originEl.off().on('updateOptions', function () {
-            this.options = $.extend(true, {}, $.fn.JQSelect.defaults, this.options);
-            return this;
-        });
-
     };
 
     JQSelect.prototype.destroy = function () {
 
-        this.removePopup();
-        this.wrapperEl.removeClass('activated');
+        this.triggerEl.remove();
 
-        $(document).off('mousedown', this.mousedownHandler);
-        $(window).off('resize', this.resizeHandler);
+        this.originEl.removeClass('jq-select-formated').unwrap();
+
+        this.popupEl && this.popupEl.remove();
+        this.popupEl = null;
 
     };
 

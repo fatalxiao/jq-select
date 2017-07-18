@@ -351,8 +351,11 @@
                     item.addClass('activated');
                 }
 
+                const checked = this.value.length === this.filteredData.length;
+                this.popupEl.children('.jq-select-select-all')
+                    .toggleClass('activated', checked);
                 this.popupEl.find('.jq-select-select-all-checkbox')
-                    .prop('checked', this.value.length === this.filteredData.length);
+                    .prop('checked', checked);
 
                 this.updateValue();
 

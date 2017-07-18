@@ -368,7 +368,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                     item.addClass('activated');
                 }
 
-                _this3.popupEl.find('.jq-select-select-all-checkbox').prop('checked', _this3.value.length === _this3.filteredData.length);
+                var checked = _this3.value.length === _this3.filteredData.length;
+                _this3.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
+                _this3.popupEl.find('.jq-select-select-all-checkbox').prop('checked', checked);
 
                 _this3.updateValue();
             });

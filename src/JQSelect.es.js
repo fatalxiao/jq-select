@@ -262,7 +262,7 @@
                 getValue(item, this.options.valueField, this.options.displayField)
             ).join(',');
 
-            this.originEl.html(`<option value="${value}" checked="checked"></option>`);
+            this.originEl.html(`<option value="${value}" selected="selected"></option>`);
 
         } else {
             this.triggerEl.html(this.options.noSelectText);

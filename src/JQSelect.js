@@ -276,7 +276,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                 return getValue(item, _this2.options.valueField, _this2.options.displayField);
             }).join(',');
 
-            this.originEl.html('<option value="' + value + '" checked="checked"></option>');
+            this.originEl.html('<option value="' + value + '" selected="selected"></option>');
         } else {
             this.triggerEl.html(this.options.noSelectText);
             this.originEl.html('');

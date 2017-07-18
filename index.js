@@ -24936,4 +24936,8 @@ $(function () {
         }
     });
 
+    $('#show-value-button').click(function () {
+        console.log($('#example1').val());
+    });
+
 });

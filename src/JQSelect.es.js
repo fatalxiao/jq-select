@@ -218,9 +218,17 @@
 
     };
 
-    JQSelect.prototype.renderList = function (scrollTop = 0) {
+    JQSelect.prototype.updateValue = function () {
 
-        const startTime = new Date().getTime();
+        const value = this.value.map(item =>
+            getValue(item, this.options.valueField, this.options.displayField)
+        ).join(',');
+
+        this.originEl.html(`<option value="${value}" checked="checked"></option>`);
+
+    };
+
+    JQSelect.prototype.renderList = function (scrollTop = 0) {
 
         if (!this.popupEl) {
             return;
@@ -292,6 +300,8 @@
                 this.popupEl.find('.jq-select-select-all-checkbox')
                     .prop('checked', this.value.length === this.filteredData.length);
 
+                this.updateValue();
+
             });
 
             list.push(item);
@@ -319,8 +329,6 @@
         });
 
         scroller.append(list);
-
-        console.log('render spend:', new Date().getTime() - startTime, 'ms');
 
     };
 
@@ -374,9 +382,14 @@
             checkboxEl.prop('checked', this.value.length === this.data.length);
 
             selectAllEl.mousedown(() => {
+
                 const checked = !checkboxEl.is(':checked');
+
                 this.value = checked ? this.data.map(item => item.rawValue) : [];
                 this.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
+
+                this.updateValue();
+
             });
 
         } else {

@@ -159,7 +159,7 @@
     JQSelect.prototype.initData = function () {
 
         if (this.options.data) {
-            this.data = formatData(this.options.data);
+            this.filteredData = this.data = formatData(this.options.data);
             return;
         }
 
@@ -170,11 +170,11 @@
         const options = this.originEl.children('option');
         if (options && options.length > 0) {
 
-            this.data = [];
+            const data = [];
             let i = 0;
 
             options.each(() => {
-                this.data.push({
+                data.push({
                     rawValue: {
                         [this.options.valueField]: $(this).val(),
                         [this.options.displayField]: $(this).html()
@@ -182,6 +182,8 @@
                     jqSelectIndex: i++
                 });
             });
+
+            this.filteredData = this.data = data;
         }
     };
 
@@ -193,22 +195,22 @@
             return;
         }
 
-        const scroller = this.popupEl.find('.jq-select-list-scroller'),
-              filteredData = filterData(this.data, this.filterText, this.options.valueField, this.options.displayField);
+        const self = this,
+              scroller = this.popupEl.find('.jq-select-list-scroller');
 
-        if (!filteredData || filteredData.length < 1) {
+        if (!this.filteredData || this.filteredData.length < 1) {
             scroller.html('');
             return;
         }
 
         const itemHeight = this.options.itemHeight,
-              { start, stop } = calDisplayIndex(filteredData, scrollTop, this.options),
+              { start, stop } = calDisplayIndex(this.filteredData, scrollTop, this.options),
               list = [];
 
         for (let i = start; i <= stop; i++) {
 
-            const rawValue = filteredData[i].rawValue,
-                  index = filteredData[i].jqSelectIndex;
+            const rawValue = this.filteredData[i].rawValue,
+                  index = this.filteredData[i].jqSelectIndex;
 
             let item = scroller.children(`.jq-select-item[jq-select-index=${index}]`);
 
@@ -254,7 +256,7 @@
                     this.value.push(rawValue);
                 }
 
-                this.popupEl.find('.jq-select-select-all-checkbox').prop('checked', this.value.length === filteredData.length);
+                this.popupEl.find('.jq-select-select-all-checkbox').prop('checked', this.value.length === this.filteredData.length);
             });
 
             list.push(item);
@@ -264,7 +266,7 @@
 
             const index = parseInt($(this).attr('jq-select-index'));
 
-            const data = filteredData.slice(start, stop);
+            const data = self.filteredData.slice(start, stop);
             let flag = false;
 
             for (let i = 0, len = data.length; i < len; i++) {
@@ -279,9 +281,7 @@
             }
         });
 
-        scroller.css({
-            height: filteredData.length * this.options.itemHeight
-        }).append(list);
+        scroller.append(list);
 
         console.log('render spend:', new Date().getTime() - startTime, 'ms');
     };
@@ -302,6 +302,8 @@
         const offset = this.triggerEl.offset();
         this.popupEl.css({
             transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
+        }).find('.jq-select-list-scroller').css({
+            height: this.filteredData.length * this.options.itemHeight
         });
         this.wrapperEl.addClass('activated');
 
@@ -309,7 +311,15 @@
         const filterEl = this.popupEl.children('.jq-select-filter-wrapper');
         if (this.options.enableFilter) {
             filterEl.children('.jq-select-filter').on('input', e => {
+
                 this.filterText = e.target.value;
+                this.filteredData = filterData(this.data, this.filterText, this.options.valueField, this.options.displayField);
+
+                this.popupEl.children('.jq-select-list')[0].scrollTop = 0;
+                this.popupEl.find('.jq-select-list-scroller').css({
+                    height: this.filteredData.length * this.options.itemHeight
+                });
+
                 this.renderList();
             });
         } else {

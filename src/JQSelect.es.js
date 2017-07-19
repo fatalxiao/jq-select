@@ -187,6 +187,40 @@
 
     }
 
+    JQSelect.prototype.init = function () {
+
+        // whether select is formated
+        var formated = this.originEl.hasClass('jq-select-formated');
+
+        if (!formated) {
+            this.originEl.addClass('jq-select-formated').hide().wrap(wrapTemplate);
+        }
+
+        this.wrapperEl = this.originEl.parent()
+            .toggleClass('multi', this.options.multi)
+            .prop('disabled', this.disabled);
+
+        if (!formated) {
+            this.triggerEl = $(triggerTemplate);
+            this.wrapperEl.prepend(this.triggerEl);
+        } else {
+            this.triggerEl = this.wrapperEl.children('.jq-select-trigger');
+        }
+
+        this.initData();
+        this.initValue();
+
+        // trigger icon
+        this.triggerEl.find('.jq-select-icon').remove();
+        if (this.options.iconCls) {
+            this.triggerEl.find('.jq-select-text').before('<i class="jq-select-icon ' + this.options.iconCls + '"></i>');
+        }
+
+        $(document).on('mousedown', this.mousedownHandler.bind(this));
+        $(window).on('resize', this.resizeHandler.bind(this));
+
+    };
+
     JQSelect.prototype.initData = function () {
 
         if (this.options.data) {
@@ -270,6 +304,79 @@
             this.triggerEl.html(this.options.noSelectText);
             this.originEl.html('');
         }
+
+    };
+
+    JQSelect.prototype.showPopup = function () {
+
+        if (!this.triggerEl) {
+            return;
+        }
+
+        if (!this.popupEl) {
+            this.popupEl = $(getPopupTemplate(this.options)).appendTo('body');
+            this.popupEl.children('.jq-select-list').on('scroll', this.scrollHandler.bind(this));
+        } else {
+            this.popupEl.removeClass('hidden');
+        }
+
+        const offset = this.triggerEl.offset();
+        this.popupEl.css({
+            transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
+        }).find('.jq-select-list-scroller').css({
+            height: this.filteredData.length * this.options.itemHeight
+        });
+        this.popupEl.children('.jq-select-list')[0].scrollTop = 0;
+        this.wrapperEl.addClass('activated');
+
+        // filter
+        const filterEl = this.popupEl.children('.jq-select-filter-wrapper');
+        if (this.options.enableFilter) {
+            filterEl.children('.jq-select-filter').on('input', (e) => {
+
+                this.filterText = e.target.value;
+                this.filteredData = filterData(this.data, this.filterText, this.options.valueField, this.options.displayField);
+
+                this.popupEl.children('.jq-select-list')[0].scrollTop = 0;
+                this.popupEl.find('.jq-select-list-scroller').css({
+                    height: this.filteredData.length * this.options.itemHeight
+                });
+
+                this.renderList();
+
+            });
+        } else {
+            filterEl.remove();
+        }
+
+        // select all
+        const selectAllEl = this.popupEl.children('.jq-select-select-all');
+        if (this.options.enableSelectAll) {
+
+            const checked = this.value.length === this.data.length,
+                checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
+
+            selectAllEl.toggleClass('activated', checked);
+            checkboxEl.prop('checked', checked);
+
+            selectAllEl.mousedown(() => {
+
+                const checked = !checkboxEl.is(':checked');
+
+                this.value = checked ? this.data.map(item => item.rawValue) : [];
+                this.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
+                this.popupEl.find('.jq-select-item').toggleClass('activated', checked);
+                this.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
+
+                this.updateValue();
+
+            });
+
+        } else {
+            selectAllEl.remove();
+        }
+
+        this.renderList();
 
     };
 
@@ -391,79 +498,6 @@
 
     };
 
-    JQSelect.prototype.showPopup = function () {
-
-        if (!this.triggerEl) {
-            return;
-        }
-
-        if (!this.popupEl) {
-            this.popupEl = $(getPopupTemplate(this.options)).appendTo('body');
-            this.popupEl.children('.jq-select-list').on('scroll', this.scrollHandler.bind(this));
-        } else {
-            this.popupEl.removeClass('hidden');
-        }
-
-        const offset = this.triggerEl.offset();
-        this.popupEl.css({
-            transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
-        }).find('.jq-select-list-scroller').css({
-            height: this.filteredData.length * this.options.itemHeight
-        });
-        this.popupEl.children('.jq-select-list')[0].scrollTop = 0;
-        this.wrapperEl.addClass('activated');
-
-        // filter
-        const filterEl = this.popupEl.children('.jq-select-filter-wrapper');
-        if (this.options.enableFilter) {
-            filterEl.children('.jq-select-filter').on('input', (e) => {
-
-                this.filterText = e.target.value;
-                this.filteredData = filterData(this.data, this.filterText, this.options.valueField, this.options.displayField);
-
-                this.popupEl.children('.jq-select-list')[0].scrollTop = 0;
-                this.popupEl.find('.jq-select-list-scroller').css({
-                    height: this.filteredData.length * this.options.itemHeight
-                });
-
-                this.renderList();
-
-            });
-        } else {
-            filterEl.remove();
-        }
-
-        // select all
-        const selectAllEl = this.popupEl.children('.jq-select-select-all');
-        if (this.options.enableSelectAll) {
-
-            const checked = this.value.length === this.data.length,
-                checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
-
-            selectAllEl.toggleClass('activated', checked);
-            checkboxEl.prop('checked', checked);
-
-            selectAllEl.mousedown(() => {
-
-                const checked = !checkboxEl.is(':checked');
-
-                this.value = checked ? this.data.map(item => item.rawValue) : [];
-                this.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
-                this.popupEl.find('.jq-select-item').toggleClass('activated', checked);
-                this.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
-
-                this.updateValue();
-
-            });
-
-        } else {
-            selectAllEl.remove();
-        }
-
-        this.renderList();
-
-    };
-
     JQSelect.prototype.hidePopup = function () {
 
         if (this.popupEl) {
@@ -496,40 +530,6 @@
 
     JQSelect.prototype.resizeHandler = function () {
         //
-    };
-
-    JQSelect.prototype.init = function () {
-
-        // whether select is formated
-        var formated = this.originEl.hasClass('jq-select-formated');
-
-        if (!formated) {
-            this.originEl.addClass('jq-select-formated').hide().wrap(wrapTemplate);
-        }
-
-        this.wrapperEl = this.originEl.parent()
-            .toggleClass('multi', this.options.multi)
-            .prop('disabled', this.disabled);
-
-        if (!formated) {
-            this.triggerEl = $(triggerTemplate);
-            this.wrapperEl.prepend(this.triggerEl);
-        } else {
-            this.triggerEl = this.wrapperEl.children('.jq-select-trigger');
-        }
-
-        this.initData();
-        this.initValue();
-
-        // trigger icon
-        this.triggerEl.find('.jq-select-icon').remove();
-        if (this.options.iconCls) {
-            this.triggerEl.find('.jq-select-text').before('<i class="jq-select-icon ' + this.options.iconCls + '"></i>');
-        }
-
-        $(document).on('mousedown', this.mousedownHandler.bind(this));
-        $(window).on('resize', this.resizeHandler.bind(this));
-
     };
 
     JQSelect.prototype.destroy = function () {

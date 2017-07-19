@@ -171,10 +171,12 @@
         this.popupEl = null;
 
         this.data = null;
-        this.visible = false;
-        this.value = [];
         this.filterText = '';
         this.filteredData = null;
+        this.value = [];
+
+        this.visible = false;
+        this.disabled = options.disabled;
 
         this.init();
 
@@ -505,7 +507,9 @@
             this.originEl.addClass('jq-select-formated').hide().wrap(wrapTemplate);
         }
 
-        this.wrapperEl = this.originEl.parent().toggleClass('multi', this.options.multi);
+        this.wrapperEl = this.originEl.parent()
+            .toggleClass('multi', this.options.multi)
+            .prop('disabled', this.disabled);
 
         if (!formated) {
             this.triggerEl = $(triggerTemplate);
@@ -563,13 +567,13 @@
         itemHeight: 30,
         renderBuffer: 3,
 
+        disabled: false,
+
         enableFilter: false,
         filterPlaceholder: 'filter ...',
 
         enableSelectAll: false,
-        selectAllText: 'Select All',
-
-        itemActivatedCls: 'activated'
+        selectAllText: 'Select All'
 
     };
 

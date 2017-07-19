@@ -1,15 +1,41 @@
+$bg: #e8edf4;
+$color: #758697;
+
+@mixin shadow($depth) {
+    @if $depth == 0 {
+        box-shadow: transparent 0px 0px 0px;
+    } @else if $depth == 1 {
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 3px 1px, rgba(0, 0, 0, 0.10) 0px 1px 1px;
+    } @else if $depth == 2 {
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 3px, rgba(0, 0, 0, 0.12) 0px 1px 3px;
+    } @else if $depth == 3 {
+        box-shadow: rgba(0, 0, 0, 0.12) 0px 5px 6px, rgba(0, 0, 0, 0.12) 0px 2px 6px;
+    } @else if $depth == 4 {
+        box-shadow: rgba(0, 0, 0, 0.15) 0px 7px 10px, rgba(0, 0, 0, 0.20) 0px 3px 9px;
+    } @else if $depth == 5 {
+        box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 30px, rgba(0, 0, 0, 0.20) 0px 6px 12px;
+    } @else if $depth == 6 {
+        box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 45px, rgba(0, 0, 0, 0.22) 0px 10px 15px;
+    } @else if $depth == 7 {
+        box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 60px, rgba(0, 0, 0, 0.22) 0px 15px 20px;
+    } @else {
+        box-shadow: none;
+    }
+}
+
 .jq-select-wrapper {
     position: relative;
 
     .jq-select-trigger {
+        @include shadow(2);
         position: relative;
         width: 200px;
         height: 40px;
         border: none;
         cursor: pointer;
-        background: #e8edf4;
+        background: $bg;
         border-radius: 2px;
-        color: #758697;
+        color: $color;
         padding: 0 36px 0 12px;
         overflow: hidden;
         white-space: nowrap;
@@ -17,7 +43,6 @@
         text-align: left;
         outline: none;
         user-select: none;
-        box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;
         transition: all 100ms ease-in-out;
 
         .jq-select-icon {
@@ -33,8 +58,8 @@
             float: right;
             width: 8px;
             height: 8px;
-            border-left: 1px solid #758697;
-            border-bottom: 1px solid #758697;
+            border-left: 1px solid $color;
+            border-bottom: 1px solid $color;
             transform: rotate(-45deg);
             box-sizing: border-box;
             margin: 1px 3px 0 0;
@@ -44,7 +69,7 @@
 
         &:hover {
             outline: none;
-            background: #ecf2f8;
+            background: lighten($bg, 1%);
         }
 
         &:focus {
@@ -52,12 +77,34 @@
         }
 
         &:active {
-            background: #e4e9ef;
-            box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 3px, rgba(0, 0, 0, 0.117647) 0px 1px 2px;
+            @include shadow(1);
+            background: darken($bg, 1%);
         }
 
-        &.activated {
-            .jq-select-trigger::after {
+        &[disabled] {
+            box-shadow: none;
+            cursor: not-allowed;
+            color: lighten($color, 20%);
+            background: lighten($bg, 2%);
+
+            &::after {
+                border-color: lighten($color, 20%);
+            }
+
+            &:hover {
+                background: lighten($bg, 2%);
+            }
+        }
+    }
+
+    &.activated {
+
+        .jq-select-trigger {
+            @include shadow(2);
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+
+            &::after {
                 transform: rotate(135deg);
                 margin: 5px 3px 0 0;
             }
@@ -67,6 +114,7 @@
 }
 
 .jq-select-popup {
+    @include shadow(2);
     position: absolute;
     left: 0;
     top: 0;
@@ -74,7 +122,6 @@
     overflow: hidden;
     background: #fff;
     font-size: 14px;
-    box-shadow: rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px;
     z-index: 99;
 
     .jq-select-checkbox {
@@ -111,11 +158,11 @@
             padding: 0 12px 0 30px;
             line-height: 30px;
             border: none;
-            border-bottom: 1px solid #e3eaf3;
+            border-bottom: 1px solid $bg;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
-            color: #4c637b;
+            color: $color;
             outline: none;
 
             &:hover,
@@ -129,8 +176,8 @@
         display: block;
         height: 30px;
         line-height: 30px;
-        background: #e8edf4;
-        color: #758697;
+        background: $bg;
+        color: $color;
         cursor: pointer;
         user-select: none;
         overflow: hidden;
@@ -167,7 +214,7 @@
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
-                color: #4c637b;
+                color: $color;
                 padding: 0 12px;
 
                 .jq-select-item-icon {
@@ -182,7 +229,7 @@
                 }
 
                 &:hover {
-                    background: #f2f6fa;
+                    background: lighten($bg, 4%);
                 }
 
                 &.hidden {

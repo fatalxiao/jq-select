@@ -149,10 +149,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.popupEl = null;
 
         this.data = null;
-        this.visible = false;
-        this.value = [];
         this.filterText = '';
         this.filteredData = null;
+        this.value = [];
+
+        this.visible = false;
+        this.disabled = options.disabled;
 
         this.init();
 
@@ -161,6 +163,48 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             originEl: originEl
         };
     }
+
+    JQSelect.prototype.init = function () {
+
+        // whether select is formated
+        var self = this,
+            formated = this.originEl.hasClass('jq-select-formated');
+
+        if (!formated) {
+            this.originEl.addClass('jq-select-formated').hide().wrap(wrapTemplate);
+        }
+
+        this.wrapperEl = this.originEl.parent().toggleClass('multi', this.options.multi).prop('disabled', this.disabled);
+
+        if (!formated) {
+            this.triggerEl = $(triggerTemplate);
+            this.wrapperEl.prepend(this.triggerEl);
+        } else {
+            this.triggerEl = this.wrapperEl.children('.jq-select-trigger');
+        }
+
+        this.initData();
+        this.initValue();
+
+        // trigger icon
+        this.triggerEl.prop('disabled', this.disabled).find('.jq-select-icon').remove();
+        if (this.options.iconCls) {
+            this.triggerEl.find('.jq-select-text').before('<i class="jq-select-icon ' + this.options.iconCls + '"></i>');
+        }
+
+        $(document).on('mousedown', this.mousedownHandler.bind(this));
+        $(window).on('resize', this.resizeHandler.bind(this));
+
+        this.originEl.off().on('enable', function () {
+            self.disabled = false;
+            self.triggerEl.prop('disabled', false);
+            return $(this);
+        }).on('disable', function () {
+            self.disabled = true;
+            self.triggerEl.prop('disabled', true);
+            return $(this);
+        });
+    };
 
     JQSelect.prototype.initData = function () {
         var _this = this;
@@ -283,8 +327,80 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
     };
 
-    JQSelect.prototype.renderList = function () {
+    JQSelect.prototype.showPopup = function () {
         var _this3 = this;
+
+        if (!this.triggerEl) {
+            return;
+        }
+
+        if (!this.popupEl) {
+            this.popupEl = $(getPopupTemplate(this.options)).appendTo('body');
+            this.popupEl.children('.jq-select-list').on('scroll', this.scrollHandler.bind(this));
+        } else {
+            this.popupEl.removeClass('hidden');
+        }
+
+        var offset = this.triggerEl.offset();
+        this.popupEl.css({
+            transform: 'translate(' + offset.left + 'px, ' + (offset.top + this.triggerEl.height()) + 'px)'
+        }).find('.jq-select-list-scroller').css({
+            height: this.filteredData.length * this.options.itemHeight
+        });
+        this.popupEl.children('.jq-select-list')[0].scrollTop = 0;
+        this.wrapperEl.addClass('activated');
+
+        // filter
+        var filterEl = this.popupEl.children('.jq-select-filter-wrapper');
+        if (this.options.enableFilter) {
+            filterEl.children('.jq-select-filter').on('input', function (e) {
+
+                _this3.filterText = e.target.value;
+                _this3.filteredData = filterData(_this3.data, _this3.filterText, _this3.options.valueField, _this3.options.displayField);
+
+                _this3.popupEl.children('.jq-select-list')[0].scrollTop = 0;
+                _this3.popupEl.find('.jq-select-list-scroller').css({
+                    height: _this3.filteredData.length * _this3.options.itemHeight
+                });
+
+                _this3.renderList();
+            });
+        } else {
+            filterEl.remove();
+        }
+
+        // select all
+        var selectAllEl = this.popupEl.children('.jq-select-select-all');
+        if (this.options.enableSelectAll) {
+
+            var checked = this.value.length === this.data.length,
+                checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
+
+            selectAllEl.toggleClass('activated', checked);
+            checkboxEl.prop('checked', checked);
+
+            selectAllEl.mousedown(function () {
+
+                var checked = !checkboxEl.is(':checked');
+
+                _this3.value = checked ? _this3.data.map(function (item) {
+                    return item.rawValue;
+                }) : [];
+                _this3.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
+                _this3.popupEl.find('.jq-select-item').toggleClass('activated', checked);
+                _this3.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
+
+                _this3.updateValue();
+            });
+        } else {
+            selectAllEl.remove();
+        }
+
+        this.renderList();
+    };
+
+    JQSelect.prototype.renderList = function () {
+        var _this4 = this;
 
         var scrollTop = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
@@ -312,8 +428,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         var _loop = function _loop(i) {
 
-            var rawValue = _this3.filteredData[i].rawValue,
-                index = _this3.filteredData[i].jqSelectIndex;
+            var rawValue = _this4.filteredData[i].rawValue,
+                index = _this4.filteredData[i].jqSelectIndex;
 
             var item = scroller.children('.jq-select-item[jq-select-index=' + index + ']');
 
@@ -325,14 +441,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                 return 'continue';
             }
 
-            item = $(getItemTemplate(_this3.options)).attr('jq-select-index', index).css({
+            item = $(getItemTemplate(_this4.options)).attr('jq-select-index', index).css({
                 height: itemHeight,
                 lineHeight: itemHeight + 'px',
                 transform: 'translate(0, ' + i * itemHeight + 'px)'
             });
 
             // icon
-            var iconCls = rawValue[_this3.options.iconClsField];
+            var iconCls = rawValue[_this4.options.iconClsField];
             if (iconCls) {
                 item.children('.jq-select-item-icon').addClass(iconCls);
             } else {
@@ -340,9 +456,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             }
 
             // checked
-            if (!_this3.options.multi) {
+            if (!_this4.options.multi) {
                 item.children('.jq-select-checkbox').remove();
-            } else if (isChecked(_this3.value, rawValue, valueField, displayField)) {
+            } else if (isChecked(_this4.value, rawValue, valueField, displayField)) {
                 item.children('.jq-select-item-checkbox').prop('checked', true);
                 item.addClass('activated');
             }
@@ -352,27 +468,27 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
             item.mousedown(function () {
 
-                if (!_this3.value || _this3.value.length < 1 || !rawValue) {
-                    _this3.value = [rawValue];
+                if (!_this4.value || _this4.value.length < 1 || !rawValue) {
+                    _this4.value = [rawValue];
                     item.addClass('activated');
-                } else if (isChecked(_this3.value, rawValue, valueField, displayField)) {
-                    for (var _i = 0, len = _this3.value.length; _i < len; _i++) {
-                        if (getValue(_this3.value[_i], valueField, displayField) === getValue(rawValue, valueField, displayField)) {
-                            _this3.value.splice(_i, 1);
+                } else if (isChecked(_this4.value, rawValue, valueField, displayField)) {
+                    for (var _i = 0, len = _this4.value.length; _i < len; _i++) {
+                        if (getValue(_this4.value[_i], valueField, displayField) === getValue(rawValue, valueField, displayField)) {
+                            _this4.value.splice(_i, 1);
                             break;
                         }
                     }
                     item.removeClass('activated');
                 } else {
-                    _this3.value.push(rawValue);
+                    _this4.value.push(rawValue);
                     item.addClass('activated');
                 }
 
-                var checked = _this3.value.length === _this3.filteredData.length;
-                _this3.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
-                _this3.popupEl.find('.jq-select-select-all-checkbox').prop('checked', checked);
+                var checked = _this4.value.length === _this4.filteredData.length;
+                _this4.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
+                _this4.popupEl.find('.jq-select-select-all-checkbox').prop('checked', checked);
 
-                _this3.updateValue();
+                _this4.updateValue();
             });
 
             list.push(item);
@@ -406,78 +522,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         scroller.append(list);
     };
 
-    JQSelect.prototype.showPopup = function () {
-        var _this4 = this;
-
-        if (!this.triggerEl) {
-            return;
-        }
-
-        if (!this.popupEl) {
-            this.popupEl = $(getPopupTemplate(this.options)).appendTo('body');
-            this.popupEl.children('.jq-select-list').on('scroll', this.scrollHandler.bind(this));
-        } else {
-            this.popupEl.removeClass('hidden');
-        }
-
-        var offset = this.triggerEl.offset();
-        this.popupEl.css({
-            transform: 'translate(' + offset.left + 'px, ' + (offset.top + this.triggerEl.height()) + 'px)'
-        }).find('.jq-select-list-scroller').css({
-            height: this.filteredData.length * this.options.itemHeight
-        });
-        this.popupEl.children('.jq-select-list')[0].scrollTop = 0;
-        this.wrapperEl.addClass('activated');
-
-        // filter
-        var filterEl = this.popupEl.children('.jq-select-filter-wrapper');
-        if (this.options.enableFilter) {
-            filterEl.children('.jq-select-filter').on('input', function (e) {
-
-                _this4.filterText = e.target.value;
-                _this4.filteredData = filterData(_this4.data, _this4.filterText, _this4.options.valueField, _this4.options.displayField);
-
-                _this4.popupEl.children('.jq-select-list')[0].scrollTop = 0;
-                _this4.popupEl.find('.jq-select-list-scroller').css({
-                    height: _this4.filteredData.length * _this4.options.itemHeight
-                });
-
-                _this4.renderList();
-            });
-        } else {
-            filterEl.remove();
-        }
-
-        // select all
-        var selectAllEl = this.popupEl.children('.jq-select-select-all');
-        if (this.options.enableSelectAll) {
-
-            var checked = this.value.length === this.data.length,
-                checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
-
-            selectAllEl.toggleClass('activated', checked);
-            checkboxEl.prop('checked', checked);
-
-            selectAllEl.mousedown(function () {
-
-                var checked = !checkboxEl.is(':checked');
-
-                _this4.value = checked ? _this4.data.map(function (item) {
-                    return item.rawValue;
-                }) : [];
-                _this4.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
-                _this4.popupEl.find('.jq-select-item').toggleClass('activated', checked);
-                _this4.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
-
-                _this4.updateValue();
-            });
-        } else {
-            selectAllEl.remove();
-        }
-
-        this.renderList();
-    };
-
     JQSelect.prototype.hidePopup = function () {
 
         if (this.popupEl) {
@@ -508,37 +552,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     JQSelect.prototype.resizeHandler = function () {
         //
-    };
-
-    JQSelect.prototype.init = function () {
-
-        // whether select is formated
-        var formated = this.originEl.hasClass('jq-select-formated');
-
-        if (!formated) {
-            this.originEl.addClass('jq-select-formated').hide().wrap(wrapTemplate);
-        }
-
-        this.wrapperEl = this.originEl.parent().toggleClass('multi', this.options.multi);
-
-        if (!formated) {
-            this.triggerEl = $(triggerTemplate);
-            this.wrapperEl.prepend(this.triggerEl);
-        } else {
-            this.triggerEl = this.wrapperEl.children('.jq-select-trigger');
-        }
-
-        this.initData();
-        this.initValue();
-
-        // trigger icon
-        this.triggerEl.find('.jq-select-icon').remove();
-        if (this.options.iconCls) {
-            this.triggerEl.find('.jq-select-text').before('<i class="jq-select-icon ' + this.options.iconCls + '"></i>');
-        }
-
-        $(document).on('mousedown', this.mousedownHandler.bind(this));
-        $(window).on('resize', this.resizeHandler.bind(this));
     };
 
     JQSelect.prototype.destroy = function () {
@@ -575,13 +588,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         itemHeight: 30,
         renderBuffer: 3,
 
+        disabled: false,
+
         enableFilter: false,
         filterPlaceholder: 'filter ...',
 
         enableSelectAll: false,
-        selectAllText: 'Select All',
-
-        itemActivatedCls: 'activated'
+        selectAllText: 'Select All'
 
     };
 })(jQuery);

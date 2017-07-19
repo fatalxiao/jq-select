@@ -190,7 +190,8 @@
     JQSelect.prototype.init = function () {
 
         // whether select is formated
-        var formated = this.originEl.hasClass('jq-select-formated');
+        const self = this,
+            formated = this.originEl.hasClass('jq-select-formated');
 
         if (!formated) {
             this.originEl.addClass('jq-select-formated').hide().wrap(wrapTemplate);
@@ -211,13 +212,25 @@
         this.initValue();
 
         // trigger icon
-        this.triggerEl.find('.jq-select-icon').remove();
+        this.triggerEl
+            .prop('disabled', this.disabled)
+            .find('.jq-select-icon').remove();
         if (this.options.iconCls) {
             this.triggerEl.find('.jq-select-text').before('<i class="jq-select-icon ' + this.options.iconCls + '"></i>');
         }
 
         $(document).on('mousedown', this.mousedownHandler.bind(this));
         $(window).on('resize', this.resizeHandler.bind(this));
+
+        this.originEl.off().on('enable', function () {
+            self.disabled = false;
+            self.triggerEl.prop('disabled', false);
+            return $(this);
+        }).on('disable', function () {
+            self.disabled = true;
+            self.triggerEl.prop('disabled', true);
+            return $(this);
+        });
 
     };
 

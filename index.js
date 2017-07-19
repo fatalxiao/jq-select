@@ -24928,7 +24928,7 @@ $(function () {
         value: [3, 103]
     });
 
-    $('#example1').trigger('disable');
+    // $('#example1').trigger('disable');
 
     $('#show-value-button').click(function () {
         console.log($('#example1').val());

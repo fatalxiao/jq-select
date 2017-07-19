@@ -1,5 +1,6 @@
 $bg: #e8edf4;
 $color: #758697;
+$border-radius: 4px;
 
 @mixin shadow($depth) {
     @if $depth == 0 {
@@ -34,7 +35,7 @@ $color: #758697;
         border: none;
         cursor: pointer;
         background: $bg;
-        border-radius: 2px;
+        border-radius: $border-radius;
         color: $color;
         padding: 0 36px 0 12px;
         overflow: hidden;
@@ -122,6 +123,8 @@ $color: #758697;
     overflow: hidden;
     background: #fff;
     font-size: 14px;
+    border-bottom-left-radius: $border-radius;
+    border-bottom-right-radius: $border-radius;
     z-index: 99;
 
     .jq-select-checkbox {

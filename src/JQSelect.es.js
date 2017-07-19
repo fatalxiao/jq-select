@@ -318,6 +318,8 @@
             this.originEl.html('');
         }
 
+        this.originEl.trigger('change');
+
     };
 
     JQSelect.prototype.showPopup = function () {

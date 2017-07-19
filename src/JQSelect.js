@@ -325,6 +325,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             this.triggerEl.html(this.options.noSelectText);
             this.originEl.html('');
         }
+
+        this.originEl.trigger('change');
     };
 
     JQSelect.prototype.showPopup = function () {

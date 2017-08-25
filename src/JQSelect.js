@@ -1,20 +1,14 @@
-'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 (function ($) {
 
-    var JQSelectList = {
+    const JQSelectList = {
 
         list: [],
 
-        add: function add(select) {
+        add: function (select) {
             this.list.push(select);
         },
 
-        destroy: function destroy(originEl) {
+        destroy: function (originEl) {
 
             var self = this,
                 i = 0;
@@ -27,115 +21,143 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             }
 
             self.list.splice(i, 1);
+
         }
 
     };
 
-    var wrapTemplate = '<div class="jq-select-wrapper"/>',
+    const wrapTemplate = '<div class="jq-select-wrapper"/>',
+
         triggerTemplate = '<button type="button" class="jq-select-trigger"></button>',
-        getPopupTemplate = function getPopupTemplate(options) {
-        return '<div class="jq-select-popup">\n\n                     <div class="jq-select-filter-wrapper">\n                         <input type="text" \n                                class="jq-select-filter" \n                                placeholder="' + options.filterPlaceholder + '"/>\n                         <i class="jq-select-filter-icon ' + options.filterIconCls + '"></i>\n                     </div>\n                     \n                     <label type="text" \n                            class="jq-select-select-all">\n                         <input type="checkbox" \n                                class="jq-select-checkbox jq-select-select-all-checkbox ' + options.checkboxIconCls + '"/>\n                         <span class="jq-select-select-all-name">' + options.selectAllText + '</span>\n                     </label>\n                     \n                     <div class="jq-select-list">\n                         <div class="jq-select-list-scroller"></div>\n                     </div>\n                     \n                 </div>';
-    },
-        getItemTemplate = function getItemTemplate(options) {
-        return '<label class="jq-select-item">\n                     <input type="checkbox" \n                            class="jq-select-checkbox jq-select-item-checkbox"/>\n                     <i class="jq-select-item-icon"></i>\n                     <span class="jq-select-item-name"></span>\n                 </label>';
-    },
-        rangeValid = function rangeValid(value, min, max) {
-        max !== undefined && (value = value > max ? max : value);
-        min !== undefined && (value = value < min ? min : value);
-        return value;
-    },
-        triggerPopupEventHandle = function triggerPopupEventHandle(el, triggerEl, popupEl, currentVisible) {
 
-        if (!triggerEl) {
-            return true;
-        }
+        getPopupTemplate = (options) => {
+            return (
+                `<div class="jq-select-popup">
 
-        while (el) {
-            if ($(el).is(popupEl)) {
-                return currentVisible;
-            } else if ($(el).is(triggerEl)) {
-                return !currentVisible;
+                     <div class="jq-select-filter-wrapper">
+                         <input type="text" 
+                                class="jq-select-filter" 
+                                placeholder="${options.filterPlaceholder}"/>
+                         <i class="jq-select-filter-icon ${options.filterIconCls}"></i>
+                     </div>
+                     
+                     <label type="text" 
+                            class="jq-select-select-all">
+                         <input type="checkbox" 
+                                class="jq-select-checkbox jq-select-select-all-checkbox ${options.checkboxIconCls}"/>
+                         <span class="jq-select-select-all-name">${options.selectAllText}</span>
+                     </label>
+                     
+                     <div class="jq-select-list">
+                         <div class="jq-select-list-scroller"></div>
+                     </div>
+                     
+                 </div>`
+            );
+        },
+
+        getItemTemplate = (options) => {
+            return (
+                `<label class="jq-select-item">
+                     <input type="checkbox" 
+                            class="jq-select-checkbox jq-select-item-checkbox"/>
+                     <i class="jq-select-item-icon"></i>
+                     <span class="jq-select-item-name"></span>
+                 </label>`
+            );
+        },
+
+        rangeValid = (value, min, max) => {
+            max !== undefined && (value = value > max ? max : value);
+            min !== undefined && (value = value < min ? min : value);
+            return value;
+        },
+
+        triggerPopupEventHandle = (el, triggerEl, popupEl, currentVisible) => {
+
+            if (!triggerEl) {
+                return true;
             }
-            el = el.parentNode;
-        }
 
-        return false;
-    },
-        formatData = function formatData(data) {
-        var index = 0;
-        return data.map(function (item) {
-            return {
+            while (el) {
+                if ($(el).is(popupEl)) {
+                    return currentVisible;
+                } else if ($(el).is(triggerEl)) {
+                    return !currentVisible;
+                }
+                el = el.parentNode;
+            }
+
+            return false;
+
+        },
+
+        formatData = (data) => {
+            let index = 0;
+            return data.map(item => ({
                 rawValue: item,
                 jqSelectIndex: index++
+            }));
+        },
+
+        calDisplayIndex = (data, scrollTop, options) => {
+
+            const len = data.length;
+
+            let start = Math.floor(scrollTop / options.itemHeight),
+                stop = start + Math.ceil(options.listHeight / options.itemHeight);
+
+            start -= options.renderBuffer;
+            stop += options.renderBuffer;
+
+            return {
+                start: rangeValid(start, 0, len - 1),
+                stop: rangeValid(stop, 0, len - 1)
             };
-        });
-    },
-        calDisplayIndex = function calDisplayIndex(data, scrollTop, options) {
 
-        var len = data.length;
+        },
 
-        var start = Math.floor(scrollTop / options.itemHeight),
-            stop = start + Math.ceil(options.listHeight / options.itemHeight);
+        getValue = (data, valueField, displayField) => {
+            return typeof data == 'object' ?
+                (data[valueField] || data[displayField])
+                :
+                data;
+        },
 
-        start -= options.renderBuffer;
-        stop += options.renderBuffer;
+        getDisplay = (data, valueField, displayField) => {
+            return typeof data == 'object' ?
+                (data[displayField] || data[valueField])
+                :
+                data;
+        },
 
-        return {
-            start: rangeValid(start, 0, len - 1),
-            stop: rangeValid(stop, 0, len - 1)
-        };
-    },
-        getValue = function getValue(data, valueField, displayField) {
-        return (typeof data === 'undefined' ? 'undefined' : _typeof(data)) == 'object' ? data[valueField] || data[displayField] : data;
-    },
-        getDisplay = function getDisplay(data, valueField, displayField) {
-        return (typeof data === 'undefined' ? 'undefined' : _typeof(data)) == 'object' ? data[displayField] || data[valueField] : data;
-    },
-        isChecked = function isChecked(value, data, valueField, displayField) {
+        isChecked = (value, data, valueField, displayField) => {
 
-        if (!value || value.length < 1 || !data) {
-            return false;
-        }
+            if (!value || value.length < 1 || !data) {
+                return false;
+            }
 
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-            for (var _iterator = value[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var item = _step.value;
-
+            for (let item of value) {
                 if (getValue(item, valueField, displayField) === getValue(data, valueField, displayField)) {
                     return true;
                 }
             }
-        } catch (err) {
-            _didIteratorError = true;
-            _iteratorError = err;
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion && _iterator.return) {
-                    _iterator.return();
-                }
-            } finally {
-                if (_didIteratorError) {
-                    throw _iteratorError;
-                }
+
+            return false;
+
+        },
+
+        filterData = (data, filterText, valueField, displayField) => {
+
+            if (!filterText) {
+                return data;
             }
-        }
 
-        return false;
-    },
-        filterData = function filterData(data, filterText, valueField, displayField) {
+            return data.filter((item) =>
+                getDisplay(item.rawValue, valueField, displayField).toString().toUpperCase()
+                    .includes(filterText.toString().toUpperCase()));
 
-        if (!filterText) {
-            return data;
-        }
-
-        return data.filter(function (item) {
-            return getDisplay(item.rawValue, valueField, displayField).toString().toUpperCase().includes(filterText.toString().toUpperCase());
-        });
-    };
+        };
 
     function JQSelect(originEl, options) {
 
@@ -162,19 +184,22 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             jQSelect: _self,
             originEl: originEl
         };
+
     }
 
     JQSelect.prototype.init = function () {
 
         // whether select is formated
-        var self = this,
+        const self = this,
             formated = this.originEl.hasClass('jq-select-formated');
 
         if (!formated) {
             this.originEl.addClass('jq-select-formated').hide().wrap(wrapTemplate);
         }
 
-        this.wrapperEl = this.originEl.parent().toggleClass('multi', this.options.multi).prop('disabled', this.disabled);
+        this.wrapperEl = this.originEl.parent()
+            .toggleClass('multi', this.options.multi)
+            .prop('disabled', this.disabled);
 
         if (!formated) {
             this.triggerEl = $(triggerTemplate);
@@ -187,7 +212,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.initValue();
 
         // trigger icon
-        this.triggerEl.prop('disabled', this.disabled).find('.jq-select-icon').remove();
+        this.triggerEl
+            .prop('disabled', this.disabled)
+            .find('.jq-select-icon').remove();
         if (this.options.iconCls) {
             this.triggerEl.find('.jq-select-text').before('<i class="jq-select-icon ' + this.options.iconCls + '"></i>');
         }
@@ -204,10 +231,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             self.triggerEl.prop('disabled', true);
             return $(this);
         });
+
     };
 
     JQSelect.prototype.initData = function () {
-        var _this = this;
 
         if (this.options.data) {
             this.filteredData = this.data = formatData(this.options.data);
@@ -219,118 +246,83 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             return;
         }
 
-        var options = this.originEl.children('option');
+        const options = this.originEl.children('option');
         if (options && options.length > 0) {
 
-            var data = [];
-            var i = 0;
+            const data = [];
+            let i = 0;
 
-            options.each(function () {
-                var _rawValue;
-
+            options.each(() => {
                 data.push({
-                    rawValue: (_rawValue = {}, _defineProperty(_rawValue, _this.options.valueField, $(_this).val()), _defineProperty(_rawValue, _this.options.displayField, $(_this).html()), _rawValue),
+                    rawValue: {
+                        [this.options.valueField]: $(this).val(),
+                        [this.options.displayField]: $(this).html()
+                    },
                     jqSelectIndex: i++
                 });
             });
 
             this.filteredData = this.data = data;
+
         }
+
     };
 
     JQSelect.prototype.initValue = function () {
 
-        if (!this.options.data || this.options.data.length < 1 || !this.options.value || this.options.value.length < 1) {
+        if (!this.options.data || this.options.data.length < 1
+            || !this.options.value || this.options.value.length < 1) {
             this.value = [];
         } else {
 
-            var result = [];
+            const result = [];
 
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
+            for (let item of this.options.value) {
 
-            try {
-                for (var _iterator2 = this.options.value[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var item = _step2.value;
-                    var _options = this.options,
-                        valueField = _options.valueField,
-                        displayField = _options.displayField,
-                        value = getValue(item, valueField, displayField);
-                    var _iteratorNormalCompletion3 = true;
-                    var _didIteratorError3 = false;
-                    var _iteratorError3 = undefined;
+                const {valueField, displayField} = this.options,
+                    value = getValue(item, valueField, displayField);
 
-                    try {
-
-                        for (var _iterator3 = this.options.data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                            var dataItem = _step3.value;
-
-                            if (getValue(dataItem, valueField, displayField) === value) {
-                                result.push(dataItem);
-                                break;
-                            }
-                        }
-                    } catch (err) {
-                        _didIteratorError3 = true;
-                        _iteratorError3 = err;
-                    } finally {
-                        try {
-                            if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                                _iterator3.return();
-                            }
-                        } finally {
-                            if (_didIteratorError3) {
-                                throw _iteratorError3;
-                            }
-                        }
+                for (let dataItem of this.options.data) {
+                    if (getValue(dataItem, valueField, displayField) === value) {
+                        result.push(dataItem);
+                        break;
                     }
                 }
-            } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
-                    }
-                } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
-                    }
-                }
+
             }
 
             this.value = result;
+
         }
 
         this.updateValue();
+
     };
 
     JQSelect.prototype.updateValue = function () {
-        var _this2 = this;
 
-        var len = this.value.length;
+        const len = this.value.length;
 
         if (len > 0) {
 
-            this.triggerEl.html(this.value.length + ' selected');
+            this.triggerEl.html(`${this.value.length} selected`);
 
-            var value = this.value.map(function (item) {
-                return getValue(item, _this2.options.valueField, _this2.options.displayField);
-            }).join(',');
+            const value = this.value.map(item =>
+                getValue(item, this.options.valueField, this.options.displayField)
+            ).join(',');
 
-            this.originEl.html('<option value="' + value + '" selected="selected"></option>');
+            this.originEl.html(`<option value="${value}" selected="selected"></option>`);
+
         } else {
             this.triggerEl.html(this.options.noSelectText);
             this.originEl.html('');
         }
 
         this.originEl.trigger('change');
+
     };
 
     JQSelect.prototype.showPopup = function () {
-        var _this3 = this;
 
         if (!this.triggerEl) {
             return;
@@ -343,9 +335,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             this.popupEl.removeClass('hidden');
         }
 
-        var offset = this.triggerEl.offset();
+        const offset = this.triggerEl.offset();
         this.popupEl.css({
-            transform: 'translate(' + offset.left + 'px, ' + (offset.top + this.triggerEl.height()) + 'px)'
+            transform: `translate(${offset.left}px, ${offset.top + this.triggerEl.height()}px)`
         }).find('.jq-select-list-scroller').css({
             height: this.filteredData.length * this.options.itemHeight
         });
@@ -353,65 +345,63 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.wrapperEl.addClass('activated');
 
         // filter
-        var filterEl = this.popupEl.children('.jq-select-filter-wrapper');
+        const filterEl = this.popupEl.children('.jq-select-filter-wrapper');
         if (this.options.enableFilter) {
-            filterEl.children('.jq-select-filter').on('input', function (e) {
+            filterEl.children('.jq-select-filter').on('input', (e) => {
 
-                _this3.filterText = e.target.value;
-                _this3.filteredData = filterData(_this3.data, _this3.filterText, _this3.options.valueField, _this3.options.displayField);
+                this.filterText = e.target.value;
+                this.filteredData = filterData(this.data, this.filterText, this.options.valueField, this.options.displayField);
 
-                _this3.popupEl.children('.jq-select-list')[0].scrollTop = 0;
-                _this3.popupEl.find('.jq-select-list-scroller').css({
-                    height: _this3.filteredData.length * _this3.options.itemHeight
+                this.popupEl.children('.jq-select-list')[0].scrollTop = 0;
+                this.popupEl.find('.jq-select-list-scroller').css({
+                    height: this.filteredData.length * this.options.itemHeight
                 });
 
-                _this3.renderList();
+                this.renderList();
+
             });
         } else {
             filterEl.remove();
         }
 
         // select all
-        var selectAllEl = this.popupEl.children('.jq-select-select-all');
+        const selectAllEl = this.popupEl.children('.jq-select-select-all');
         if (this.options.enableSelectAll) {
 
-            var checked = this.value.length === this.data.length,
+            const checked = this.value.length === this.data.length,
                 checkboxEl = selectAllEl.children('.jq-select-select-all-checkbox');
 
             selectAllEl.toggleClass('activated', checked);
             checkboxEl.prop('checked', checked);
 
-            selectAllEl.mousedown(function () {
+            selectAllEl.mousedown(() => {
 
-                var checked = !checkboxEl.is(':checked');
+                const checked = !checkboxEl.is(':checked');
 
-                _this3.value = checked ? _this3.data.map(function (item) {
-                    return item.rawValue;
-                }) : [];
-                _this3.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
-                _this3.popupEl.find('.jq-select-item').toggleClass('activated', checked);
-                _this3.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
+                this.value = checked ? this.data.map(item => item.rawValue) : [];
+                this.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
+                this.popupEl.find('.jq-select-item').toggleClass('activated', checked);
+                this.popupEl.find('.jq-select-item-checkbox').prop('checked', checked);
 
-                _this3.updateValue();
+                this.updateValue();
+
             });
+
         } else {
             selectAllEl.remove();
         }
 
         this.renderList();
+
     };
 
-    JQSelect.prototype.renderList = function () {
-        var _this4 = this;
-
-        var scrollTop = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
+    JQSelect.prototype.renderList = function (scrollTop = 0) {
 
         if (!this.popupEl) {
             return;
         }
 
-        var self = this,
+        const self = this,
             scroller = this.popupEl.find('.jq-select-list-scroller');
 
         if (!this.filteredData || this.filteredData.length < 1) {
@@ -419,38 +409,36 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             return;
         }
 
-        var itemHeight = this.options.itemHeight,
-            _calDisplayIndex = calDisplayIndex(this.filteredData, scrollTop, this.options),
-            start = _calDisplayIndex.start,
-            stop = _calDisplayIndex.stop,
-            _options2 = this.options,
-            valueField = _options2.valueField,
-            displayField = _options2.displayField,
+        const itemHeight = this.options.itemHeight,
+            {start, stop} = calDisplayIndex(this.filteredData, scrollTop, this.options),
+            {valueField, displayField} = this.options,
             list = [];
 
-        var _loop = function _loop(i) {
+        for (let i = start; i <= stop; i++) {
 
-            var rawValue = _this4.filteredData[i].rawValue,
-                index = _this4.filteredData[i].jqSelectIndex;
+            const rawValue = this.filteredData[i].rawValue,
+                index = this.filteredData[i].jqSelectIndex;
 
-            var item = scroller.children('.jq-select-item[jq-select-index=' + index + ']');
+            let item = scroller.children(`.jq-select-item[jq-select-index=${index}]`);
 
             // if exist
             if (item[0]) {
                 item.css({
-                    transform: 'translate(0, ' + i * itemHeight + 'px)'
+                    transform: `translate(0, ${i * itemHeight}px)`
                 });
-                return 'continue';
+                continue;
             }
 
-            item = $(getItemTemplate(_this4.options)).attr('jq-select-index', index).css({
-                height: itemHeight,
-                lineHeight: itemHeight + 'px',
-                transform: 'translate(0, ' + i * itemHeight + 'px)'
-            });
+            item = $(getItemTemplate(this.options))
+                .attr('jq-select-index', index)
+                .css({
+                    height: itemHeight,
+                    lineHeight: `${itemHeight}px`,
+                    transform: `translate(0, ${i * itemHeight}px)`
+                });
 
             // icon
-            var iconCls = rawValue[_this4.options.iconClsField];
+            const iconCls = rawValue[this.options.iconClsField];
             if (iconCls) {
                 item.children('.jq-select-item-icon').addClass(iconCls);
             } else {
@@ -458,9 +446,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             }
 
             // checked
-            if (!_this4.options.multi) {
+            if (!this.options.multi) {
                 item.children('.jq-select-checkbox').remove();
-            } else if (isChecked(_this4.value, rawValue, valueField, displayField)) {
+            } else if (isChecked(this.value, rawValue, valueField, displayField)) {
                 item.children('.jq-select-item-checkbox').prop('checked', true);
                 item.addClass('activated');
             }
@@ -468,48 +456,47 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             // display text
             item.children('.jq-select-item-name').html(getDisplay(rawValue, valueField, displayField));
 
-            item.mousedown(function () {
+            item.mousedown(() => {
 
-                if (!_this4.value || _this4.value.length < 1 || !rawValue) {
-                    _this4.value = [rawValue];
+                if (!this.value || this.value.length < 1 || !rawValue) {
+                    this.value = [rawValue];
                     item.addClass('activated');
-                } else if (isChecked(_this4.value, rawValue, valueField, displayField)) {
-                    for (var _i = 0, len = _this4.value.length; _i < len; _i++) {
-                        if (getValue(_this4.value[_i], valueField, displayField) === getValue(rawValue, valueField, displayField)) {
-                            _this4.value.splice(_i, 1);
+                } else if (isChecked(this.value, rawValue, valueField, displayField)) {
+                    for (let i = 0, len = this.value.length; i < len; i++) {
+                        if (getValue(this.value[i], valueField, displayField)
+                            === getValue(rawValue, valueField, displayField)) {
+                            this.value.splice(i, 1);
                             break;
                         }
                     }
                     item.removeClass('activated');
                 } else {
-                    _this4.value.push(rawValue);
+                    this.value.push(rawValue);
                     item.addClass('activated');
                 }
 
-                var checked = _this4.value.length === _this4.filteredData.length;
-                _this4.popupEl.children('.jq-select-select-all').toggleClass('activated', checked);
-                _this4.popupEl.find('.jq-select-select-all-checkbox').prop('checked', checked);
+                const checked = this.value.length === this.filteredData.length;
+                this.popupEl.children('.jq-select-select-all')
+                    .toggleClass('activated', checked);
+                this.popupEl.find('.jq-select-select-all-checkbox')
+                    .prop('checked', checked);
 
-                _this4.updateValue();
+                this.updateValue();
+
             });
 
             list.push(item);
-        };
 
-        for (var i = start; i <= stop; i++) {
-            var _ret = _loop(i);
-
-            if (_ret === 'continue') continue;
         }
 
         scroller.children().each(function () {
 
-            var index = parseInt($(this).attr('jq-select-index'));
+            const index = parseInt($(this).attr('jq-select-index'));
 
-            var data = self.filteredData.slice(start, stop + 1);
-            var flag = false;
+            const data = self.filteredData.slice(start, stop + 1);
+            let flag = false;
 
-            for (var i = 0, len = data.length; i < len; i++) {
+            for (let i = 0, len = data.length; i < len; i++) {
                 if (index === data[i].jqSelectIndex) {
                     flag = true;
                     break;
@@ -519,9 +506,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             if (!flag) {
                 $(this).remove();
             }
+
         });
 
         scroller.append(list);
+
     };
 
     JQSelect.prototype.hidePopup = function () {
@@ -532,6 +521,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         this.wrapperEl.removeClass('activated');
         this.visible = false;
+
     };
 
     JQSelect.prototype.mousedownHandler = function (e) {
@@ -546,6 +536,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         if (!this.wrapperEl.hasClass('activated')) {
             this.showPopup();
         }
+
     };
 
     JQSelect.prototype.scrollHandler = function (e) {
@@ -564,6 +555,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         this.popupEl && this.popupEl.remove();
         this.popupEl = null;
+
     };
 
     $.fn.JQSelect = function (options) {
@@ -599,4 +591,5 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         selectAllText: 'Select All'
 
     };
-})(jQuery);
+
+}(jQuery));

@@ -7,7 +7,8 @@ var gulp = require('gulp'),
     cssmin = require('gulp-cssmin'),
     autoprefixer = require('gulp-autoprefixer'),
     rename = require('gulp-rename'),
-    gulpSequence = require('gulp-sequence');
+    gulpSequence = require('gulp-sequence'),
+    browserify = require('gulp-browserify');
 
 
 /** -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- server -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
@@ -28,18 +29,6 @@ gulp.task('example', function () {
 
 
 /** -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- compile -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-gulp.task('compile:es', function () {
-    return gulp.src('./src/JQSelect.es.js')
-        .pipe(babel({
-            presets: ['env']
-        }))
-        .on('error', function (e) {
-            console.error(e.toString());
-        })
-        .pipe(rename('JQSelect.js'))
-        .pipe(gulp.dest('./src'));
-});
-
 gulp.task('compile:sass', function () {
     return gulp.src(['./src/JQSelect.scss'])
         .pipe(plumber())
@@ -49,10 +38,6 @@ gulp.task('compile:sass', function () {
 
 
 /** -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- watch -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
-gulp.task('watch:es', function () {
-    gulp.watch('./src/JQSelect.es.js', ['compile:es']);
-});
-
 gulp.task('watch:sass', function () {
     gulp.watch('./src/JQSelect.scss', ['compile:sass']);
 });
@@ -85,8 +70,19 @@ gulp.task('build:cssmin', function () {
 });
 
 gulp.task('build:js', function () {
-    return gulp.src(['./src/JQSelect.js'])
+    return gulp.src('./src/JQSelect.es.js')
         .pipe(plumber())
+        .pipe(babel({
+            presets: ['es2015'],
+            plugins: ['transform-runtime']
+        }))
+        .pipe(browserify({
+            'standalone': true
+        }))
+        .on('error', function (e) {
+            console.error(e.toString());
+        })
+        .pipe(rename('JQSelect.js'))
         .pipe(gulp.dest('./dist/'));
 });
 

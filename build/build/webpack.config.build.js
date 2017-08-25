@@ -2,31 +2,48 @@ var path = require('path');
 var utils = require('./../utils');
 var webpack = require('webpack');
 var config = require('../../config/index');
-var merge = require('webpack-merge');
-var baseWebpackConfig = require('./../webpack.config.base.js');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
-// var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 
 var env = config.build.env;
 
-var webpackConfig = merge(baseWebpackConfig, {
-    module: {
-        rules: utils.styleLoaders({
-            sourceMap: config.build.productionSourceMap,
-            extract: true
-        })
-    },
-    devtool: config.build.productionSourceMap ? '#source-map' : false,
+module.exports = {
+    devtool: false,
     entry: {
-        app: './src/JQSelect.js'
+        JQSelect: './src/JQSelect.js'
     },
     output: {
         publicPath: './',
         path: config.build.assetsRoot,
         filename: utils.assetsPath('[name].min.js'),
         chunkFilename: utils.assetsPath('[id].min.js')
+    },
+    resolve: {
+        extensions: ['.js']
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            loader: 'babel-loader'
+        }, {
+            test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+            loader: 'url-loader',
+            query: {
+                limit: 1000,
+                name: utils.assetsPath('img/[name].[hash:7].[ext]')
+            }
+        }, {
+            test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+            loader: 'url-loader',
+            query: {
+                limit: 1000,
+                name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
+            }
+        }, ...utils.styleLoaders({
+            sourceMap: config.build.productionSourceMap,
+            extract: true
+        })]
     },
     plugins: [
 
@@ -38,7 +55,7 @@ var webpackConfig = merge(baseWebpackConfig, {
             compress: {
                 warnings: false
             },
-            sourceMap: true
+            sourceMap: false
         }),
 
         new ExtractTextPlugin({
@@ -47,22 +64,6 @@ var webpackConfig = merge(baseWebpackConfig, {
 
         new OptimizeCSSPlugin(),
 
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'vendor',
-            minChunks: function (module, count) {
-                return (
-                    module.resource && /\.js$/.test(module.resource) && module.resource.indexOf(
-                        path.join(__dirname, '../node_modules')
-                    ) === 0
-                );
-            }
-        }),
-
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'manifest',
-            chunks: ['vendor']
-        }),
-
         new CopyWebpackPlugin([{
             from: path.resolve(__dirname, '../../lib'),
             to: config.build.assetsSubDirectory,
@@ -70,6 +71,4 @@ var webpackConfig = merge(baseWebpackConfig, {
         }])
 
     ]
-});
-
-module.exports = webpackConfig;
+};

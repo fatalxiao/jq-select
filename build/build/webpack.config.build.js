@@ -1,8 +1,6 @@
-var path = require('path');
 var utils = require('./../utils');
 var webpack = require('webpack');
 var config = require('../../config/index');
-var CopyWebpackPlugin = require('copy-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 
@@ -16,8 +14,8 @@ module.exports = {
     output: {
         publicPath: './',
         path: config.build.assetsRoot,
-        filename: utils.assetsPath('[name].min.js'),
-        chunkFilename: utils.assetsPath('[id].min.js')
+        filename: utils.distPath('[name].min.js'),
+        chunkFilename: utils.distPath('[id].min.js')
     },
     resolve: {
         extensions: ['.js']
@@ -31,14 +29,7 @@ module.exports = {
             loader: 'url-loader',
             query: {
                 limit: 1000,
-                name: utils.assetsPath('img/[name].[hash:7].[ext]')
-            }
-        }, {
-            test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-            loader: 'url-loader',
-            query: {
-                limit: 1000,
-                name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
+                name: utils.distPath('images/[name].[ext]')
             }
         }, ...utils.styleLoaders({
             sourceMap: config.build.productionSourceMap,
@@ -59,16 +50,10 @@ module.exports = {
         }),
 
         new ExtractTextPlugin({
-            filename: utils.assetsPath('[name].min.css')
+            filename: utils.distPath('[name].min.css')
         }),
 
-        new OptimizeCSSPlugin(),
-
-        new CopyWebpackPlugin([{
-            from: path.resolve(__dirname, '../../lib'),
-            to: config.build.assetsSubDirectory,
-            ignore: ['.*']
-        }])
+        new OptimizeCSSPlugin()
 
     ]
 };

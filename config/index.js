@@ -9,9 +9,9 @@ module.exports = {
         autoOpenBrowser: true,
         srcRoot: path.resolve(__dirname, '../examples'),
         index: path.resolve(__dirname, '../examples/index.html'),
-        assetsSubDirectory: 'lib',
+        assetsSubDirectory: 'static',
         assetsPublicPath: '/',
-        assetsVirtualRoot: path.posix.join('/', 'lib'),
+        assetsVirtualRoot: path.posix.join('/', 'static'),
         proxyTable: {},
         cssSourceMap: false
 
@@ -21,7 +21,7 @@ module.exports = {
 
         env: require('./prod.env'),
         assetsRoot: path.resolve(__dirname, '../dist'),
-        assetsSubDirectory: 'lib',
+        assetsSubDirectory: 'static',
         assetsPublicPath: '/'
 
     },
@@ -31,7 +31,7 @@ module.exports = {
         env: require('./prod.env'),
         index: path.resolve(__dirname, '../docs/index.html'),
         assetsRoot: path.resolve(__dirname, '../docs'),
-        assetsSubDirectory: 'lib',
+        assetsSubDirectory: 'static',
         assetsPublicPath: '/'
 
     },

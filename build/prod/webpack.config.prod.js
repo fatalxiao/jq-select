@@ -93,7 +93,7 @@ module.exports = {
         }),
 
         new CopyWebpackPlugin([{
-            from: path.resolve(__dirname, '../../lib'),
+            from: path.resolve(__dirname, '../../static'),
             to: config.prod.assetsSubDirectory,
             ignore: ['.*']
         }])

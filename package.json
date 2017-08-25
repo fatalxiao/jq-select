@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "node build/dev/dev-server.js",
         "build:component": "rimraf dist && node build/build/build.js",
-        "build:example": "rimraf docs && node build/prod/prod.js && gulp copyFiles",
+        "build:example": "rimraf docs && node build/prod/prod.js",
         "run:demo": "node build/demo/demo-server.js",
         "demo": "npm run build:example && npm run run:demo"
     },
@@ -28,9 +28,6 @@
         "extract-text-webpack-plugin": "^2.1.0",
         "file-loader": "^0.10.1",
         "friendly-errors-webpack-plugin": "^1.6.1",
-        "gulp": "^3.9.1",
-        "gulp-sequence": "^0.4.6",
-        "gulp-util": "^3.0.8",
         "html-webpack-plugin": "^2.28.0",
         "node-sass": "^4.5.3",
         "opn": "^4.0.2",
@@ -40,7 +37,6 @@
         "rimraf": "^2.6.1",
         "sass-loader": "^6.0.3",
         "style-loader": "^0.13.2",
-        "through2": "^2.0.3",
         "url-loader": "^0.5.8",
         "webpack": "^2.3.2",
         "webpack-bundle-analyzer": "^2.9.0",

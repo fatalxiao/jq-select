@@ -5,23 +5,26 @@ var config = require('../../config/index');
 var merge = require('webpack-merge');
 var baseWebpackConfig = require('./../webpack.config.base.js');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+// var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 
-var env = config.prod.env;
+var env = config.build.env;
 
 var webpackConfig = merge(baseWebpackConfig, {
     module: {
         rules: utils.styleLoaders({
-            sourceMap: config.prod.productionSourceMap,
+            sourceMap: config.build.productionSourceMap,
             extract: true
         })
     },
-    devtool: config.prod.productionSourceMap ? '#source-map' : false,
+    devtool: config.build.productionSourceMap ? '#source-map' : false,
+    entry: {
+        app: './src/JQSelect.js'
+    },
     output: {
         publicPath: './',
-        path: config.prod.assetsRoot,
+        path: config.build.assetsRoot,
         filename: utils.assetsPath('js/[name].[chunkhash].js'),
         chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
     },
@@ -44,17 +47,17 @@ var webpackConfig = merge(baseWebpackConfig, {
 
         new OptimizeCSSPlugin(),
 
-        new HtmlWebpackPlugin({
-            filename: config.prod.index,
-            template: './examples/index.html',
-            favicon: './examples/assets/images/favicon.ico',
-            inject: true,
-            minify: {
-                removeComments: true,
-                collapseWhitespace: true
-            },
-            chunksSortMode: 'dependency'
-        }),
+        // new HtmlWebpackPlugin({
+        //     filename: config.build.index,
+        //     template: './examples/index.html',
+        //     favicon: './examples/assets/images/favicon.ico',
+        //     inject: true,
+        //     minify: {
+        //         removeComments: true,
+        //         collapseWhitespace: true
+        //     },
+        //     chunksSortMode: 'dependency'
+        // }),
 
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
@@ -74,7 +77,7 @@ var webpackConfig = merge(baseWebpackConfig, {
 
         new CopyWebpackPlugin([{
             from: path.resolve(__dirname, '../../static'),
-            to: config.prod.assetsSubDirectory,
+            to: config.build.assetsSubDirectory,
             ignore: ['.*']
         }])
 

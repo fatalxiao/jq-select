@@ -1,3 +1,5 @@
+import '../src/JQSelect.scss';
+
 (function ($) {
 
     const JQSelectList = {

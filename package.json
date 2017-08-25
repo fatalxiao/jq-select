@@ -5,6 +5,7 @@
     "license": "MIT",
     "scripts": {
         "dev": "node build/dev/dev-server.js",
+        "build:component": "rimraf dist && node build/build/build.js",
         "build:example": "rimraf docs && node build/prod/prod.js",
         "run:demo": "node build/demo/demo-server.js",
         "demo": "npm run build:example && npm run run:demo"

@@ -1,5 +1,4 @@
 import '../src/JQSelect';
-import '../src/JQSelect.scss';
 
 const data = [
     {

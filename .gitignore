@@ -12,6 +12,3 @@ package-lock.json
 
 # windows thumbnail cache
 Thumbs.db
-
-# Dist directories
-/dist

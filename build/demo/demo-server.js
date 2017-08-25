@@ -4,16 +4,13 @@ process.env.NODE_ENV = '"production"';
 
 var express = require('express'),
     opn = require('opn'),
-    compression = require('compression'),
 
     app = express(),
     config = require('../../config'),
     port = config.demo.port,
     uri = 'http://localhost:' + port;
 
-app.use(compression());
-
-app.use(express.static(config.build.assetsRoot));
+app.use(express.static(config.prod.assetsRoot));
 
 app.listen(port, function (err) {
 

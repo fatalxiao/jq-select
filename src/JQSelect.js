@@ -1,3 +1,5 @@
+import 'babel-polyfill';
+
 import '../src/JQSelect.scss';
 
 (function ($) {

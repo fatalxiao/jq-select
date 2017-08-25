@@ -5,9 +5,13 @@ npm-debug.log*
 
 # Dependency directories
 node_modules
+package-lock.json
 
 # Idea project files
 .idea
 
 # windows thumbnail cache
 Thumbs.db
+
+# Dist directories
+/dist

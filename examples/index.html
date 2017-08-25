@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <meta charset="UTF-8">
+        <title>jq-select demo</title>
+
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+            }
+
+            .form-group {
+                margin: 50px;
+                line-height: 40px;
+            }
+
+            .form-group:first-child {
+                margin-top: 25px;
+            }
+
+            .form-group:last-child {
+                margin-bottom: 25px;
+            }
+
+            .form-group > label {
+                display: block;
+                text-align: left;
+                color: #4c637b;
+                user-select: none;
+            }
+
+            #show-value-button {
+                width: 100px;
+                height: 24px;
+                background: #eee;
+                border: 1px solid #ccc;
+                outline: none;
+                cursor: pointer;
+                border-radius: 4px;
+                margin-top: 20px;
+            }
+        </style>
+
+    </head>
+    <body>
+
+        <form>
+
+            <div class="form-group">
+                <select id="example1"></select>
+                <button id="show-value-button" type="button">Show Value</button>
+            </div>
+
+        </form>
+
+        <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+    </body>
+</html>

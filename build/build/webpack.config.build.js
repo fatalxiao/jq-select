@@ -25,8 +25,8 @@ var webpackConfig = merge(baseWebpackConfig, {
     output: {
         publicPath: './',
         path: config.build.assetsRoot,
-        filename: utils.assetsPath('js/[name].[chunkhash].js'),
-        chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
+        filename: utils.assetsPath('[name].min.js'),
+        chunkFilename: utils.assetsPath('[id].min.js')
     },
     plugins: [
 
@@ -42,22 +42,10 @@ var webpackConfig = merge(baseWebpackConfig, {
         }),
 
         new ExtractTextPlugin({
-            filename: utils.assetsPath('css/[name].[contenthash].css')
+            filename: utils.assetsPath('[name].min.css')
         }),
 
         new OptimizeCSSPlugin(),
-
-        // new HtmlWebpackPlugin({
-        //     filename: config.build.index,
-        //     template: './examples/index.html',
-        //     favicon: './examples/assets/images/favicon.ico',
-        //     inject: true,
-        //     minify: {
-        //         removeComments: true,
-        //         collapseWhitespace: true
-        //     },
-        //     chunksSortMode: 'dependency'
-        // }),
 
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
@@ -76,7 +64,7 @@ var webpackConfig = merge(baseWebpackConfig, {
         }),
 
         new CopyWebpackPlugin([{
-            from: path.resolve(__dirname, '../../static'),
+            from: path.resolve(__dirname, '../../lib'),
             to: config.build.assetsSubDirectory,
             ignore: ['.*']
         }])

@@ -20,14 +20,10 @@ module.exports = {
     build: {
 
         env: require('./prod.env'),
-        index: path.resolve(__dirname, '../docs/index.html'),
-        assetsRoot: path.resolve(__dirname, '../docs'),
-        assetsSubDirectory: 'static',
+        assetsRoot: path.resolve(__dirname, '../dist'),
+        assetsSubDirectory: 'lib',
         assetsPublicPath: '/',
-        productionSourceMap: false,
-        productionGzip: true,
-        productionGzipExtensions: ['js', 'css'],
-        bundleAnalyzerReport: process.env.npm_config_report
+        productionSourceMap: false
 
     },
 
@@ -38,10 +34,7 @@ module.exports = {
         assetsRoot: path.resolve(__dirname, '../docs'),
         assetsSubDirectory: 'static',
         assetsPublicPath: '/',
-        productionSourceMap: false,
-        productionGzip: true,
-        productionGzipExtensions: ['js', 'css'],
-        bundleAnalyzerReport: process.env.npm_config_report
+        productionSourceMap: false
 
     },
 

@@ -32,7 +32,7 @@ import '../src/JQSelect.scss';
 
         triggerTemplate = '<button type="button" class="jq-select-trigger"></button>',
 
-        getPopupTemplate = (options) => {
+        getPopupTemplate = options => {
             return (
                 `<div class="jq-select-popup">
 
@@ -58,7 +58,7 @@ import '../src/JQSelect.scss';
             );
         },
 
-        getItemTemplate = (options) => {
+        getItemTemplate = options => {
             return (
                 `<label class="jq-select-item">
                      <input type="checkbox" 

@@ -2,8 +2,6 @@ var path = require('path');
 var utils = require('./../utils');
 var webpack = require('webpack');
 var config = require('../../config/index');
-var merge = require('webpack-merge');
-var baseWebpackConfig = require('./../webpack.config.base.js');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
@@ -11,19 +9,42 @@ var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 
 var env = config.prod.env;
 
-var webpackConfig = merge(baseWebpackConfig, {
-    module: {
-        rules: utils.styleLoaders({
-            sourceMap: config.prod.productionSourceMap,
-            extract: true
-        })
-    },
+module.exports = {
     devtool: false,
+    entry: {
+        app: './examples/index.js'
+    },
     output: {
         publicPath: './',
         path: config.prod.assetsRoot,
         filename: utils.assetsPath('js/[name].[chunkhash].js'),
         chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
+    },
+    resolve: {
+        extensions: ['.js']
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            loader: 'babel-loader'
+        }, {
+            test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+            loader: 'url-loader',
+            query: {
+                limit: 1000,
+                name: utils.assetsPath('img/[name].[hash:7].[ext]')
+            }
+        }, {
+            test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+            loader: 'url-loader',
+            query: {
+                limit: 1000,
+                name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
+            }
+        }, ...utils.styleLoaders({
+            sourceMap: config.prod.productionSourceMap,
+            extract: true
+        })]
     },
     plugins: [
 
@@ -47,7 +68,6 @@ var webpackConfig = merge(baseWebpackConfig, {
         new HtmlWebpackPlugin({
             filename: config.prod.index,
             template: './examples/index.html',
-            favicon: './examples/assets/images/favicon.ico',
             inject: true,
             minify: {
                 removeComments: true,
@@ -73,12 +93,10 @@ var webpackConfig = merge(baseWebpackConfig, {
         }),
 
         new CopyWebpackPlugin([{
-            from: path.resolve(__dirname, '../../static'),
+            from: path.resolve(__dirname, '../../lib'),
             to: config.prod.assetsSubDirectory,
             ignore: ['.*']
         }])
 
     ]
-});
-
-module.exports = webpackConfig;
+};
